@@ -25,17 +25,11 @@ export default function Header() {
               <span className="font-bold text-white font-headline-md">Voxa</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6 font-sans">
-              <Link href="/workspace" className="text-sm text-[#cbc3d7] hover:text-white transition-colors">
-                Platform
+              <Link href="/install" className="text-sm text-[#cbc3d7] hover:text-white transition-colors">
+                Install Extension
               </Link>
               <Link href="/technology" className="text-sm text-[#cbc3d7] hover:text-white transition-colors">
-                Solutions
-              </Link>
-              <Link href="/technology" className="text-sm text-[#cbc3d7] hover:text-white transition-colors">
-                API Reference
-              </Link>
-              <Link href="/design-system" className="text-sm text-[#cbc3d7] hover:text-white transition-colors">
-                Design System
+                Architecture
               </Link>
             </nav>
           </div>

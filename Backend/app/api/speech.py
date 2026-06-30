@@ -1,7 +1,10 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 import os
 import traceback
+import json
+from app.core.config import BACKEND_URL
+from app.services.postprocess_service import improve_transcript
 
 from app.services.speech_service import transcribe_audio
 from app.services.translation_service import (
@@ -41,8 +44,8 @@ async def get_output_audio():
 @router.post("/translate-and-speak")
 async def translate_and_speak(
     file: UploadFile = File(...),
-    # source_lang: str = Form("en"),
-    # target_lang: str = Form("hi-IN"),
+    source_lang: str = Form("en"),
+    target_lang: str = Form("hi-IN"),
 ):
 
     # ---------------------------------------
@@ -54,80 +57,85 @@ async def translate_and_speak(
             detail="Source and target language cannot be the same."
         )
 
-    try:
-
-        # =====================================
-        # STEP 1 : Speech To Text
-        # =====================================
-        transcript = transcribe_audio(file, language=source_lang)
-
-        # =====================================
-        # STEP 2 : Translation
-        # =====================================
-        translated = translate_text(
-            text=transcript,
-            source_lang=source_lang,
-            target_lang=target_lang,
-        )
-
-        print("\n" + "=" * 100)
-        print("TRANSCRIPT")
-        print(transcript)
-        print("-" * 100)
-        print("TRANSLATED")
-        print(translated)
-        print("=" * 100 + "\n")
-
-        # =====================================
-        # STEP 3 : Text To Speech
-        # =====================================
-        output_audio_url = None
-
+    def event_generator():
         try:
+            # Step 1: Uploading/Uplink completed, starting Speech Recognition (Groq Whisper)
+            yield json.dumps({"step": 2}) + "\n"
+
+            # =====================================
+            # STEP 1 : Speech To Text
+            # =====================================
+            transcript = transcribe_audio(file, language=source_lang)
+
+            # Step 2: Speech Recognition completed, starting Transcript Correction (Claude Sonnet 4)
+            yield json.dumps({"step": 3}) + "\n"
+            
+            transcript = improve_transcript(transcript)
+
+            # Step 3: Transcript Correction completed, starting Translation (Azure)
+            yield json.dumps({"step": 4}) + "\n"
+
+            # =====================================
+            # STEP 2 : Translation
+            # =====================================
+            translated = translate_text(
+                text=transcript,
+                source_lang=source_lang,
+                target_lang=target_lang,
+            )
 
             print("\n" + "=" * 100)
-            print("TEXT SENT TO TTS")
+            print("TRANSCRIPT")
+            print(transcript)
+            print("-" * 100)
+            print("TRANSLATED")
             print(translated)
             print("=" * 100 + "\n")
 
-            audio_file = TTSService.generate_speech(translated)
+            # Step 4: Translation completed, starting Voice Synthesis (ElevenLabs)
+            yield json.dumps({"step": 5}) + "\n"
 
-            if audio_file and os.path.exists(audio_file):
-
-                print(f"✅ Audio Generated Successfully : {audio_file}")
-                print(f"📦 Size : {os.path.getsize(audio_file)} bytes")
-
-                output_audio_url = (
-                    "http://localhost:8000/speech/output-audio"
-                )
-
-            else:
-                print("❌ output.mp3 was not generated.")
-
-        except Exception as tts_error:
-
-            print("\n❌ TTS ERROR")
-            traceback.print_exc()
-
-            # Continue returning transcript + translation
+            # =====================================
+            # STEP 3 : Text To Speech
+            # =====================================
             output_audio_url = None
 
-        # =====================================
-        # STEP 4 : Response
-        # =====================================
-        return {
-            "success": True,
-            "transcript": transcript,
-            "translated_text": translated,
-            "output_audio_url": output_audio_url,
-        }
+            try:
+                print("\n" + "=" * 100)
+                print("TEXT SENT TO TTS")
+                print(translated)
+                print("=" * 100 + "\n")
 
-    except Exception as e:
+                audio_file = TTSService.generate_speech(translated)
 
-        print("\n❌ PIPELINE FAILED")
-        traceback.print_exc()
+                if audio_file and os.path.exists(audio_file):
+                    print(f"✅ Audio Generated Successfully : {audio_file}")
+                    print(f"📦 Size : {os.path.getsize(audio_file)} bytes")
+                    output_audio_url = f"{BACKEND_URL}/speech/output-audio"
+                else:
+                    print("❌ output.mp3 was not generated.")
 
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
+            except Exception as tts_error:
+                print("\n❌ TTS ERROR")
+                traceback.print_exc()
+                output_audio_url = None
+
+            # Step 5: Completed
+            yield json.dumps({
+                "step": 6,
+                "success": True,
+                "transcript": transcript,
+                "translated_text": translated,
+                "output_audio_url": output_audio_url,
+            }) + "\n"
+
+        except Exception as e:
+            print("\n❌ PIPELINE FAILED")
+            traceback.print_exc()
+            yield json.dumps({
+                "step": 0,
+                "success": False,
+                "error": str(e)
+            }) + "\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")

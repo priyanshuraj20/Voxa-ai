@@ -5,7 +5,7 @@ import React, { useRef, useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
-import ShaderBackground from "@/components/ui/ShaderBackground";
+
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import CustomAudioPlayer from "@/components/ui/CustomAudioPlayer";
 import { LANGUAGES } from "@/constants/languages";
@@ -36,6 +36,7 @@ export default function WorkspacePage() {
   const [isPlayingTTS, setIsPlayingTTS] = useState(false); // Tracks if synthesized translation voice is playing
   const [copied, setCopied] = useState(false); // Visual feedback state when copying translation output
   const [error, setError] = useState(""); // Error alert state
+  const [processingStep, setProcessingStep] = useState<number>(0); // Pipeline processing step tracking
 
   const [sourceLang, setSourceLang] = useState("en");
   // Translation metrics from FastAPI backend
@@ -143,23 +144,28 @@ export default function WorkspacePage() {
     }
 
     setIsProcessing(true);
+    setProcessingStep(1); // 1: Audio Uplink / Uploading
     setError("");
+
+    let currentStep = 1;
+    const stepInterval = setInterval(() => {
+      if (currentStep < 5) {
+        currentStep += 1;
+        setProcessingStep(currentStep);
+      }
+    }, 600);
 
     try {
       const formData = new FormData();
 
       formData.append("file", blob, "recording.webm");
-
-      // NEW
       formData.append("source_lang", sourceLang);
-
-      // Existing
       formData.append("target_lang", targetLang);
 
       console.log("📤 Sending speech translation request...");
 
       const response = await fetch(
-        "http://localhost:8000/speech/translate-and-speak",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/speech/translate-and-speak`,
         {
           method: "POST",
           body: formData,
@@ -171,19 +177,21 @@ export default function WorkspacePage() {
       }
 
       const data = await response.json();
-
       console.log("✅ Translation result:", data);
+
+      clearInterval(stepInterval);
+      setProcessingStep(6); // 6: Completed
 
       if (data.success) {
         setTranscript(data.transcript || "");
-
         setOutputText(data.translated_text || "");
-
         setTtsAudioUrl(data.output_audio_url || null);
       } else {
         setError("Speech translation server failed.");
       }
     } catch (err) {
+      clearInterval(stepInterval);
+      setProcessingStep(0);
       console.error(err);
 
       setError(
@@ -231,10 +239,7 @@ export default function WorkspacePage() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-black text-[#e7e0ed] relative font-sans">
-      {/* Interactive shader flow background */}
-      <ShaderBackground />
-
+    <div className="flex flex-col h-screen overflow-hidden bg-black text-[#e7e0ed] relative font-sans grid-bg radial-glow">
       <Header />
 
       {/* Sidebar navigation + Main Area wrapper. 
@@ -452,29 +457,86 @@ export default function WorkspacePage() {
                       </span>
                     </div>
                     {isProcessing ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 border-b border-white/5 pb-2">
-                          <span className="w-2 h-2 rounded-full bg-[#adc6ff] animate-ping" />
-                          <p className="font-mono text-[9px] text-[#adc6ff] uppercase tracking-widest font-bold">
-                            [NLLB CORE] Running sequence translation...
-                          </p>
+                      <div className="space-y-3 py-2">
+                        <div className="font-mono text-[9px] uppercase tracking-wider text-[#adc6ff] border-b border-white/5 pb-2 font-bold mb-3">
+                          Processing Pipeline Steps
                         </div>
-                        <div className="font-mono text-[11px] text-zinc-500 space-y-1">
-                          <div>
-                            &gt; Contacting Azure Cognitive Translation layer...
+                        <div className="space-y-2.5">
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                              processingStep > 1 
+                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                : processingStep === 1
+                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                  : "border-zinc-800 text-zinc-600"
+                            }`}>
+                              {processingStep > 1 ? "✓" : "1"}
+                            </span>
+                            <span className={processingStep === 1 ? "text-white font-medium" : "text-zinc-500"}>
+                              Uploading & buffering audio segment
+                            </span>
                           </div>
-                          <div>
-                            &gt; Aligning multilingual context vectors (EN
-                            --&gt; {targetLang.split("-")[0].toUpperCase()})...
+
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                              processingStep > 2 
+                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                : processingStep === 2
+                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                  : "border-zinc-800 text-zinc-600"
+                            }`}>
+                              {processingStep > 2 ? "✓" : "2"}
+                            </span>
+                            <span className={processingStep === 2 ? "text-white font-medium" : "text-zinc-500"}>
+                              Speech Recognition (Groq Whisper large-v3)
+                            </span>
                           </div>
-                          <div className="flex items-center gap-1.5 text-zinc-400">
-                            <span className="w-1.5 h-3 bg-[#adc6ff] animate-pulse" />
-                            <span>
-                              Synthesizing output voice synthesizer...
+
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                              processingStep > 3 
+                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                : processingStep === 3
+                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                  : "border-zinc-800 text-zinc-600"
+                            }`}>
+                              {processingStep > 3 ? "✓" : "3"}
+                            </span>
+                            <span className={processingStep === 3 ? "text-white font-medium" : "text-zinc-500"}>
+                              Transcript Correction (Claude Sonnet 4)
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                              processingStep > 4 
+                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                : processingStep === 4
+                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                  : "border-zinc-800 text-zinc-600"
+                            }`}>
+                              {processingStep > 4 ? "✓" : "4"}
+                            </span>
+                            <span className={processingStep === 4 ? "text-white font-medium" : "text-zinc-500"}>
+                              Neural Text Translation (Azure Translator)
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                              processingStep > 5 
+                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                : processingStep === 5
+                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                  : "border-zinc-800 text-zinc-600"
+                            }`}>
+                              {processingStep > 5 ? "✓" : "5"}
+                            </span>
+                            <span className={processingStep === 5 ? "text-white font-medium" : "text-zinc-500"}>
+                              Speech Synthesis (ElevenLabs Vocoder)
                             </span>
                           </div>
                         </div>
-                        <SkeletonLoader lines={3} />
                       </div>
                     ) : (
                       <p className="text-lg text-white font-light leading-relaxed">
@@ -647,7 +709,7 @@ export default function WorkspacePage() {
 </footer>
 
       {/* Mobile Bottom Navigation Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 flex justify-around items-center h-16 z-50">
+      <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-zinc-900 flex justify-around items-center h-16 z-50">
         <Link
           href="/workspace"
           className="flex flex-col items-center gap-1 text-[#8b5cf6] flex-1 py-1"
@@ -658,20 +720,22 @@ export default function WorkspacePage() {
           <span className="text-[10px] font-medium font-sans">Workspace</span>
         </Link>
         <Link
+          href="/install"
+          className="flex flex-col items-center gap-1 text-[#cbc3d7]/60 hover:text-white flex-1 py-1"
+        >
+          <span className="material-symbols-outlined text-[22px]">
+            download
+          </span>
+          <span className="text-[10px] font-medium font-sans">Install</span>
+        </Link>
+        <Link
           href="/technology"
           className="flex flex-col items-center gap-1 text-[#cbc3d7]/60 hover:text-white flex-1 py-1"
         >
           <span className="material-symbols-outlined text-[22px]">
             insights
           </span>
-          <span className="text-[10px] font-medium font-sans">Pipeline</span>
-        </Link>
-        <Link
-          href="/design-system"
-          className="flex flex-col items-center gap-1 text-[#cbc3d7]/60 hover:text-white flex-1 py-1"
-        >
-          <span className="material-symbols-outlined text-[22px]">palette</span>
-          <span className="text-[10px] font-medium font-sans">Specs</span>
+          <span className="text-[10px] font-medium font-sans">Architecture</span>
         </Link>
       </div>
         </div>

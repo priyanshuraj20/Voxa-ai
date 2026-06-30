@@ -4,49 +4,49 @@ import React, { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import ShaderBackground from "@/components/ui/ShaderBackground";
+
 
 const features = [
   {
-    icon: "bolt",
-    title: "Instantaneous Inference",
-    desc: "Optimized CUDA kernels deliver sub-100ms response times for real-time speech-to-speech interaction across 200+ locales.",
-    accent: "group-hover:border-[#8b5cf6]/30",
+    icon: "sync_alt",
+    title: "Real-Time WebSockets",
+    desc: "Streams tab captured audio segments continuously from the Chrome Extension to a FastAPI server with sub-second response times.",
+    accent: "group-hover:border-[#8b5cf6]/20",
     iconColor: "text-[#8b5cf6]",
   },
   {
-    icon: "security",
-    title: "Zero-Trust Privacy",
-    desc: "Data is processed in ephemeral memory. No logs, no persistence, and enterprise-grade VPC deployment options.",
-    accent: "group-hover:border-[#adc6ff]/30",
+    icon: "interpreter_mode",
+    title: "Local Speaker Diarization",
+    desc: "Lightweight CPU-based audio pitch extraction (F0) to cluster dialogue by speaker (e.g. Speaker A, Speaker B) dynamically.",
+    accent: "group-hover:border-[#adc6ff]/20",
     iconColor: "text-[#adc6ff]",
   },
   {
-    icon: "api",
-    title: "Native Integration",
-    desc: "Simple gRPC and REST APIs for seamless embedding into existing communication workflows and custom hardware.",
-    accent: "group-hover:border-[#ffb869]/30",
+    icon: "speech_to_text",
+    title: "Whisper ASR + Claude Sonnet 4",
+    desc: "Decodes speech via Groq Whisper large-v3 and automatically refines spelling, proper nouns, and boundaries via Claude Sonnet 4.",
+    accent: "group-hover:border-[#ffb869]/20",
     iconColor: "text-[#ffb869]",
   },
   {
-    icon: "layers",
-    title: "Model Orchestration",
-    desc: "Whisper v3, NLLB-200, and proprietary transformer layers working in concert for unparalleled lexical accuracy.",
-    accent: "group-hover:border-[#d0bcff]/30",
+    icon: "translate",
+    title: "Azure Neural Translation",
+    desc: "Translates transcription dynamically using contextual neural machine translation supporting dozens of target locales.",
+    accent: "group-hover:border-[#d0bcff]/20",
     iconColor: "text-[#d0bcff]",
   },
   {
-    icon: "public",
-    title: "Global Edge Nodes",
-    desc: "24 regional data centers ensure low-latency connectivity regardless of where your users are located globally.",
-    accent: "group-hover:border-[#3b82f6]/30",
+    icon: "settings_voice",
+    title: "Expressive Speech Synthesis",
+    desc: "Synthesizes final translations back into speech using ElevenLabs multilingual voice model for realistic audio output.",
+    accent: "group-hover:border-[#3b82f6]/20",
     iconColor: "text-[#3b82f6]",
   },
   {
-    icon: "monitoring",
-    title: "Real-time Analytics",
-    desc: "Monitor token usage, latency distribution, and sentiment across all translation pipelines via an integrated dashboard.",
-    accent: "group-hover:border-[#8b5cf6]/30",
+    icon: "extension",
+    title: "Chrome Extension Integration",
+    desc: "Manifest V3 tab capture captures Google Meet calls and injects interactive subtitle overlay widgets on top of tabs.",
+    accent: "group-hover:border-[#8b5cf6]/20",
     iconColor: "text-[#8b5cf6]",
   },
 ];
@@ -63,12 +63,8 @@ export default function LandingPage() {
   return (
     <>
       <Header />
-      {/* WebGL interactive background */}
-      <ShaderBackground />
 
-      <main className="bg-black text-[#e7e0ed] min-h-screen relative z-10 font-sans overflow-hidden pb-12">
-        {/* Radial Purple Glow Overlay from Top */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[600px] bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_65%)] pointer-events-none z-0" />
+      <main className="bg-black text-[#e7e0ed] min-h-screen relative z-10 font-sans overflow-hidden pb-12 grid-bg radial-glow">
 
         {/* Hero Section */}
         <section className="pt-40 pb-24 px-6 max-w-[1200px] mx-auto text-center relative z-10">
@@ -78,10 +74,10 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#8b5cf6]/35 bg-[#8b5cf6]/10 text-[11px] font-mono tracking-widest text-[#d0bcff] mb-8 select-none shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/60 text-[11px] font-mono tracking-widest text-[#d0bcff] mb-8 select-none"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6] animate-pulse"></span>
-            VOXA PLATFORM ENGINE V3.0 ONLINE
+            VOXA MULTILINGUAL TRANSLATION GATEWAY
           </motion.div>
 
           {/* Main Title with Elegant White-to-Purple Gradient */}
@@ -89,10 +85,10 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.95] mb-6 max-w-4xl mx-auto font-geist text-transparent bg-clip-text bg-gradient-to-r from-white via-[#e7e0ed] to-[#d0bcff] pb-2"
+            className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.95] mb-6 max-w-4xl mx-auto font-geist text-white pb-2"
           >
-            Neural translation for <br className="hidden sm:inline" />
-            technical scale.
+            Real-time multilingual <br className="hidden sm:inline" />
+            audio translation.
           </motion.h1>
 
           {/* Description */}
@@ -100,9 +96,9 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-base md:text-lg text-[#cbc3d7]/85 max-w-2xl mx-auto mb-10 leading-relaxed font-light"
+            className="text-base md:text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-light font-sans"
           >
-            High-fidelity, real-time speech and text translation powered by distributed foundational models. Built for global connectivity and secure enterprise pipelines.
+            Real-time AI-powered speech translation for Google Meet, calls, and live browser audio. Capture, transcribe, refine transcript, and translate inside your browser.
           </motion.p>
 
           {/* Action CTAs with Micro-Scales */}
@@ -114,81 +110,81 @@ export default function LandingPage() {
           >
             <Link
               href="/workspace"
-              className="bg-[#8b5cf6] text-white px-8 py-3.5 rounded-lg font-bold text-sm hover:bg-[#7c3aed] transition-all flex items-center gap-2 shadow-lg shadow-[#8b5cf6]/20 active:scale-98 select-none"
+              className="bg-[#8b5cf6] text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#7c3aed] transition-all flex items-center gap-2 active:scale-98 select-none shadow-sm"
             >
               Launch Workspace
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </Link>
             <Link
               href="/technology"
-              className="border border-white/10 bg-white/5 text-white px-8 py-3.5 rounded-lg font-bold text-sm hover:bg-white/10 hover:border-white/20 transition-all active:scale-98 select-none"
+              className="border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-zinc-900/80 hover:border-zinc-700 transition-all active:scale-98 select-none"
             >
-              System Pipeline Architecture
+              System Architecture
             </Link>
           </motion.div>
 
-          {/* Terminal Mockup Wrapper (adds a razor-sharp glowing frame) */}
+          {/* Terminal Mockup Wrapper (adds a clean flat border) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.98, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative max-w-4xl mx-auto rounded-xl p-[1px] bg-gradient-to-r from-[#8b5cf6]/35 via-white/5 to-[#3b82f6]/20 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+            className="relative max-w-4xl mx-auto rounded-xl p-[1px] bg-zinc-800/80 shadow-2xl"
           >
             {/* Terminal Inner Frame */}
-            <div className="relative rounded-xl bg-black/90 backdrop-blur-xl overflow-hidden">
-              <div className="h-10 border-b border-white/5 flex items-center px-4 gap-1.5 bg-[#0f0d15]/50 select-none">
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                <div className="ml-4 text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-mono font-medium">
-                  VOXA SYSTEM INSPECTOR — NODE_NODE_JP_3
+            <div className="relative rounded-xl bg-zinc-950/80 backdrop-blur-xl overflow-hidden">
+              <div className="h-10 border-b border-zinc-900 flex items-center px-4 gap-1.5 bg-zinc-950/50 select-none">
+                <div className="w-2.5 h-2.5 rounded-full bg-zinc-800"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-zinc-800"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-zinc-800"></div>
+                <div className="ml-4 text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-mono font-medium">
+                  VOXA REAL-TIME TRANSCRIPTION TESTBED
                 </div>
               </div>
               
               <div className="p-8 flex flex-col md:flex-row gap-8 items-center justify-between">
                 <div className="flex flex-col gap-5 text-left w-full md:w-1/2">
                   <div className="space-y-1.5">
-                    <div className="text-[9px] text-[#adc6ff] font-mono uppercase tracking-widest font-bold">INPUT_STREAM [EN-US]</div>
-                    <div className="text-white text-lg font-light font-sans leading-relaxed">
-                      "Our infrastructure scales automatically."
+                    <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-widest font-bold">INPUT_STREAM [EN-US]</div>
+                    <div className="text-white text-base font-light font-sans leading-relaxed">
+                      "Voxa streams tab audio over WebSockets."
                     </div>
                   </div>
-                  <div className="h-px bg-white/5 w-full"></div>
+                  <div className="h-px bg-zinc-900 w-full"></div>
                   <div className="space-y-1.5">
                     <div className="text-[9px] text-[#d0bcff] font-mono uppercase tracking-widest font-bold">
                       OUTPUT_STREAM [JA-JP]
                     </div>
-                    <div className="text-[#d0bcff] text-lg font-light font-sans leading-relaxed">
-                      "当社のインフラは自動的にスケールします。"
+                    <div className="text-[#d0bcff] text-base font-light font-sans leading-relaxed">
+                      "VoxaはWebSockets経由でタブオーディオをストリーミングします。"
                     </div>
                   </div>
                 </div>
 
                 {/* Live Waveform Simulator */}
-                <div className="w-full md:w-auto border border-white/5 rounded-xl p-6 bg-white/5 flex flex-col items-center gap-4 shrink-0 shadow-inner">
+                <div className="w-full md:w-auto border border-zinc-900 rounded-xl p-6 bg-zinc-900/20 flex flex-col items-center gap-4 shrink-0">
                   <div className="flex items-end gap-1.5 h-12 select-none">
                     <div
-                      className="w-1.5 bg-[#8b5cf6] rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-[#8b5cf6]/80 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0s", height: "40%" }}
                     ></div>
                     <div
-                      className="w-1.5 bg-[#8b5cf6] rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-[#8b5cf6]/80 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0.2s", height: "60%" }}
                     ></div>
                     <div
-                      className="w-1.5 bg-[#adc6ff] rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-zinc-700 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0.1s", height: "80%" }}
                     ></div>
                     <div
-                      className="w-1.5 bg-[#8b5cf6] rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-[#8b5cf6]/80 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0.4s", height: "30%" }}
                     ></div>
                     <div
-                      className="w-1.5 bg-[#8b5cf6] rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-[#8b5cf6]/80 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0.3s", height: "70%" }}
                     ></div>
                   </div>
-                  <div className="text-[9px] font-mono text-zinc-500 tracking-widest">LATENCY: 42ms</div>
+                  <div className="text-[9px] font-mono text-zinc-600 tracking-widest">PROCESSING LATENCY: &lt; 1.0S</div>
                 </div>
               </div>
             </div>
@@ -196,10 +192,10 @@ export default function LandingPage() {
         </section>
 
         {/* Features Premium Grid */}
-        <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-white/5 relative z-10">
+        <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10">
           <div className="mb-12 text-center md:text-left">
-            <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#cbc3d7]/50 border-l-2 border-[#8b5cf6] pl-4">Capabilities</span>
-            <h2 className="text-3xl font-semibold font-geist text-white mt-3 tracking-tight">Full stack neural interpretation.</h2>
+            <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#8b5cf6] pl-4">Capabilities</span>
+            <h2 className="text-3xl font-semibold font-geist text-white mt-3 tracking-tight">Full stack speech translation pipeline.</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {features.map((feat, i) => (
@@ -209,17 +205,14 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6, delay: i * 0.05 }}
-                className={`premium-card p-8 flex flex-col gap-6 group hover:border-[#8b5cf6]/30 transition-all duration-300 relative overflow-hidden`}
+                className={`p-8 flex flex-col gap-6 group border border-zinc-900 bg-zinc-950/40 rounded-xl transition-all duration-300`}
               >
-                {/* Subtle gradient hover background glow */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.03),transparent_40%)] pointer-events-none" />
-                
-                <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center transition-colors duration-300 group-hover:bg-[#8b5cf6]/10 select-none">
+                <div className="w-10 h-10 rounded-lg bg-zinc-900/60 border border-zinc-800 flex items-center justify-center select-none">
                   <span className={`material-symbols-outlined text-xl ${feat.iconColor}`}>{feat.icon}</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg mb-2 text-white font-geist group-hover:text-[#d0bcff] transition-colors">{feat.title}</h3>
-                  <p className="text-[#cbc3d7]/70 text-sm leading-relaxed font-light font-sans">
+                  <h3 className="font-semibold text-base mb-2 text-white font-geist transition-colors">{feat.title}</h3>
+                  <p className="text-zinc-400 text-xs leading-relaxed font-sans font-light">
                     {feat.desc}
                   </p>
                 </div>
@@ -229,76 +222,66 @@ export default function LandingPage() {
         </section>
 
         {/* Stats / Trust Section */}
-        <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-white/5 relative z-10">
+        <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-16">
             <div className="md:w-1/2">
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#cbc3d7]/50 border-l-2 border-[#8b5cf6] pl-4">Reliability metrics</span>
-              <h2 className="text-3xl font-bold tracking-tight text-white font-geist mt-3 mb-6">Engineered for high-availability.</h2>
-              <p className="text-[#cbc3d7]/80 mb-8 leading-relaxed font-light font-sans">
-                Voxa handles over 100 million translations daily with a 99.99% uptime SLA. Our infrastructure is built to scale from individual developers to global enterprise setups.
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#8b5cf6] pl-4">Core Pipeline Metrics</span>
+              <h2 className="text-3xl font-bold tracking-tight text-white font-geist mt-3 mb-6">Optimized for fast processing.</h2>
+              <p className="text-zinc-400 text-sm mb-8 leading-relaxed font-light font-sans">
+                Voxa processes streaming audio chunks in 500ms intervals, running speech recognition, LLM post-processing correction, and translation concurrently to keep latency under 1 second.
               </p>
               <div className="flex flex-wrap gap-x-12 gap-y-8 select-none">
                 <div>
-                  <div className="text-3xl font-bold text-[#d0bcff] font-geist">99.99%</div>
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono mt-1">Uptime SLA</div>
+                  <div className="text-3xl font-bold text-[#d0bcff] font-geist">&lt; 1.0s</div>
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Processing Latency</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-[#adc6ff] font-geist">12ms</div>
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono mt-1">Avg Jitter</div>
+                  <div className="text-3xl font-bold text-[#adc6ff] font-geist">500ms</div>
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Streaming Chunk Size</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-[#ffb869] font-geist">200+</div>
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono mt-1">Languages</div>
+                  <div className="text-3xl font-bold text-[#ffb869] font-geist">45+</div>
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Supported Languages</div>
                 </div>
               </div>
             </div>
 
             {/* Spec grid cells */}
             <div className="md:w-1/2 w-full grid grid-cols-2 gap-4">
-              <div className="premium-card p-8 flex flex-col items-center justify-center text-center group hover:border-[#8b5cf6]/30 transition-all select-none">
-                <span className="material-symbols-outlined text-[#8b5cf6] text-3xl mb-4">memory</span>
-                <div className="text-xs uppercase font-mono tracking-widest text-white">H100 Optimized</div>
+              <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-950/40 rounded-xl select-none">
+                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">dns</span>
+                <div className="text-xs font-mono tracking-wider text-zinc-300">FastAPI Backend</div>
               </div>
-              <div className="premium-card p-8 flex flex-col items-center justify-center text-center group hover:border-[#adc6ff]/30 transition-all select-none">
-                <span className="material-symbols-outlined text-[#adc6ff] text-3xl mb-4">cloud</span>
-                <div className="text-xs uppercase font-mono tracking-widest text-white">Hybrid Cloud</div>
+              <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-950/40 rounded-xl select-none">
+                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">settings_ethernet</span>
+                <div className="text-xs font-mono tracking-wider text-zinc-300">WebSockets Core</div>
               </div>
-              <div className="premium-card p-8 flex flex-col items-center justify-center text-center group hover:border-[#ffb869]/30 transition-all select-none">
-                <span className="material-symbols-outlined text-[#ffb869] text-3xl mb-4">terminal</span>
-                <div className="text-xs uppercase font-mono tracking-widest text-white">CLI Core SDK</div>
+              <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-950/40 rounded-xl select-none">
+                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">psychology</span>
+                <div className="text-xs font-mono tracking-wider text-zinc-300">Claude Postprocess</div>
               </div>
-              <div className="premium-card p-8 flex flex-col items-center justify-center text-center group hover:border-[#d0bcff]/30 transition-all select-none">
-                <span className="material-symbols-outlined text-[#d0bcff] text-3xl mb-4">hub</span>
-                <div className="text-xs uppercase font-mono tracking-widest text-white">Edge nodes</div>
+              <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-950/40 rounded-xl select-none">
+                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">extension</span>
+                <div className="text-xs font-mono tracking-wider text-zinc-300">Extension Widget</div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Final CTA wrapped inside a premium glowing container */}
+        {/* Final CTA wrapped inside a clean flat container */}
         <section className="max-w-[1200px] mx-auto px-6 py-12 relative z-10">
-          <div className="relative rounded-2xl p-[1px] bg-gradient-to-r from-[#8b5cf6]/30 via-white/5 to-[#adc6ff]/20 overflow-hidden shadow-2xl">
-            {/* CTA backdrop blur */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-2xl" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(139,92,246,0.1),transparent_50%)]" />
-
+          <div className="relative rounded-2xl border border-zinc-900 bg-zinc-950/80 overflow-hidden shadow-xl">
             <div className="relative z-10 px-8 py-20 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6 text-white font-geist">Scale your communication infrastructure.</h2>
-              <p className="text-[#cbc3d7]/70 mb-10 max-w-xl mx-auto font-light font-sans">
-                Start building with the Voxa API today. First 1,000 requests are free of charge.
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6 text-white font-geist">Synthesize translations instantly.</h2>
+              <p className="text-zinc-400 mb-10 max-w-xl mx-auto font-light font-sans text-sm">
+                Experience natural human voice playback, customized speaker diarization, and contextual ASR transcript correction.
               </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <div className="flex justify-center">
                 <Link
                   href="/workspace"
-                  className="bg-[#8b5cf6] text-white px-10 py-3.5 rounded-lg font-bold hover:bg-[#7c3aed] transition-colors text-sm shadow-lg shadow-[#8b5cf6]/10 active:scale-98"
+                  className="bg-[#8b5cf6] text-white px-10 py-3.5 rounded-lg font-bold hover:bg-[#7c3aed] transition-colors text-sm shadow-md active:scale-98"
                 >
-                  Start Session
-                </Link>
-                <Link
-                  href="/workspace"
-                  className="border border-white/10 bg-white/5 text-[#cbc3d7] px-10 py-3.5 rounded-lg font-bold hover:bg-white/10 transition-colors text-sm active:scale-98"
-                >
-                  Talk to an expert
+                  Open Workspace
                 </Link>
               </div>
             </div>

@@ -188,9 +188,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Cursor Hiding on Desktop */
-@media (pointer: fine) {
-  body, a, button, [role="button"], .premium-card {
-    cursor: none !important;
-  }
+@utility grid-bg {
+  background-size: 24px 24px;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 0);
 }
+
+@utility radial-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.05), transparent 70%);
+}
+
+
+

@@ -85,26 +85,7 @@ export default function Sidebar() {
               >
                 insights
               </span>
-              Tech Pipeline
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              href="/design-system"
-              className={`flex items-center px-stack-lg py-4 font-label-md text-label-md transition-all group ${
-                pathname === "/design-system"
-                  ? "sidebar-item-active font-bold"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
-              }`}
-            >
-              <span
-                className="material-symbols-outlined mr-4 text-[22px]"
-                style={pathname === "/design-system" ? { fontVariationSettings: "'FILL' 1" } : {}}
-              >
-                palette
-              </span>
-              Design System
+              Architecture
             </Link>
           </li>
         </ul>

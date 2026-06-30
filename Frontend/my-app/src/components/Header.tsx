@@ -40,9 +40,6 @@ export default function Header() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/workspace" className="text-sm text-[#cbc3d7] hover:text-white transition-colors px-3 py-1.5 font-medium">
-              Log In
-            </Link>
             <Link href="/workspace" className="bg-[#8b5cf6] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#7c3aed] transition-colors shadow-lg shadow-[#8b5cf6]/15">
               Launch Workspace
             </Link>
@@ -67,10 +64,10 @@ export default function Header() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <button className="text-[12px] md:text-sm text-primary hover:underline font-bold flex items-center gap-1">
+            <Link href="/install" className="text-[12px] md:text-sm text-primary hover:underline font-bold flex items-center gap-1">
               Download &amp; Sync Extension
               <span className="material-symbols-outlined text-xs">open_in_new</span>
-            </button>
+            </Link>
             <button 
               onClick={() => setShowBanner(false)}
               className="text-[#cbc3d7] hover:text-white transition-colors flex items-center justify-center p-0.5"
@@ -80,6 +77,7 @@ export default function Header() {
           </div>
         </div>
       )}
+
 
       {/* Top Header Menu */}
       <header className="h-20 flex justify-between items-center px-6 border-b border-white/5 z-10 bg-black/40 backdrop-blur-xl">

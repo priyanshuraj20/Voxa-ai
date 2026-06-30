@@ -53,6 +53,25 @@ export default function Sidebar() {
 
           <li>
             <Link
+              href="/install"
+              className={`flex items-center px-stack-lg py-4 font-label-md text-label-md transition-all group ${
+                pathname === "/install"
+                  ? "sidebar-item-active font-bold"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+              }`}
+            >
+              <span
+                className="material-symbols-outlined mr-4 text-[22px]"
+                style={pathname === "/install" ? { fontVariationSettings: "'FILL' 1" } : {}}
+              >
+                download
+              </span>
+              Download Extension
+            </Link>
+          </li>
+
+          <li>
+            <Link
               href="/technology"
               className={`flex items-center px-stack-lg py-4 font-label-md text-label-md transition-all group ${
                 pathname === "/technology"
@@ -100,13 +119,6 @@ export default function Sidebar() {
           >
             <span className="material-symbols-outlined mr-4 text-[22px]">settings</span>
             Preferences
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center text-on-surface-variant hover:text-red-400 transition-all font-label-md text-label-md"
-          >
-            <span className="material-symbols-outlined mr-4 text-[22px]">logout</span>
-            Terminate Session
           </Link>
         </div>
 

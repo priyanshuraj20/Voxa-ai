@@ -1,6 +1,6 @@
 from elevenlabs.client import ElevenLabs
 from app.core.config import ELEVENLABS_API_KEY
-print(ELEVENLABS_API_KEY)
+print("ElevenLabs initialized.")
 
 
 client = ElevenLabs(

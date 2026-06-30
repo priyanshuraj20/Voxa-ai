@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.api.health import router as health_router
 from app.api.speech import router as speech_router
 from app.api.translation import router as translation_router
+from app.api.websocket_api import router as websocket_router
 
 
 app = FastAPI(
@@ -16,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3001"],
+    allow_origins=["*"], # Allow any origin to connect, helpful for Chrome Extension host matches
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(speech_router)
 app.include_router(translation_router)
+app.include_router(websocket_router)
 
 @app.get("/test")
 def test_route():

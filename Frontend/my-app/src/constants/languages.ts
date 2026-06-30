@@ -1,0 +1,44 @@
+export interface Language {
+  code: string;
+  name: string;
+  nativeName: string;
+}
+
+export const LANGUAGES: Language[] = [
+  {
+    code: "en-US",
+    name: "English (US)",
+    nativeName: "English",
+  },
+  { code: "hi-IN", name: "Hindi", nativeName: "हिन्दी" },
+  { code: "es-ES", name: "Spanish (Spain)", nativeName: "Español" },
+  { code: "fr-FR", name: "French (France)", nativeName: "Français" },
+  { code: "de-DE", name: "German (Germany)", nativeName: "Deutsch" },
+  { code: "ja-JP", name: "Japanese", nativeName: "日本語" },
+  { code: "zh-CN", name: "Chinese Simplified", nativeName: "简体中文" },
+  { code: "zh-TW", name: "Chinese Traditional", nativeName: "繁體中文" },
+  { code: "ko-KR", name: "Korean", nativeName: "한국어" },
+  { code: "it-IT", name: "Italian", nativeName: "Italiano" },
+  { code: "pt-BR", name: "Portuguese (Brazil)", nativeName: "Português" },
+  { code: "ru-RU", name: "Russian", nativeName: "Русский" },
+  { code: "tr-TR", name: "Turkish", nativeName: "Türkçe" },
+  { code: "ar-SA", name: "Arabic (Saudi Arabia)", nativeName: "العربية" },
+  { code: "bn-IN", name: "Bengali (India)", nativeName: "বাংলা" },
+  { code: "ta-IN", name: "Tamil (India)", nativeName: "தமிழ்" },
+  { code: "te-IN", name: "Telugu (India)", nativeName: "తెలుగు" },
+  { code: "mr-IN", name: "Marathi (India)", nativeName: "मराठी" },
+  { code: "gu-IN", name: "Gujarati (India)", nativeName: "ગુજરાતી" },
+  { code: "kn-IN", name: "Kannada (India)", nativeName: "ಕನ್ನಡ" },
+  { code: "ml-IN", name: "Malayalam (India)", nativeName: "മലയാളം" },
+  { code: "pa-IN", name: "Punjabi (India)", nativeName: "ਪੰਜਾਬੀ" },
+  { code: "vi-VN", name: "Vietnamese", nativeName: "Tiếng Việt" },
+  { code: "nl-NL", name: "Dutch", nativeName: "Nederlands" },
+  { code: "pl-PL", name: "Polish", nativeName: "Polski" },
+  { code: "sv-SE", name: "Swedish", nativeName: "Svenska" },
+  { code: "da-DK", name: "Danish", nativeName: "Dansk" },
+  { code: "fi-FI", name: "Finnish", nativeName: "Suomi" },
+  { code: "no-NO", name: "Norwegian", nativeName: "Norsk" },
+  { code: "el-GR", name: "Greek", nativeName: "Ελληνικά" },
+  { code: "he-IL", name: "Hebrew", nativeName: "עברית" },
+  { code: "th-TH", name: "Thai", nativeName: "ไทย" },
+];

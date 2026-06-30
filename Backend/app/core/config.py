@@ -10,4 +10,12 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
+
+AZURE_TRANSLATOR_KEY = os.getenv("AZURE_TRANSLATOR_KEY")
+AZURE_TRANSLATOR_REGION = os.getenv("AZURE_TRANSLATOR_REGION", "centralindia")
+AZURE_TRANSLATOR_ENDPOINT = os.getenv(
+    "AZURE_TRANSLATOR_ENDPOINT",
+    "https://api.cognitive.microsofttranslator.com"
+)
+
 # abb poore project mein api key yahi se access hogi

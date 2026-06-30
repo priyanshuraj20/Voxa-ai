@@ -7,6 +7,9 @@ from app.core.config import GROQ_API_KEY
 client = Groq(api_key=GROQ_API_KEY)
 
 def transcribe_audio(file):
+    # Reset file cursor to 0 in case it was advanced during multipart form parsing
+    file.file.seek(0)
+    
     # 1. Create a safe temporary file on the host machine disk
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_file:
         temp_file.write(file.file.read())

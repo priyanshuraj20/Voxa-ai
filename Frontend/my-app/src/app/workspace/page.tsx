@@ -674,6 +674,8 @@ export default function WorkspacePage() {
           <span className="text-[10px] font-medium font-sans">Specs</span>
         </Link>
       </div>
+        </div>
+      </div>
     </div>
   );
 }

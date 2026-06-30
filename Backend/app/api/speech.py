@@ -41,8 +41,8 @@ async def get_output_audio():
 @router.post("/translate-and-speak")
 async def translate_and_speak(
     file: UploadFile = File(...),
-    source_lang: str = Form("en"),
-    target_lang: str = Form("hi-IN"),
+    # source_lang: str = Form("en"),
+    # target_lang: str = Form("hi-IN"),
 ):
 
     # ---------------------------------------
@@ -59,7 +59,7 @@ async def translate_and_speak(
         # =====================================
         # STEP 1 : Speech To Text
         # =====================================
-        transcript = transcribe_audio(file)
+        transcript = transcribe_audio(file, language=source_lang)
 
         # =====================================
         # STEP 2 : Translation

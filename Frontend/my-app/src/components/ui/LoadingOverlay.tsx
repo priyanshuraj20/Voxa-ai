@@ -75,11 +75,39 @@ export default function LoadingOverlay() {
             transition={{ duration: 0.8 }}
             className="w-16 h-16 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center overflow-hidden shadow-2xl relative z-10"
           >
-            <img
-              src="https://lh3.googleusercontent.com/aida/AP1WRLuKVSk3_84_5GQ6VkK2082k2yi4ZiupJd9HG6EFX_8ZdPjwMZ0pLB9YafMoTihOJwySlqPC8GR_ysGt6qanmSuH3t0OgpcAsHo_JkfRvhqb2XSZOGNqnsNNnHc4yj2BKgPqtrsSHLUsfnNcL6VIJQFqaFU51fidPBqq50VrfNldOBJEFxfdb-9Byi7HcQqBxZpgL9YnhDIkarAFkZnrdwPiDUPTpeQziyaJdyrhHuLsyC_MvFuOTOSzWw"
-              alt="Voxa Logo"
-              className="w-12 h-12 object-contain"
-            />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-10 h-10 animate-pulse"
+            >
+              <path
+                d="M4.5 4L12 18L19.5 4"
+                stroke="url(#voxa-loader-v-grad)"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M8.5 9.5L12 13.5L15.5 9.5"
+                stroke="url(#voxa-loader-v-inner)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity="0.8"
+              />
+              <defs>
+                <linearGradient id="voxa-loader-v-grad" x1="4.5" y1="4" x2="19.5" y2="4">
+                  <stop stopColor="#d0bcff" />
+                  <stop offset="0.5" stopColor="#8b5cf6" />
+                  <stop offset="1" stopColor="#3b82f6" />
+                </linearGradient>
+                <linearGradient id="voxa-loader-v-inner" x1="8.5" y1="9.5" x2="15.5" y2="9.5">
+                  <stop stopColor="#ffb869" />
+                  <stop offset="1" stopColor="#8b5cf6" />
+                </linearGradient>
+              </defs>
+            </svg>
           </motion.div>
           {/* Subtle neon drop shadow behind logo */}
           <div className="absolute inset-0 w-16 h-16 bg-[#8b5cf6]/10 blur-xl rounded-full scale-110 pointer-events-none z-0" />

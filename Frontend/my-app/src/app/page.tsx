@@ -295,11 +295,39 @@ export default function LandingPage() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 text-lg font-bold text-white group">
               <div className="w-8 h-8 rounded bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center overflow-hidden">
-                <img 
-                  src="https://lh3.googleusercontent.com/aida/AP1WRLuKVSk3_84_5GQ6VkK2082k2yi4ZiupJd9HG6EFX_8ZdPjwMZ0pLB9YafMoTihOJwySlqPC8GR_ysGt6qanmSuH3t0OgpcAsHo_JkfRvhqb2XSZOGNqnsNNnHc4yj2BKgPqtrsSHLUsfnNcL6VIJQFqaFU51fidPBqq50VrfNldOBJEFxfdb-9Byi7HcQqBxZpgL9YnhDIkarAFkZnrdwPiDUPTpeQziyaJdyrhHuLsyC_MvFuOTOSzWw" 
-                  alt="Voxa Logo" 
-                  className="w-5 h-5 object-contain"
-                />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                >
+                  <path
+                    d="M4.5 4L12 18L19.5 4"
+                    stroke="url(#voxa-landing-v-grad)"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M8.5 9.5L12 13.5L15.5 9.5"
+                    stroke="url(#voxa-landing-v-inner)"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity="0.8"
+                  />
+                  <defs>
+                    <linearGradient id="voxa-landing-v-grad" x1="4.5" y1="4" x2="19.5" y2="4">
+                      <stop stopColor="#d0bcff" />
+                      <stop offset="0.5" stopColor="#8b5cf6" />
+                      <stop offset="1" stopColor="#3b82f6" />
+                    </linearGradient>
+                    <linearGradient id="voxa-landing-v-inner" x1="8.5" y1="9.5" x2="15.5" y2="9.5">
+                      <stop stopColor="#ffb869" />
+                      <stop offset="1" stopColor="#8b5cf6" />
+                    </linearGradient>
+                  </defs>
+                </svg>
               </div>
               <span className="font-bold text-white font-headline-md">Voxa</span>
             </div>

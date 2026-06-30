@@ -24,15 +24,28 @@ export default function Sidebar() {
             className="w-6 h-6 group-hover:scale-105 transition-transform"
           >
             <path
-              d="M4 5L12 19L20 5"
-              stroke="url(#voxa-sidebar-gradient)"
+              d="M4.5 4L12 18L19.5 4"
+              stroke="url(#voxa-sidebar-v-grad)"
               strokeWidth="3.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
+            <path
+              d="M8.5 9.5L12 13.5L15.5 9.5"
+              stroke="url(#voxa-sidebar-v-inner)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.8"
+            />
             <defs>
-              <linearGradient id="voxa-sidebar-gradient" x1="4" y1="5" x2="20" y2="19">
+              <linearGradient id="voxa-sidebar-v-grad" x1="4.5" y1="4" x2="19.5" y2="4">
                 <stop stopColor="#d0bcff" />
+                <stop offset="0.5" stopColor="#8b5cf6" />
+                <stop offset="1" stopColor="#3b82f6" />
+              </linearGradient>
+              <linearGradient id="voxa-sidebar-v-inner" x1="8.5" y1="9.5" x2="15.5" y2="9.5">
+                <stop stopColor="#ffb869" />
                 <stop offset="1" stopColor="#8b5cf6" />
               </linearGradient>
             </defs>

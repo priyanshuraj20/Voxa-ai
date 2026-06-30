@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: "Voxa | Cinematic Precision Workspace",
   description: "Real-time AI Multilingual Speech & Text Translation Platform powered by distributed foundational models.",
   icons: {
-    icon: "https://lh3.googleusercontent.com/aida/AP1WRLuKVSk3_84_5GQ6VkK2082k2yi4ZiupJd9HG6EFX_8ZdPjwMZ0pLB9YafMoTihOJwySlqPC8GR_ysGt6qanmSuH3t0OgpcAsHo_JkfRvhqb2XSZOGNqnsNNnHc4yj2BKgPqtrsSHLUsfnNcL6VIJQFqaFU51fidPBqq50VrfNldOBJEFxfdb-9Byi7HcQqBxZpgL9YnhDIkarAFkZnrdwPiDUPTpeQziyaJdyrhHuLsyC_MvFuOTOSzWw",
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'><path d='M4.5 4L12 18L19.5 4' stroke='%238b5cf6' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/></svg>",
   },
 };
 

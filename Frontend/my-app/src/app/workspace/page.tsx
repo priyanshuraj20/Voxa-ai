@@ -147,14 +147,6 @@ export default function WorkspacePage() {
     setProcessingStep(1); // 1: Audio Uplink / Uploading
     setError("");
 
-    let currentStep = 1;
-    const stepInterval = setInterval(() => {
-      if (currentStep < 5) {
-        currentStep += 1;
-        setProcessingStep(currentStep);
-      }
-    }, 600);
-
     try {
       const formData = new FormData();
 
@@ -176,21 +168,51 @@ export default function WorkspacePage() {
         throw new Error(`HTTP network error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log("✅ Translation result:", data);
+      if (!response.body) {
+        throw new Error("Response body is not readable.");
+      }
 
-      clearInterval(stepInterval);
-      setProcessingStep(6); // 6: Completed
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
 
-      if (data.success) {
-        setTranscript(data.transcript || "");
-        setOutputText(data.translated_text || "");
-        setTtsAudioUrl(data.output_audio_url || null);
-      } else {
-        setError("Speech translation server failed.");
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+
+          try {
+            const data = JSON.parse(trimmed);
+            console.log("📨 Stream chunk received:", data);
+
+            if (data.step !== undefined) {
+              setProcessingStep(data.step);
+            }
+
+            if (data.step === 6) {
+              if (data.success) {
+                setTranscript(data.transcript || "");
+                setOutputText(data.translated_text || "");
+                setTtsAudioUrl(data.output_audio_url || null);
+              } else {
+                setError(data.error || "Speech translation server failed.");
+              }
+            } else if (data.step === 0) {
+              setError(data.error || "Speech translation server failed.");
+            }
+          } catch (jsonErr) {
+            console.error("JSON parse error on stream chunk:", jsonErr, trimmed);
+          }
+        }
       }
     } catch (err) {
-      clearInterval(stepInterval);
       setProcessingStep(0);
       console.error(err);
 
@@ -244,7 +266,7 @@ export default function WorkspacePage() {
 
       {/* Sidebar navigation + Main Area wrapper. 
           Adjusted pt-[120px] dynamically offset top fixed banner + header height */}
-      <div className="flex flex-1 pt-[120px] overflow-hidden relative z-10">
+      <div className="flex flex-1 pt-[120px] overflow-hidden relative z-10 min-h-0">
         <Sidebar />
 
         {/* Workspace core container */}

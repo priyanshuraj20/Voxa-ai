@@ -4,7 +4,7 @@ Voxa AI is a real-time speech translation system that captures browser or microp
 
 ---
 
-## 📸 Core Dashboards & Interfaces
+## 📸 Product Showcases
 
 ### 💻 Real-Time Workspace Dashboard
 The core Next.js application workspace allows local microphone recording, uploading WebM audio files to the translation REST API, and rendering the pipeline progress status alongside original and translated speech outputs.
@@ -22,9 +22,28 @@ When inside a Google Meet call, clicking the pinned extension icon opens our sid
 
 ## 🚀 The Voxa Pipeline Architecture
 
-Voxa supports two primary flows: **REST-Based File Upload** (with transcript correction) and **Real-Time WebSocket Streaming**.
+Voxa supports two primary translation flows: **REST-Based File Upload with Streaming Status Updates** and **Real-Time WebSocket Streaming**.
 
-### 1. WebSocket Streaming Flow (Chrome Extension)
+### 1. REST Streaming Pipeline Flow (Workspace Web App)
+When you record or upload an audio file in the Workspace web app, the backend translates it through a streaming REST connection (`POST /speech/translate-and-speak`). Instead of a single blocking response, the server yields incremental progress updates using a `StreamingResponse` (Server-Sent Events) to keep the client UI in sync.
+
+```
+[User Mic Input] ──► [WebM Recording Blob] ──► [POST /speech/translate-and-speak]
+                                                           │
+                                                           ├──► Step 2: Groq Whisper ASR transcription start
+                                                           │
+                                                           ├──► Step 3: OpenRouter Claude Sonnet 4 correction start
+                                                           │
+                                                           ├──► Step 4: Azure Neural Translation start
+                                                           │
+                                                           ├──► Step 5: ElevenLabs synthetic voice generation start
+                                                           │
+                                                           └──► Step 6: Returns final JSON payload with audio URL
+```
+
+### 2. WebSocket Streaming Flow (Chrome Extension)
+The Chrome Extension captures internal Google Meet/browser tab audio, downsamples it to a clean 16kHz mono 16-bit PCM feed in the background, and streams raw binary chunks to the server in 3-second windows for instant processing.
+
 ```
 [Google Meet Tab Audio] ──► (Captured via Chrome Offscreen Document)
                                        │
@@ -50,28 +69,12 @@ Voxa supports two primary flows: **REST-Based File Upload** (with transcript cor
 [JSON Response]         ──► (Sends transcripts & translations back to client)
 ```
 
-### 2. REST Pipeline Flow (Workspace Web App)
-```
-[User Mic Input] ──► [WebM Recording Blob] ──► [POST /speech/translate-and-speak]
-                                                           │
-                                                           ▼
-                                               [Groq Whisper transcription]
-                                                           │
-                                                           ▼
-                                               [Claude Sonnet 4 Correction]
-                                                           │
-                                                           ▼
-                                               [Azure Neural Translation]
-                                                           │
-                                                           ▼
-                                               [ElevenLabs voice synthesis]
-```
-
 ---
 
 ## ✨ Key Features
 
 * **WebSocket PCM Streaming:** The Chrome Extension downsamples browser tab audio to 16kHz mono PCM and streams it continuously to bypass typical REST polling latencies.
+* **SSE Progress Updates:** The workspace REST API uses a generator-based Server-Sent Events flow to trigger visual checklist checkmarks in real time as ASR, correction, translation, and TTS synthesis complete.
 * **ASR Transcript Correction:** Raw transcriptions from Whisper large-v3 are sent through an LLM layer (Claude Sonnet 4 via OpenRouter) to clean up homophones, restore boundary punctuation, and fix capitalization errors.
 * **Azure Translation Layer:** Fully contextual translation into 45+ supported target locales using Azure Cognitive Services.
 * **Expressive Synthesizer:** Incorporates ElevenLabs Voice Synthesis (using `eleven_multilingual_v2`) to generate realistic voice playbacks of the translated sentences.
@@ -86,8 +89,15 @@ Voxa-ai/
 ├── Backend/                 # Python FastAPI Web Server & AI Engine
 │   └── app/
 │       ├── api/             # API Router Endpoints (REST & WebSockets)
+│       │   ├── health.py    # Health checks
+│       │   ├── speech.py    # REST Translation & serving output-audio
+│       │   └── websocket_api.py # WebSocket Stream Gateway
 │       ├── core/            # Config variables & settings
 │       ├── services/        # Logic Handlers (STT, Postprocess, Translation, TTS)
+│       │   ├── speech_service.py      # Groq Whisper
+│       │   ├── postprocess_service.py # OpenRouter Claude 3.5 Sonnet
+│       │   ├── translation_service.py # Azure Translator API
+│       │   └── tts_service.py         # ElevenLabs TTS
 │       └── main.py          # FastAPI server loader
 │
 ├── Frontend/my-app/         # Next.js 16 Web Dashboard

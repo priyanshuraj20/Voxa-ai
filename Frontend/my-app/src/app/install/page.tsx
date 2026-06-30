@@ -6,15 +6,15 @@ import Sidebar from "@/components/Sidebar";
 
 export default function InstallPage() {
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-black text-zinc-300 relative font-sans">
+    <div className="flex flex-col min-h-screen bg-black text-zinc-300 relative font-sans">
       <Header />
       
       {/* Sidebar + Main Area wrapper */}
-      <div className="flex flex-1 pt-[120px] overflow-hidden relative z-10">
+      <div className="flex flex-1 pt-[120px] relative z-10">
         <Sidebar />
 
         {/* Core Main Area */}
-        <main className="flex-1 overflow-y-auto px-6 md:px-16 py-10 w-full pb-28 bg-transparent custom-scrollbar grid-bg radial-glow">
+        <main className="flex-1 px-6 md:px-16 py-10 w-full pb-28 bg-transparent grid-bg radial-glow">
           <div className="max-w-3xl mx-auto flex flex-col gap-12">
             
             {/* Header Title */}

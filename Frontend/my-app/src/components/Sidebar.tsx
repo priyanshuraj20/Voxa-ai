@@ -52,7 +52,7 @@ export default function Sidebar() {
           </svg>
         </div>
         <div className="flex flex-col">
-          <span className="font-headline-md text-headline-md font-bold text-on-background tracking-tight group-hover:text-white transition-colors">Voxa</span>
+          <span className="font-headline-md text-headline-md font-bold text-on-background tracking-tight group-hover:text-white transition-colors">Voxa AI</span>
           <span className="text-[9px] text-[#ffb869] font-mono tracking-widest uppercase leading-none mt-0.5">VOXA AI ACTIVE</span>
         </div>
       </Link>

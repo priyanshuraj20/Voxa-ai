@@ -50,7 +50,7 @@ export default function Header() {
                   </defs>
                 </svg>
               </div>
-              <span className="font-bold text-white font-headline-md">Voxa</span>
+              <span className="font-bold text-white font-headline-md">Voxa AI</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6 font-sans">
               <Link href="/install" className="text-sm text-[#cbc3d7] hover:text-white transition-colors">

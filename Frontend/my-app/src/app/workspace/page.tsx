@@ -289,8 +289,10 @@ export default function WorkspacePage() {
             </div>
           )}
 
-          {/* Grid Split-view Workspace */}
-          <div className="flex-1 grid grid-cols-12 gap-6 p-6 overflow-hidden pb-20 md:pb-6">
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            {/* Grid Split-view Workspace */}
+            <div className="grid grid-cols-12 gap-6 p-6 h-[calc(100vh-180px)] min-h-[500px] shrink-0">
             {/* LEFT COLUMN: Input Stream Context (Whisper ASR) */}
             <div className="col-span-12 md:col-span-6 flex flex-col gap-4 h-full overflow-hidden">
               <div className="flex-1 flex flex-col premium-card overflow-hidden">
@@ -626,6 +628,80 @@ export default function WorkspacePage() {
               </div>
             </div>
           </div>
+
+          {/* Use Cases Section */}
+          <div className="p-8 border-t border-zinc-900 bg-zinc-950/20 space-y-8 select-none">
+            <div className="max-w-4xl mx-auto text-center md:text-left">
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#8b5cf6] pl-4">Voxa AI Application</span>
+              <h2 className="text-2xl font-semibold font-geist text-white mt-3 tracking-tight">Interactive Use Cases</h2>
+              <p className="text-zinc-400 text-xs mt-2 leading-relaxed font-sans font-light max-w-xl">
+                Unlock global connectivity with Voxa AI. Whether conducting international calls, practicing accent pronunciation, or learning new idioms, Voxa AI bridges the gap.
+              </p>
+            </div>
+
+            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Google Meet Use Case */}
+              <div className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-xl flex flex-col gap-4 group">
+                <div className="w-10 h-10 rounded-lg bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[#8b5cf6] text-xl">groups</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm mb-1 text-white font-geist">Live Meetings (Google Meet)</h3>
+                  <p className="text-zinc-400 text-[11px] leading-relaxed font-sans font-light">
+                    Translate video calls on the fly. Injects real-time captions directly into meeting tabs for seamless collaboration.
+                  </p>
+                </div>
+                <div className="rounded-lg overflow-hidden border border-zinc-900 bg-black mt-2">
+                  <img 
+                    src="/assets/google_meet.png" 
+                    alt="Google Meet Integration" 
+                    className="w-full object-contain opacity-85 group-hover:scale-102 transition-transform duration-300"
+                  />
+                </div>
+              </div>
+
+              {/* Pronunciation Practice */}
+              <div className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-xl flex flex-col gap-4 group">
+                <div className="w-10 h-10 rounded-lg bg-[#ffb869]/10 border border-[#ffb869]/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[#ffb869] text-xl">record_voice_over</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm mb-1 text-white font-geist">Speaking Practice</h3>
+                  <p className="text-zinc-400 text-[11px] leading-relaxed font-sans font-light">
+                    Improve accent and sentence delivery. Read transcripts side-by-side with translated references to practice and compare.
+                  </p>
+                </div>
+                <div className="rounded-lg overflow-hidden border border-zinc-900 bg-black mt-2">
+                  <img 
+                    src="/assets/workspace.png" 
+                    alt="Workspace practice view" 
+                    className="w-full object-contain opacity-85 group-hover:scale-102 transition-transform duration-300"
+                  />
+                </div>
+              </div>
+
+              {/* Language Learning */}
+              <div className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-xl flex flex-col gap-4 group">
+                <div className="w-10 h-10 rounded-lg bg-[#adc6ff]/10 border border-[#adc6ff]/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[#adc6ff] text-xl">school</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm mb-1 text-white font-geist">Language Learning</h3>
+                  <p className="text-zinc-400 text-[11px] leading-relaxed font-sans font-light">
+                    Accelerate your language acquisition. Listen to translated syntheses to capture the native pitch and accents naturally.
+                  </p>
+                </div>
+                <div className="rounded-lg overflow-hidden border border-zinc-900 bg-black mt-2">
+                  <img 
+                    src="/assets/setup_guide.png" 
+                    alt="Setup and learning guide" 
+                    className="w-full object-contain opacity-85 group-hover:scale-102 transition-transform duration-300"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
           {/* Status footer bar at the bottom */}
 <footer className="h-12 bg-black border-t border-white/5 w-full flex items-center px-6 justify-between select-none absolute bottom-0 md:relative shrink-0 z-20">

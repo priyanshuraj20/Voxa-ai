@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Voxa | Cinematic Precision Workspace",
+  title: "Voxa AI | Cinematic Precision Workspace",
   description: "Real-time AI Multilingual Speech & Text Translation Platform powered by distributed foundational models.",
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'><path d='M4.5 4L12 18L19.5 4' stroke='%238b5cf6' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/></svg>",

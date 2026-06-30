@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getRandomAIFact } from "@/constants/aiFacts";
 
 const loadingStatuses = [
-  "Initializing Voxa...",
+  "Initializing Voxa AI...",
   "Preparing Workspace...",
   "Loading AI Models...",
   "Connecting Translation Engine...",
@@ -26,7 +26,7 @@ const loadingStatuses = [
 const subtleIcons = ["🎤", "🧠", "🌍", "⚡", "🔊", "💬"];
 
 export default function LoadingOverlay() {
-  const [status, setStatus] = useState("Initializing Voxa...");
+  const [status, setStatus] = useState("Initializing Voxa AI...");
   const [aiFact, setAiFact] = useState("");
   const [iconIndex, setIconIndex] = useState(0);
 
@@ -61,7 +61,7 @@ export default function LoadingOverlay() {
     <div className="fixed inset-0 w-full h-full bg-[#000000] z-[9999] flex flex-col justify-between items-center py-16 px-6 select-none font-sans overflow-hidden">
       {/* Absolute top grid details to look highly professional */}
       <div className="w-full max-w-[1200px] flex justify-between items-center text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
-        <span>VOXA SECURE_TUNNEL: ENCRYPTED</span>
+        <span>VOXA AI SECURE_TUNNEL: ENCRYPTED</span>
         <span>NODE: LAUNCH_CORE_V3</span>
       </div>
 

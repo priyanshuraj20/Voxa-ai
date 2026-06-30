@@ -329,7 +329,7 @@ export default function LandingPage() {
                   </defs>
                 </svg>
               </div>
-              <span className="font-bold text-white font-headline-md">Voxa</span>
+              <span className="font-bold text-white font-headline-md">Voxa AI</span>
             </div>
             <p className="text-sm text-zinc-400 max-w-xs leading-relaxed font-light font-sans">
               Building the future of neural translation and global communication infrastructure.

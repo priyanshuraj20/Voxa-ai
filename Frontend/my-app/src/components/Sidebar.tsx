@@ -17,11 +17,26 @@ export default function Sidebar() {
         className="p-stack-lg h-20 flex items-center gap-3 border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
       >
         <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg shadow-primary/10 select-none overflow-hidden group-hover:border-primary/45 transition-colors">
-          <img 
-            src="https://lh3.googleusercontent.com/aida/AP1WRLuKVSk3_84_5GQ6VkK2082k2yi4ZiupJd9HG6EFX_8ZdPjwMZ0pLB9YafMoTihOJwySlqPC8GR_ysGt6qanmSuH3t0OgpcAsHo_JkfRvhqb2XSZOGNqnsNNnHc4yj2BKgPqtrsSHLUsfnNcL6VIJQFqaFU51fidPBqq50VrfNldOBJEFxfdb-9Byi7HcQqBxZpgL9YnhDIkarAFkZnrdwPiDUPTpeQziyaJdyrhHuLsyC_MvFuOTOSzWw" 
-            alt="Voxa Logo" 
-            className="w-7 h-7 object-contain group-hover:scale-105 transition-transform"
-          />
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6 group-hover:scale-105 transition-transform"
+          >
+            <path
+              d="M4 5L12 19L20 5"
+              stroke="url(#voxa-sidebar-gradient)"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <defs>
+              <linearGradient id="voxa-sidebar-gradient" x1="4" y1="5" x2="20" y2="19">
+                <stop stopColor="#d0bcff" />
+                <stop offset="1" stopColor="#8b5cf6" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
         <div className="flex flex-col">
           <span className="font-headline-md text-headline-md font-bold text-on-background tracking-tight group-hover:text-white transition-colors">Voxa</span>

@@ -5,7 +5,7 @@ from app.api.speech import router as speech_router
 from app.api.translation import router as translation_router
 from app.api.websocket_api import router as websocket_router
 from app.core.config import FRONTEND_URL
-
+from fastapi.responses import RedirectResponse
 
 
 
@@ -34,3 +34,6 @@ app.include_router(websocket_router)
 @app.get("/test")
 def test_route():
     return {"status": "The server is alive!"}
+app.get("/")
+async def root():
+    return RedirectResponse(url="/docs")

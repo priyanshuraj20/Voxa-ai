@@ -1,38 +1,40 @@
 # 🌍 Voxa AI — Real-Time Browser Audio Translator
 
-Voxa AI is a real-time speech translation system that captures browser or microphone audio, processes it through sequential AI pipeline stages, and delivers punctuated text, translated output, and synthetic voice synthesis back to the client in under 1 second.
+Voxa AI is a state-of-the-art, real-time speech translation platform. It captures browser tab sound streams or microphone audio, orchestrates them through an optimized sequence of specialized AI modules, and outputs punctuated transcripts, translations, and natural voice syntheses back to the user in sub-second latencies.
+
+🔗 **Production Live Link:** [voxa-ai-pi.vercel.app](https://voxa-ai-pi.vercel.app/)
 
 ---
 
 ## 📸 Product Showcases
 
 ### 💻 Real-Time Workspace Dashboard
-The core Next.js application workspace allows local microphone recording, uploading WebM audio files to the translation REST API, and rendering the pipeline progress status alongside original and translated speech outputs.
+The Next.js 16 dashboard allows users to record microphone inputs, upload audio files, and watch progress updates resolve in real time.
 <p align="left">
   <img src="assets/workspace.png" alt="Voxa AI Workspace" width="90%" style="border-radius: 8px; border: 1px solid #1f1f1f;" />
 </p>
 
 ### 🌍 Google Meet Active Integration
-When inside a Google Meet call, clicking the pinned extension icon opens our side panel. Live translated transcripts stream directly into the panel, while a floating subtitle overlay renders translations directly on top of the browser meeting tab.
+The Voxa AI Chrome Extension captures tab audio contextually, presenting subtitle streams in a side panel or as a floating overlay inside active Meet tabs.
 <p align="left">
   <img src="assets/google_meet.png" alt="Google Meet Translation" width="90%" style="border-radius: 8px; border: 1px solid #1f1f1f;" />
 </p>
 
 ---
 
-## 🚀 The Voxa Pipeline Architecture
+## 🚀 The Voxa AI Pipeline Architecture
 
-Voxa supports two primary translation flows: **REST-Based File Upload with Streaming Status Updates** and **Real-Time WebSocket Streaming**.
+Voxa AI operates two primary translation flows: **REST-Based File Upload with Streaming Status Updates** and **Real-Time WebSocket Binary Streaming**.
 
 ### 1. REST Streaming Pipeline Flow (Workspace Web App)
-When you record or upload an audio file in the Workspace web app, the backend translates it through a streaming REST connection (`POST /speech/translate-and-speak`). Instead of a single blocking response, the server yields incremental progress updates using a `StreamingResponse` (Server-Sent Events) to keep the client UI in sync.
+When uploading or recording audio via the Workspace dashboard, the server processes it via `POST /speech/translate-and-speak`. Instead of blocking, the server yields incremental progress status updates chunk-by-chunk using a Server-Sent Events (SSE) stream to drive the frontend checkmarks.
 
 ```
 [User Mic Input] ──► [WebM Recording Blob] ──► [POST /speech/translate-and-speak]
                                                            │
                                                            ├──► Step 2: Groq Whisper ASR transcription start
                                                            │
-                                                           ├──► Step 3: OpenRouter Claude Sonnet 4 correction start
+                                                           ├──► Step 3: OpenRouter Claude 3.5 Sonnet correction start
                                                            │
                                                            ├──► Step 4: Azure Neural Translation start
                                                            │
@@ -42,7 +44,7 @@ When you record or upload an audio file in the Workspace web app, the backend tr
 ```
 
 ### 2. WebSocket Streaming Flow (Chrome Extension)
-The Chrome Extension captures internal Google Meet/browser tab audio, downsamples it to a clean 16kHz mono 16-bit PCM feed in the background, and streams raw binary chunks to the server in 3-second windows for instant processing.
+The Chrome Extension downsamples meeting or tab audio to a clean 16kHz mono 16-bit PCM feed in the background, streaming raw binary chunks over persistent WebSockets in 3-second windows for instant processing.
 
 ```
 [Google Meet Tab Audio] ──► (Captured via Chrome Offscreen Document)
@@ -57,7 +59,10 @@ The Chrome Extension captures internal Google Meet/browser tab audio, downsample
 [FastAPI Buffer]        ──► (Accumulates chunks in 3-second sliding window)
                                        │
                                        ▼
-[Groq Whisper ASR]      ──► (Transcribes raw audio using whisper-large-v3)
+[Groq Whisper ASR]      ──► (Transcribes raw audio using Whisper large-v3)
+                                       │
+                                       ▼
+[OpenRouter Postprocess]──► (Punctuates & corrects text using Claude 3.5 Sonnet)
                                        │
                                        ▼
 [Azure Translator]      ──► (Translates transcript contextually into target language)
@@ -71,14 +76,14 @@ The Chrome Extension captures internal Google Meet/browser tab audio, downsample
 
 ---
 
-## ✨ Key Features
+## ✨ Core Features & Technical Stack
 
-* **WebSocket PCM Streaming:** The Chrome Extension downsamples browser tab audio to 16kHz mono PCM and streams it continuously to bypass typical REST polling latencies.
-* **SSE Progress Updates:** The workspace REST API uses a generator-based Server-Sent Events flow to trigger visual checklist checkmarks in real time as ASR, correction, translation, and TTS synthesis complete.
-* **ASR Transcript Correction:** Raw transcriptions from Whisper large-v3 are sent through an LLM layer (Claude Sonnet 4 via OpenRouter) to clean up homophones, restore boundary punctuation, and fix capitalization errors.
-* **Azure Translation Layer:** Fully contextual translation into 45+ supported target locales using Azure Cognitive Services.
-* **Expressive Synthesizer:** Incorporates ElevenLabs Voice Synthesis (using `eleven_multilingual_v2`) to generate realistic voice playbacks of the translated sentences.
-* **Floating subtitle injection:** Injects a secure floating overlay widget directly into Meet/Zoom tabs without performance impact.
+* **WebSocket PCM Streaming:** Downsamples browser audio to 16kHz mono PCM and streams it continuously to achieve sub-second latencies.
+* **Server-Sent Events (SSE) Progress:** Visual step checklist updates are synchronized 100% with server execution milestones (ASR, post-refine, translate, TTS synthesis).
+* **ASR Transcript Correction:** Raw transcriptions from Whisper large-v3 are sent through **Claude 3.5 Sonnet via OpenRouter** to correct homophones, insert punctuation, and fix grammar before translation.
+* **Azure Translation Layer:** Fully contextual text translation into 45+ supported target locales using Azure Cognitive Services.
+* **Expressive Synthesizer:** Integrates ElevenLabs Voice Synthesis (using `eleven_multilingual_v2`) to generate natural speech playback.
+* **Floating Subtitle Injection:** Injects a secure floating overlay widget directly into Google Meet browser tabs.
 
 ---
 
@@ -101,7 +106,7 @@ Voxa-ai/
 │       └── main.py          # FastAPI server loader
 │
 ├── Frontend/my-app/         # Next.js 16 Web Dashboard
-│   ├── public/              # Static assets & Packed voxa_entension.zip
+│   ├── public/              # Static assets & Packed extension voxa_entension.zip
 │   └── src/
 │       ├── app/             # Page routing & pages (Landing, workspace, tech)
 │       └── components/      # Responsive design systems
@@ -161,7 +166,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the web workspace.
 2. Toggle **Developer Mode** on in the top-right.
 3. Click **Load Unpacked** in the top-left.
 4. Select the `Extension` directory in the root of this project.
-5. Use the shortcut `Ctrl + Shift + U` or click the Voxa icon to start translating your meetings!
+5. Use the shortcut `Ctrl + Shift + U` or click the Voxa AI icon to start translating your meetings!
 
 ---
 

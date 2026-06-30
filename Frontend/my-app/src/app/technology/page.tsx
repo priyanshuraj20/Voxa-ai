@@ -138,6 +138,15 @@ export default function TechnologyPage() {
                     <span className="material-symbols-outlined text-zinc-700 md:hidden">south</span>
 
                     <div className="flex flex-col items-center bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-center shrink-0 w-28">
+                      <span className="material-symbols-outlined text-[#8b5cf6] text-lg mb-1">magic_button</span>
+                      <span className="text-white font-bold text-[9px]">OpenRouter</span>
+                      <span className="text-[8px] text-zinc-500">Claude Post-Refine</span>
+                    </div>
+
+                    <span className="material-symbols-outlined text-zinc-700 hidden md:block">east</span>
+                    <span className="material-symbols-outlined text-zinc-700 md:hidden">south</span>
+
+                    <div className="flex flex-col items-center bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-center shrink-0 w-28">
                       <span className="material-symbols-outlined text-[#ffb869] text-lg mb-1">translate</span>
                       <span className="text-white font-bold text-[9px]">Azure Neural</span>
                       <span className="text-[8px] text-zinc-500">Translation</span>

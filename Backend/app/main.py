@@ -21,7 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -34,6 +34,6 @@ app.include_router(websocket_router)
 @app.get("/test")
 def test_route():
     return {"status": "The server is alive!"}
-app.get("/")
+@app.get("/")
 async def root():
     return RedirectResponse(url="/docs")

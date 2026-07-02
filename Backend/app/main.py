@@ -17,8 +17,8 @@ from app.auth.router import router as auth_router
 
 
 app = FastAPI(
-    title="LiveLingua API",
-    description="Real-Time Ai Multilingual Speech Translation Platform",
+    title="Voxa Ai",
+    description="Real-Time Multilingual Speech & Document Translation Platform.",
     version="1.0.0"
 )
 

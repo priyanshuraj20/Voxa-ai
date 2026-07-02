@@ -69,10 +69,8 @@ export default function LandingPage() {
       <Header />
 
       <main className="bg-black text-[#e7e0ed] min-h-screen relative z-10 font-sans overflow-hidden pb-12 grid-bg radial-glow">
-
         {/* Hero Section */}
         <section className="pt-40 pb-24 px-6 max-w-[1200px] mx-auto text-center relative z-10">
-          
           {/* Release Chip */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -92,7 +90,7 @@ export default function LandingPage() {
             className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.95] mb-6 max-w-4xl mx-auto font-geist text-white pb-2"
           >
             Real-time multilingual <br className="hidden sm:inline" />
-            audio translation.
+            Speech & Document Translation Platform..
           </motion.h1>
 
           {/* Description */}
@@ -102,7 +100,10 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-base md:text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-light font-sans"
           >
-            Real-time AI-powered speech translation for Google Meet, calls, and live browser audio. Capture, transcribe, refine transcript, and translate inside your browser.
+            Real-time, AI-powered speech translation for Google Meet, phone
+            calls, and live browser audio. The tool captures, transcribes,
+            refines, and translates audio directly inside the browser, while
+            also featuring an integrated PDF translator.
           </motion.p>
 
           {/* Action CTAs with Micro-Scales */}
@@ -118,7 +119,9 @@ export default function LandingPage() {
               className="bg-[#6366f1] text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#4f46e5] transition-all flex items-center gap-2 active:scale-98 select-none"
             >
               Launch Workspace
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              <span className="material-symbols-outlined text-sm">
+                arrow_forward
+              </span>
             </Link>
             <Link
               href="/technology"
@@ -145,11 +148,13 @@ export default function LandingPage() {
                   VOXA REAL-TIME TRANSCRIPTION TESTBED
                 </div>
               </div>
-              
+
               <div className="p-8 flex flex-col md:flex-row gap-8 items-center justify-between">
                 <div className="flex flex-col gap-5 text-left w-full md:w-1/2">
                   <div className="space-y-1.5">
-                    <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-widest font-bold">INPUT_STREAM [EN-US]</div>
+                    <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-widest font-bold">
+                      INPUT_STREAM [EN-US]
+                    </div>
                     <div className="text-white text-base font-light font-sans leading-relaxed">
                       "Voxa streams tab audio over WebSockets."
                     </div>
@@ -189,7 +194,9 @@ export default function LandingPage() {
                       style={{ animationDelay: "0.3s", height: "70%" }}
                     ></div>
                   </div>
-                  <div className="text-[9px] font-mono text-zinc-600 tracking-widest">PROCESSING LATENCY: &lt; 1.0S</div>
+                  <div className="text-[9px] font-mono text-zinc-600 tracking-widest">
+                    PROCESSING LATENCY: &lt; 1.0S
+                  </div>
                 </div>
               </div>
             </div>
@@ -199,8 +206,12 @@ export default function LandingPage() {
         {/* Features Premium Grid */}
         <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10">
           <div className="mb-12 text-center md:text-left">
-            <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#6366f1] pl-4">Capabilities</span>
-            <h2 className="text-3xl font-semibold font-geist text-white mt-3 tracking-tight">Full stack speech translation pipeline.</h2>
+            <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#6366f1] pl-4">
+              Capabilities
+            </span>
+            <h2 className="text-3xl font-semibold font-geist text-white mt-3 tracking-tight">
+              Full stack speech translation pipeline.
+            </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {features.map((feat, i) => (
@@ -213,10 +224,16 @@ export default function LandingPage() {
                 className={`p-8 flex flex-col gap-6 group border border-zinc-900 bg-zinc-950/40 rounded-xl transition-all duration-300`}
               >
                 <div className="w-10 h-10 rounded-lg bg-zinc-900/60 border border-zinc-800 flex items-center justify-center select-none">
-                  <span className={`material-symbols-outlined text-xl ${feat.iconColor}`}>{feat.icon}</span>
+                  <span
+                    className={`material-symbols-outlined text-xl ${feat.iconColor}`}
+                  >
+                    {feat.icon}
+                  </span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-base mb-2 text-white font-geist transition-colors">{feat.title}</h3>
+                  <h3 className="font-semibold text-base mb-2 text-white font-geist transition-colors">
+                    {feat.title}
+                  </h3>
                   <p className="text-zinc-400 text-xs leading-relaxed font-sans font-light">
                     {feat.desc}
                   </p>
@@ -238,28 +255,44 @@ export default function LandingPage() {
                 AI PDF Reading Assistant
               </h2>
               <p className="text-zinc-400 text-sm leading-relaxed font-sans font-light">
-                Translate complete documents on the fly. Extract text from uploaded PDFs, translate paragraphs instantly using Azure Neural models, and convert the results to expressive spoken voices.
+                Translate complete documents on the fly. Extract text from
+                uploaded PDFs, translate paragraphs instantly using Azure Neural
+                models, and convert the results to expressive spoken voices.
               </p>
 
               {/* Flowchart Diagram */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 py-4 text-xs font-mono font-bold text-zinc-500 uppercase tracking-widest bg-zinc-950/40 p-6 rounded-xl border border-zinc-900/60">
                 <div className="flex flex-col items-center gap-1">
-                  <span className="material-symbols-outlined text-zinc-400 text-lg">upload_file</span>
+                  <span className="material-symbols-outlined text-zinc-400 text-lg">
+                    upload_file
+                  </span>
                   <span>Upload PDF</span>
                 </div>
-                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">↓</div>
+                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">
+                  ↓
+                </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="material-symbols-outlined text-zinc-400 text-lg">content_paste_search</span>
+                  <span className="material-symbols-outlined text-zinc-400 text-lg">
+                    content_paste_search
+                  </span>
                   <span>Extract Text</span>
                 </div>
-                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">↓</div>
+                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">
+                  ↓
+                </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="material-symbols-outlined text-[#6366f1] text-lg">translate</span>
+                  <span className="material-symbols-outlined text-[#6366f1] text-lg">
+                    translate
+                  </span>
                   <span>Translate</span>
                 </div>
-                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">↓</div>
+                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">
+                  ↓
+                </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="material-symbols-outlined text-[#6366f1] text-lg">volume_up</span>
+                  <span className="material-symbols-outlined text-[#6366f1] text-lg">
+                    volume_up
+                  </span>
                   <span>Listen</span>
                 </div>
               </div>
@@ -269,26 +302,38 @@ export default function LandingPage() {
             <div className="border border-zinc-900 bg-zinc-950/80 p-8 rounded-2xl flex flex-col gap-6 relative shadow-lg">
               <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#6366f1] text-lg">picture_as_pdf</span>
-                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">research_paper.pdf</span>
+                  <span className="material-symbols-outlined text-[#6366f1] text-lg">
+                    picture_as_pdf
+                  </span>
+                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                    research_paper.pdf
+                  </span>
                 </div>
-                <span className="text-[10px] text-zinc-500 font-mono">1.2 MB | 4 Pages</span>
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  1.2 MB | 4 Pages
+                </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-[10px] font-sans">
                 {/* Left Text segment */}
                 <div className="bg-zinc-900/40 border border-zinc-900 p-4 rounded-lg space-y-2">
-                  <span className="text-zinc-500 font-mono text-[9px] uppercase tracking-wider font-bold">Extracted Text</span>
+                  <span className="text-zinc-500 font-mono text-[9px] uppercase tracking-wider font-bold">
+                    Extracted Text
+                  </span>
                   <p className="text-zinc-300 leading-relaxed font-light">
-                    This document presents a neural model for real-time speech translation and document parsing...
+                    This document presents a neural model for real-time speech
+                    translation and document parsing...
                   </p>
                 </div>
 
                 {/* Right Text segment */}
                 <div className="bg-zinc-900/40 border border-[#6366f1]/20 p-4 rounded-lg space-y-2">
-                  <span className="text-[#6366f1] font-mono text-[9px] uppercase tracking-wider font-bold">Translation [ES]</span>
+                  <span className="text-[#6366f1] font-mono text-[9px] uppercase tracking-wider font-bold">
+                    Translation [ES]
+                  </span>
                   <p className="text-zinc-300 leading-relaxed font-light">
-                    Este documento presenta un modelo neuronal para la traducción de voz en tiempo real y el análisis...
+                    Este documento presenta un modelo neuronal para la
+                    traducción de voz en tiempo real y el análisis...
                   </p>
                 </div>
               </div>
@@ -296,14 +341,22 @@ export default function LandingPage() {
               <div className="flex items-center justify-between bg-zinc-900/40 border border-zinc-900 p-3 rounded-xl">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-[#6366f1]">
-                    <span className="material-symbols-outlined text-sm">play_arrow</span>
+                    <span className="material-symbols-outlined text-sm">
+                      play_arrow
+                    </span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-zinc-400 font-sans">Synthesis Output</span>
-                    <span className="text-[9px] text-zinc-500 font-mono">ELEVEN_MULTILINGUAL_V2</span>
+                    <span className="text-[10px] text-zinc-400 font-sans">
+                      Synthesis Output
+                    </span>
+                    <span className="text-[9px] text-zinc-500 font-mono">
+                      ELEVEN_MULTILINGUAL_V2
+                    </span>
                   </div>
                 </div>
-                <span className="material-symbols-outlined text-zinc-500 text-sm">download</span>
+                <span className="material-symbols-outlined text-zinc-500 text-sm">
+                  download
+                </span>
               </div>
             </div>
           </div>
@@ -313,23 +366,41 @@ export default function LandingPage() {
         <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-16">
             <div className="md:w-1/2">
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#6366f1] pl-4">Core Pipeline Metrics</span>
-              <h2 className="text-3xl font-bold tracking-tight text-white font-geist mt-3 mb-6">Optimized for fast processing.</h2>
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#6366f1] pl-4">
+                Core Pipeline Metrics
+              </span>
+              <h2 className="text-3xl font-bold tracking-tight text-white font-geist mt-3 mb-6">
+                Optimized for fast processing.
+              </h2>
               <p className="text-zinc-400 text-sm mb-8 leading-relaxed font-light font-sans">
-                Voxa processes streaming audio chunks in 500ms intervals, running speech recognition, LLM post-processing correction, and translation concurrently to keep latency under 1 second.
+                Voxa processes streaming audio chunks in 500ms intervals,
+                running speech recognition, LLM post-processing correction, and
+                translation concurrently to keep latency under 1 second.
               </p>
               <div className="flex flex-wrap gap-x-12 gap-y-8 select-none">
                 <div>
-                  <div className="text-3xl font-bold text-[#6366f1] font-geist">&lt; 1.0s</div>
-                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Processing Latency</div>
+                  <div className="text-3xl font-bold text-[#6366f1] font-geist">
+                    &lt; 1.0s
+                  </div>
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">
+                    Processing Latency
+                  </div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-[#38bdf8] font-geist">500ms</div>
-                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Streaming Chunk Size</div>
+                  <div className="text-3xl font-bold text-[#38bdf8] font-geist">
+                    500ms
+                  </div>
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">
+                    Streaming Chunk Size
+                  </div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-zinc-300 font-geist">45+</div>
-                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Supported Languages</div>
+                  <div className="text-3xl font-bold text-zinc-300 font-geist">
+                    45+
+                  </div>
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">
+                    Supported Languages
+                  </div>
                 </div>
               </div>
             </div>
@@ -337,20 +408,36 @@ export default function LandingPage() {
             {/* Spec grid cells */}
             <div className="md:w-1/2 w-full grid grid-cols-2 gap-4">
               <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-900/50 rounded-lg select-none">
-                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">dns</span>
-                <div className="text-xs font-mono tracking-wider text-zinc-300">FastAPI Backend</div>
+                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">
+                  dns
+                </span>
+                <div className="text-xs font-mono tracking-wider text-zinc-300">
+                  FastAPI Backend
+                </div>
               </div>
               <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-950/40 rounded-xl select-none">
-                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">settings_ethernet</span>
-                <div className="text-xs font-mono tracking-wider text-zinc-300">WebSockets Core</div>
+                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">
+                  settings_ethernet
+                </span>
+                <div className="text-xs font-mono tracking-wider text-zinc-300">
+                  WebSockets Core
+                </div>
               </div>
               <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-950/40 rounded-xl select-none">
-                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">psychology</span>
-                <div className="text-xs font-mono tracking-wider text-zinc-300">Claude Postprocess</div>
+                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">
+                  psychology
+                </span>
+                <div className="text-xs font-mono tracking-wider text-zinc-300">
+                  Claude Postprocess
+                </div>
               </div>
               <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-950/40 rounded-xl select-none">
-                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">extension</span>
-                <div className="text-xs font-mono tracking-wider text-zinc-300">Extension Widget</div>
+                <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">
+                  extension
+                </span>
+                <div className="text-xs font-mono tracking-wider text-zinc-300">
+                  Extension Widget
+                </div>
               </div>
             </div>
           </div>
@@ -360,9 +447,12 @@ export default function LandingPage() {
         <section className="max-w-[1200px] mx-auto px-6 py-12 relative z-10">
           <div className="relative rounded-xl border border-zinc-900 bg-zinc-900/50 overflow-hidden">
             <div className="relative z-10 px-8 py-20 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6 text-white font-geist">Synthesize translations instantly.</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6 text-white font-geist">
+                Synthesize translations instantly.
+              </h2>
               <p className="text-zinc-400 mb-10 max-w-xl mx-auto font-light font-sans text-sm">
-                Experience natural human voice playback, customized speaker diarization, and contextual ASR transcript correction.
+                Experience natural human voice playback, customized speaker
+                diarization, and contextual ASR transcript correction.
               </p>
               <div className="flex justify-center">
                 <Link
@@ -406,22 +496,37 @@ export default function LandingPage() {
                     opacity="0.8"
                   />
                   <defs>
-                    <linearGradient id="voxa-landing-v-grad" x1="4.5" y1="4" x2="19.5" y2="4">
+                    <linearGradient
+                      id="voxa-landing-v-grad"
+                      x1="4.5"
+                      y1="4"
+                      x2="19.5"
+                      y2="4"
+                    >
                       <stop stopColor="#a5b4fc" />
                       <stop offset="0.5" stopColor="#6366f1" />
                       <stop offset="1" stopColor="#38bdf8" />
                     </linearGradient>
-                    <linearGradient id="voxa-landing-v-inner" x1="8.5" y1="9.5" x2="15.5" y2="9.5">
+                    <linearGradient
+                      id="voxa-landing-v-inner"
+                      x1="8.5"
+                      y1="9.5"
+                      x2="15.5"
+                      y2="9.5"
+                    >
                       <stop stopColor="#818cf8" />
                       <stop offset="1" stopColor="#6366f1" />
                     </linearGradient>
                   </defs>
                 </svg>
               </div>
-              <span className="font-bold text-white font-headline-md">Voxa AI</span>
+              <span className="font-bold text-white font-headline-md">
+                Voxa AI
+              </span>
             </div>
             <p className="text-sm text-zinc-400 max-w-xs leading-relaxed font-light font-sans">
-              Building the future of neural translation and global communication infrastructure.
+              Building the future of neural translation and global communication
+              infrastructure.
             </p>
             {/* Customized Developer Signature */}
             <div className="flex flex-col items-start gap-1 py-1 select-none pt-4">
@@ -434,54 +539,157 @@ export default function LandingPage() {
             </div>
             {/* Social Platform Links */}
             <div className="flex items-center gap-4.5 text-zinc-500 mt-2">
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#0077b5] transition-all hover:scale-110 duration-200" title="LinkedIn Profile">
-                <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#0077b5] transition-all hover:scale-110 duration-200"
+                title="LinkedIn Profile"
+              >
+                <svg
+                  className="w-4.5 h-4.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                  <rect x="2" y="9" width="4" height="12"></rect>
+                  <circle cx="4" cy="4" r="2"></circle>
+                </svg>
               </a>
-              <a href="https://github.com/priyanshuraj20" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-all hover:scale-110 duration-200" title="GitHub Profile">
-                <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+              <a
+                href="https://github.com/priyanshuraj20"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-all hover:scale-110 duration-200"
+                title="GitHub Profile"
+              >
+                <svg
+                  className="w-4.5 h-4.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                </svg>
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#e1306c] transition-all hover:scale-110 duration-200" title="Instagram Profile">
-                <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#e1306c] transition-all hover:scale-110 duration-200"
+                title="Instagram Profile"
+              >
+                <svg
+                  className="w-4.5 h-4.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
               </a>
-              <a href="mailto:priyanshuraj.work@gmail.com" className="hover:text-[#6366f1] transition-all hover:scale-110 duration-200" title="Send Email">
-                <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <a
+                href="mailto:priyanshuraj.work@gmail.com"
+                className="hover:text-[#6366f1] transition-all hover:scale-110 duration-200"
+                title="Send Email"
+              >
+                <svg
+                  className="w-4.5 h-4.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
               </a>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-16 font-sans">
             <div className="flex flex-col gap-3">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-[#cbc3d7]/30">Product</h4>
-              <Link href="/workspace" onClick={handleWorkspaceClick} className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-[#cbc3d7]/30">
+                Product
+              </h4>
+              <Link
+                href="/workspace"
+                onClick={handleWorkspaceClick}
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 Translation API
               </Link>
-              <Link href="/workspace" onClick={handleWorkspaceClick} className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link
+                href="/workspace"
+                onClick={handleWorkspaceClick}
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 Vocal Engine
               </Link>
-              <Link href="/workspace" onClick={handleWorkspaceClick} className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link
+                href="/workspace"
+                onClick={handleWorkspaceClick}
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 Real-time Suite
               </Link>
             </div>
             <div className="flex flex-col gap-3">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-[#cbc3d7]/30">Resources</h4>
-              <Link href="/technology" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-[#cbc3d7]/30">
+                Resources
+              </h4>
+              <Link
+                href="/technology"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 Documentation
               </Link>
-              <Link href="/technology" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link
+                href="/technology"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 API Reference
               </Link>
-              <Link href="/technology" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link
+                href="/technology"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 System Status
               </Link>
             </div>
             <div className="flex flex-col gap-3">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-[#cbc3d7]/30">Company</h4>
-              <Link href="/technology" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-[#cbc3d7]/30">
+                Company
+              </h4>
+              <Link
+                href="/technology"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 About
               </Link>
-              <Link href="/technology" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link
+                href="/technology"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 Security Policy
               </Link>
-              <Link href="/technology" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link
+                href="/technology"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
                 Contact Sales
               </Link>
             </div>
@@ -490,9 +698,15 @@ export default function LandingPage() {
         <div className="max-w-[1200px] mx-auto px-6 py-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/30">
           <div>© 2026 Voxa AI. All rights reserved.</div>
           <div className="flex gap-6 font-mono text-[10px]">
-            <Link href="#" className="hover:text-[#6366f1] transition-colors">PRIVACY_POLICY</Link>
-            <Link href="#" className="hover:text-[#6366f1] transition-colors">TERMS_OF_SERVICE</Link>
-            <Link href="#" className="hover:text-[#6366f1] transition-colors">GDPR_COMPLIANCE</Link>
+            <Link href="#" className="hover:text-[#6366f1] transition-colors">
+              PRIVACY_POLICY
+            </Link>
+            <Link href="#" className="hover:text-[#6366f1] transition-colors">
+              TERMS_OF_SERVICE
+            </Link>
+            <Link href="#" className="hover:text-[#6366f1] transition-colors">
+              GDPR_COMPLIANCE
+            </Link>
           </div>
         </div>
       </footer>

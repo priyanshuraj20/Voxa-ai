@@ -4,59 +4,63 @@ import React, { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Link from "next/link";
 import { motion } from "framer-motion";
-
+import { useRouter } from "next/navigation";
+import { getAccessToken } from "@/lib/auth";
 
 const features = [
   {
-    icon: "sync_alt",
-    title: "Real-Time WebSockets",
-    desc: "Streams tab captured audio segments continuously from the Chrome Extension to a FastAPI server with sub-second response times.",
-    accent: "group-hover:border-[#8b5cf6]/20",
-    iconColor: "text-[#8b5cf6]",
-  },
-  {
     icon: "interpreter_mode",
-    title: "Local Speaker Diarization",
-    desc: "Lightweight CPU-based audio pitch extraction (F0) to cluster dialogue by speaker (e.g. Speaker A, Speaker B) dynamically.",
-    accent: "group-hover:border-[#adc6ff]/20",
-    iconColor: "text-[#adc6ff]",
+    title: "Real-Time Speech Translation",
+    desc: "Seamless speech recognition and sub-second translation for browser audio, Google Meet, and live feeds.",
+    iconColor: "text-[#6366f1]",
   },
   {
-    icon: "speech_to_text",
-    title: "Whisper ASR + Claude Sonnet 4",
-    desc: "Decodes speech via Groq Whisper large-v3 and automatically refines spelling, proper nouns, and boundaries via Claude Sonnet 4.",
-    accent: "group-hover:border-[#ffb869]/20",
-    iconColor: "text-[#ffb869]",
-  },
-  {
-    icon: "translate",
-    title: "Azure Neural Translation",
-    desc: "Translates transcription dynamically using contextual neural machine translation supporting dozens of target locales.",
-    accent: "group-hover:border-[#d0bcff]/20",
-    iconColor: "text-[#d0bcff]",
-  },
-  {
-    icon: "settings_voice",
-    title: "Expressive Speech Synthesis",
-    desc: "Synthesizes final translations back into speech using ElevenLabs multilingual voice model for realistic audio output.",
-    accent: "group-hover:border-[#3b82f6]/20",
-    iconColor: "text-[#3b82f6]",
+    icon: "picture_as_pdf",
+    title: "AI PDF Reading Assistant",
+    desc: "Extract text from uploaded PDFs, translate it to your preferred target locale, and generate human-like speech output.",
+    iconColor: "text-[#6366f1]",
   },
   {
     icon: "extension",
     title: "Chrome Extension Integration",
-    desc: "Manifest V3 tab capture captures Google Meet calls and injects interactive subtitle overlay widgets on top of tabs.",
-    accent: "group-hover:border-[#8b5cf6]/20",
-    iconColor: "text-[#8b5cf6]",
+    desc: "Manifest V3 side panel widget and tab capture overlays that synchronizes audio feeds directly with your translation gateway.",
+    iconColor: "text-[#6366f1]",
+  },
+  {
+    icon: "account_circle",
+    title: "User Profiles & Preferences",
+    desc: "Configure and persist default preferred source and target languages to customize translation environments automatically.",
+    iconColor: "text-[#6366f1]",
+  },
+  {
+    icon: "language",
+    title: "Multi-Language Support",
+    desc: "Translate transcripts and documents dynamically into dozens of supported neural machine translation language locales.",
+    iconColor: "text-[#6366f1]",
+  },
+  {
+    icon: "security",
+    title: "Secure Session Management",
+    desc: "Robust token authorization, session recovery, secure route protection, and sandbox email recovery systems.",
+    iconColor: "text-[#6366f1]",
   },
 ];
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleWorkspaceClick = (e: React.MouseEvent) => {
+    const token = getAccessToken();
+    if (!token) {
+      e.preventDefault();
+      router.push("/login?required=true");
+    }
+  };
 
   if (!mounted) return null;
 
@@ -74,9 +78,9 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/60 text-[11px] font-mono tracking-widest text-[#d0bcff] mb-8 select-none"
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/60 text-[11px] font-mono tracking-widest text-zinc-400 mb-8 select-none"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6] animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] animate-pulse"></span>
             VOXA MULTILINGUAL TRANSLATION GATEWAY
           </motion.div>
 
@@ -110,14 +114,15 @@ export default function LandingPage() {
           >
             <Link
               href="/workspace"
-              className="bg-[#8b5cf6] text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#7c3aed] transition-all flex items-center gap-2 active:scale-98 select-none shadow-sm"
+              onClick={handleWorkspaceClick}
+              className="bg-[#6366f1] text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#4f46e5] transition-all flex items-center gap-2 active:scale-98 select-none"
             >
               Launch Workspace
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </Link>
             <Link
               href="/technology"
-              className="border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-zinc-900/80 hover:border-zinc-700 transition-all active:scale-98 select-none"
+              className="border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-zinc-850 hover:border-zinc-700 transition-all active:scale-98 select-none"
             >
               System Architecture
             </Link>
@@ -128,10 +133,10 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.98, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative max-w-4xl mx-auto rounded-xl p-[1px] bg-zinc-800/80 shadow-2xl"
+            className="relative max-w-4xl mx-auto rounded-xl bg-zinc-900 border border-zinc-800"
           >
             {/* Terminal Inner Frame */}
-            <div className="relative rounded-xl bg-zinc-950/80 backdrop-blur-xl overflow-hidden">
+            <div className="relative rounded-xl bg-zinc-950 overflow-hidden">
               <div className="h-10 border-b border-zinc-900 flex items-center px-4 gap-1.5 bg-zinc-950/50 select-none">
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-800"></div>
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-800"></div>
@@ -151,24 +156,24 @@ export default function LandingPage() {
                   </div>
                   <div className="h-px bg-zinc-900 w-full"></div>
                   <div className="space-y-1.5">
-                    <div className="text-[9px] text-[#d0bcff] font-mono uppercase tracking-widest font-bold">
+                    <div className="text-[9px] text-[#6366f1] font-mono uppercase tracking-widest font-bold">
                       OUTPUT_STREAM [JA-JP]
                     </div>
-                    <div className="text-[#d0bcff] text-base font-light font-sans leading-relaxed">
+                    <div className="text-[#6366f1] text-base font-light font-sans leading-relaxed">
                       "VoxaはWebSockets経由でタブオーディオをストリーミングします。"
                     </div>
                   </div>
                 </div>
 
                 {/* Live Waveform Simulator */}
-                <div className="w-full md:w-auto border border-zinc-900 rounded-xl p-6 bg-zinc-900/20 flex flex-col items-center gap-4 shrink-0">
+                <div className="w-full md:w-auto border border-zinc-900 rounded-xl p-6 bg-zinc-900/50 flex flex-col items-center gap-4 shrink-0">
                   <div className="flex items-end gap-1.5 h-12 select-none">
                     <div
-                      className="w-1.5 bg-[#8b5cf6]/80 rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-[#6366f1]/80 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0s", height: "40%" }}
                     ></div>
                     <div
-                      className="w-1.5 bg-[#8b5cf6]/80 rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-[#6366f1]/80 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0.2s", height: "60%" }}
                     ></div>
                     <div
@@ -176,11 +181,11 @@ export default function LandingPage() {
                       style={{ animationDelay: "0.1s", height: "80%" }}
                     ></div>
                     <div
-                      className="w-1.5 bg-[#8b5cf6]/80 rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-[#6366f1]/80 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0.4s", height: "30%" }}
                     ></div>
                     <div
-                      className="w-1.5 bg-[#8b5cf6]/80 rounded-full animate-waveform-jump"
+                      className="w-1.5 bg-[#6366f1]/80 rounded-full animate-waveform-jump"
                       style={{ animationDelay: "0.3s", height: "70%" }}
                     ></div>
                   </div>
@@ -194,7 +199,7 @@ export default function LandingPage() {
         {/* Features Premium Grid */}
         <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10">
           <div className="mb-12 text-center md:text-left">
-            <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#8b5cf6] pl-4">Capabilities</span>
+            <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#6366f1] pl-4">Capabilities</span>
             <h2 className="text-3xl font-semibold font-geist text-white mt-3 tracking-tight">Full stack speech translation pipeline.</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -221,26 +226,109 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* AI PDF Reading Assistant Showcase Section */}
+        <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10 select-none">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            {/* Left Column: Descriptions and flow */}
+            <div className="space-y-6">
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#6366f1] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded">
+                New Feature
+              </span>
+              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-white font-geist">
+                AI PDF Reading Assistant
+              </h2>
+              <p className="text-zinc-400 text-sm leading-relaxed font-sans font-light">
+                Translate complete documents on the fly. Extract text from uploaded PDFs, translate paragraphs instantly using Azure Neural models, and convert the results to expressive spoken voices.
+              </p>
+
+              {/* Flowchart Diagram */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 py-4 text-xs font-mono font-bold text-zinc-500 uppercase tracking-widest bg-zinc-950/40 p-6 rounded-xl border border-zinc-900/60">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="material-symbols-outlined text-zinc-400 text-lg">upload_file</span>
+                  <span>Upload PDF</span>
+                </div>
+                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">↓</div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="material-symbols-outlined text-zinc-400 text-lg">content_paste_search</span>
+                  <span>Extract Text</span>
+                </div>
+                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">↓</div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="material-symbols-outlined text-[#6366f1] text-lg">translate</span>
+                  <span>Translate</span>
+                </div>
+                <div className="text-zinc-700 text-center sm:rotate-0 rotate-90">↓</div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="material-symbols-outlined text-[#6366f1] text-lg">volume_up</span>
+                  <span>Listen</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Clean Illustration / Mockup Card */}
+            <div className="border border-zinc-900 bg-zinc-950/80 p-8 rounded-2xl flex flex-col gap-6 relative shadow-lg">
+              <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[#6366f1] text-lg">picture_as_pdf</span>
+                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">research_paper.pdf</span>
+                </div>
+                <span className="text-[10px] text-zinc-500 font-mono">1.2 MB | 4 Pages</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-[10px] font-sans">
+                {/* Left Text segment */}
+                <div className="bg-zinc-900/40 border border-zinc-900 p-4 rounded-lg space-y-2">
+                  <span className="text-zinc-500 font-mono text-[9px] uppercase tracking-wider font-bold">Extracted Text</span>
+                  <p className="text-zinc-300 leading-relaxed font-light">
+                    This document presents a neural model for real-time speech translation and document parsing...
+                  </p>
+                </div>
+
+                {/* Right Text segment */}
+                <div className="bg-zinc-900/40 border border-[#6366f1]/20 p-4 rounded-lg space-y-2">
+                  <span className="text-[#6366f1] font-mono text-[9px] uppercase tracking-wider font-bold">Translation [ES]</span>
+                  <p className="text-zinc-300 leading-relaxed font-light">
+                    Este documento presenta un modelo neuronal para la traducción de voz en tiempo real y el análisis...
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between bg-zinc-900/40 border border-zinc-900 p-3 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-[#6366f1]">
+                    <span className="material-symbols-outlined text-sm">play_arrow</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-zinc-400 font-sans">Synthesis Output</span>
+                    <span className="text-[9px] text-zinc-500 font-mono">ELEVEN_MULTILINGUAL_V2</span>
+                  </div>
+                </div>
+                <span className="material-symbols-outlined text-zinc-500 text-sm">download</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Stats / Trust Section */}
         <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-16">
             <div className="md:w-1/2">
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#8b5cf6] pl-4">Core Pipeline Metrics</span>
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#6366f1] pl-4">Core Pipeline Metrics</span>
               <h2 className="text-3xl font-bold tracking-tight text-white font-geist mt-3 mb-6">Optimized for fast processing.</h2>
               <p className="text-zinc-400 text-sm mb-8 leading-relaxed font-light font-sans">
                 Voxa processes streaming audio chunks in 500ms intervals, running speech recognition, LLM post-processing correction, and translation concurrently to keep latency under 1 second.
               </p>
               <div className="flex flex-wrap gap-x-12 gap-y-8 select-none">
                 <div>
-                  <div className="text-3xl font-bold text-[#d0bcff] font-geist">&lt; 1.0s</div>
+                  <div className="text-3xl font-bold text-[#6366f1] font-geist">&lt; 1.0s</div>
                   <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Processing Latency</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-[#adc6ff] font-geist">500ms</div>
+                  <div className="text-3xl font-bold text-[#38bdf8] font-geist">500ms</div>
                   <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Streaming Chunk Size</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-[#ffb869] font-geist">45+</div>
+                  <div className="text-3xl font-bold text-zinc-300 font-geist">45+</div>
                   <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mt-1">Supported Languages</div>
                 </div>
               </div>
@@ -248,7 +336,7 @@ export default function LandingPage() {
 
             {/* Spec grid cells */}
             <div className="md:w-1/2 w-full grid grid-cols-2 gap-4">
-              <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-950/40 rounded-xl select-none">
+              <div className="p-8 flex flex-col items-center justify-center text-center border border-zinc-900 bg-zinc-900/50 rounded-lg select-none">
                 <span className="material-symbols-outlined text-zinc-400 text-2xl mb-4">dns</span>
                 <div className="text-xs font-mono tracking-wider text-zinc-300">FastAPI Backend</div>
               </div>
@@ -270,7 +358,7 @@ export default function LandingPage() {
 
         {/* Final CTA wrapped inside a clean flat container */}
         <section className="max-w-[1200px] mx-auto px-6 py-12 relative z-10">
-          <div className="relative rounded-2xl border border-zinc-900 bg-zinc-950/80 overflow-hidden shadow-xl">
+          <div className="relative rounded-xl border border-zinc-900 bg-zinc-900/50 overflow-hidden">
             <div className="relative z-10 px-8 py-20 text-center">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6 text-white font-geist">Synthesize translations instantly.</h2>
               <p className="text-zinc-400 mb-10 max-w-xl mx-auto font-light font-sans text-sm">
@@ -279,7 +367,8 @@ export default function LandingPage() {
               <div className="flex justify-center">
                 <Link
                   href="/workspace"
-                  className="bg-[#8b5cf6] text-white px-10 py-3.5 rounded-lg font-bold hover:bg-[#7c3aed] transition-colors text-sm shadow-md active:scale-98"
+                  onClick={handleWorkspaceClick}
+                  className="bg-[#6366f1] text-white px-10 py-3.5 rounded-lg font-bold hover:bg-[#4f46e5] transition-colors text-sm active:scale-98"
                 >
                   Open Workspace
                 </Link>
@@ -294,7 +383,7 @@ export default function LandingPage() {
         <div className="max-w-[1200px] mx-auto px-6 py-16 flex flex-col md:flex-row justify-between items-start gap-12">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 text-lg font-bold text-white group">
-              <div className="w-8 h-8 rounded bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center overflow-hidden">
+              <div className="w-8 h-8 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -318,13 +407,13 @@ export default function LandingPage() {
                   />
                   <defs>
                     <linearGradient id="voxa-landing-v-grad" x1="4.5" y1="4" x2="19.5" y2="4">
-                      <stop stopColor="#d0bcff" />
-                      <stop offset="0.5" stopColor="#8b5cf6" />
-                      <stop offset="1" stopColor="#3b82f6" />
+                      <stop stopColor="#a5b4fc" />
+                      <stop offset="0.5" stopColor="#6366f1" />
+                      <stop offset="1" stopColor="#38bdf8" />
                     </linearGradient>
                     <linearGradient id="voxa-landing-v-inner" x1="8.5" y1="9.5" x2="15.5" y2="9.5">
-                      <stop stopColor="#ffb869" />
-                      <stop offset="1" stopColor="#8b5cf6" />
+                      <stop stopColor="#818cf8" />
+                      <stop offset="1" stopColor="#6366f1" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -337,7 +426,7 @@ export default function LandingPage() {
             {/* Customized Developer Signature */}
             <div className="flex flex-col items-start gap-1 py-1 select-none pt-4">
               <p className="text-xs text-zinc-500 font-mono tracking-wider leading-relaxed">
-                Fueled by <span className="text-[#ffb869] font-semibold">Diet Coke</span> 🥤 &amp; <span className="text-[#8b5cf6] font-semibold">iterating minds</span> 🧠
+                Voxa AI Multi-modal Gateway
               </p>
               <p className="text-[10px] text-zinc-600 font-mono tracking-widest uppercase mt-0.5">
                 — Priyanshu Raj
@@ -354,7 +443,7 @@ export default function LandingPage() {
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#e1306c] transition-all hover:scale-110 duration-200" title="Instagram Profile">
                 <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
               </a>
-              <a href="mailto:priyanshuraj.work@gmail.com" className="hover:text-[#8b5cf6] transition-all hover:scale-110 duration-200" title="Send Email">
+              <a href="mailto:priyanshuraj.work@gmail.com" className="hover:text-[#6366f1] transition-all hover:scale-110 duration-200" title="Send Email">
                 <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
               </a>
             </div>
@@ -362,13 +451,13 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-16 font-sans">
             <div className="flex flex-col gap-3">
               <h4 className="text-xs font-bold uppercase tracking-widest text-[#cbc3d7]/30">Product</h4>
-              <Link href="/workspace" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link href="/workspace" onClick={handleWorkspaceClick} className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Translation API
               </Link>
-              <Link href="/workspace" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link href="/workspace" onClick={handleWorkspaceClick} className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Vocal Engine
               </Link>
-              <Link href="/workspace" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link href="/workspace" onClick={handleWorkspaceClick} className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Real-time Suite
               </Link>
             </div>
@@ -401,9 +490,9 @@ export default function LandingPage() {
         <div className="max-w-[1200px] mx-auto px-6 py-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/30">
           <div>© 2026 Voxa AI. All rights reserved.</div>
           <div className="flex gap-6 font-mono text-[10px]">
-            <Link href="#" className="hover:text-[#d0bcff] transition-colors">PRIVACY_POLICY</Link>
-            <Link href="#" className="hover:text-[#d0bcff] transition-colors">TERMS_OF_SERVICE</Link>
-            <Link href="#" className="hover:text-[#d0bcff] transition-colors">GDPR_COMPLIANCE</Link>
+            <Link href="#" className="hover:text-[#6366f1] transition-colors">PRIVACY_POLICY</Link>
+            <Link href="#" className="hover:text-[#6366f1] transition-colors">TERMS_OF_SERVICE</Link>
+            <Link href="#" className="hover:text-[#6366f1] transition-colors">GDPR_COMPLIANCE</Link>
           </div>
         </div>
       </footer>

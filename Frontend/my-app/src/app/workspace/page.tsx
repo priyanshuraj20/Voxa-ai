@@ -5,6 +5,9 @@ import React, { useRef, useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { getAccessToken } from "@/lib/auth";
 
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import CustomAudioPlayer from "@/components/ui/CustomAudioPlayer";
@@ -26,6 +29,19 @@ const waveformBars = [
 ];
 
 export default function WorkspacePage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Route protection redirect checks
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) {
+      router.push("/login?required=true");
+    } else if (!loading && !user) {
+      router.push("/login?required=true");
+    }
+  }, [user, loading, router]);
+
   // ==========================================
   // React State variables
   // ==========================================
@@ -53,6 +69,7 @@ export default function WorkspacePage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null); // Ref to hold standard browser MediaRecorder instance
   const audioChunksRef = useRef<Blob[]>([]); // Array to aggregate raw chunks of recorded audio stream
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null); // Ref to play back recorded local audio file
+  const playingAudioRef = useRef<HTMLAudioElement | null>(null); // Ref to manage active TTS playing audio
 
   // ==========================================
   // Clipboard copying helper
@@ -156,13 +173,25 @@ export default function WorkspacePage() {
 
       console.log("📤 Sending speech translation request...");
 
+      const token = getAccessToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/speech/translate-and-speak`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           body: formData,
         },
       );
+
+      if (response.status === 401) {
+        setError("Session expired. Please login again.");
+        setTimeout(() => {
+          router.push("/login?expired=true");
+        }, 1500);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP network error! Status: ${response.status}`);
@@ -240,25 +269,47 @@ export default function WorkspacePage() {
     }
 
     try {
+      if (playingAudioRef.current) {
+        playingAudioRef.current.pause();
+        playingAudioRef.current.src = "";
+        playingAudioRef.current = null;
+      }
+
       const audio = new Audio(`${ttsAudioUrl}?t=${Date.now()}`);
+      playingAudioRef.current = audio;
       setIsPlayingTTS(true);
 
       // Reset play status when track ends
-      audio.onended = () => setIsPlayingTTS(false);
+      audio.onended = () => {
+        setIsPlayingTTS(false);
+        playingAudioRef.current = null;
+      };
       audio.onerror = () => {
         setError("Failed to stream TTS output file.");
         setIsPlayingTTS(false);
+        playingAudioRef.current = null;
       };
 
       audio.play().catch((e) => {
         setError(`Audio play failed: ${e.message}`);
         setIsPlayingTTS(false);
+        playingAudioRef.current = null;
       });
     } catch (err) {
       setError("Playback system initialization failed.");
       setIsPlayingTTS(false);
+      playingAudioRef.current = null;
     }
   };
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-center select-none font-sans">
+        <span className="w-8 h-8 border-2 border-white/20 border-t-[#6366f1] rounded-full animate-spin"></span>
+        <p className="text-sm text-zinc-500 font-mono tracking-widest uppercase">Authorizing Session...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-black text-[#e7e0ed] relative font-sans grid-bg radial-glow">
@@ -599,11 +650,23 @@ export default function WorkspacePage() {
                 <div className="p-4 border-t border-white/5 bg-black/40 flex justify-end gap-3 select-none">
                   <button
                     onClick={() => {
+                      if (playingAudioRef.current) {
+                        playingAudioRef.current.pause();
+                        playingAudioRef.current.src = "";
+                        playingAudioRef.current = null;
+                      }
+                      if (audioPlayerRef.current) {
+                        audioPlayerRef.current.pause();
+                        audioPlayerRef.current.src = "";
+                      }
                       setOutputText("");
                       setTranscript("");
                       setTtsAudioUrl(null);
                       setAudioUrl(null);
                       setAudioBlob(null);
+                      setIsPlayingTTS(false);
+                      setProcessingStep(0);
+                      setError("");
                     }}
                     disabled={isProcessing}
                     className="font-mono text-[10px] uppercase tracking-widest px-5 py-3 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/15 transition-all rounded-lg active:scale-95 disabled:opacity-50"

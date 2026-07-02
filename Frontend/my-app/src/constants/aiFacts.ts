@@ -1,7 +1,7 @@
 /**
  * List of 100 interesting, high-quality facts about Artificial Intelligence,
  * Speech Recognition, Languages, Translation, Voice Technology, Machine Learning,
- * Whisper, NLLB, FastAPI, React, Chrome Extensions, and Developer Productivity.
+ * Whisper, PDF Processing, FastAPI, React, Chrome Extensions, and Developer Productivity.
  */
 export const AI_FACTS: string[] = [
   "There are over 7,000 spoken languages worldwide.",
@@ -14,7 +14,7 @@ export const AI_FACTS: string[] = [
   "Low latency significantly improves conversational AI experiences.",
   "Whisper v3 Turbo is optimized for rapid speech recognition.",
   "The first speech recognition system, 'Audrey', was built by Bell Labs in 1952.",
-  "NLLB stands for 'No Language Left Behind', mapping over 200 languages.",
+  "The PDF Reading Assistant parses document binary streams in-memory using byte buffers.",
   "Deep learning uses neural networks with many layers to learn complex patterns.",
   "Artificial intelligence has roots dating back to ancient Greek myths of automata.",
   "Translation models learn semantic representations of words in high-dimensional space.",
@@ -50,7 +50,9 @@ export const AI_FACTS: string[] = [
   "The Rosetta Stone, found in 1799, was key to translating Egyptian hieroglyphs.",
   "Text-to-Speech engines use pitch contours to simulate human emotional inflection.",
   "Whisper uses a sequence-to-sequence model to perform multi-task speech processing.",
-  "Meta's NLLB model supports many languages that had zero translation data before.",
+  "PDF text extraction runs on the server using pypdf, ensuring no files are written to disk.",
+  "Azure Neural Translation translates PDF text segments preserving context.",
+  "ElevenLabs TTS synthesizes translated PDF segments to natural-sounding audio streams.",
   "FastAPI generates OpenAPI specifications directly from Python code definitions.",
   "JSX is a syntax extension to JavaScript that describes what the UI should look like.",
   "Extensions can use service workers to run background tasks efficiently.",

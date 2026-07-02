@@ -67,7 +67,7 @@ export default function CustomAudioPlayer({ src, label }: CustomAudioPlayerProps
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="flex items-center gap-3.5 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 flex-1 min-w-[240px] max-w-[400px] select-none font-sans transition-all hover:border-white/15">
+    <div className="flex items-center gap-3.5 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 flex-1 min-w-[240px] max-w-[400px] select-none font-sans">
       {/* Hidden audio player node */}
       <audio
         ref={audioRef}
@@ -82,7 +82,7 @@ export default function CustomAudioPlayer({ src, label }: CustomAudioPlayerProps
       {/* Play/Pause Button */}
       <button
         onClick={togglePlay}
-        className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 border border-white/5 text-white hover:text-[#8b5cf6] hover:bg-white/10 active:scale-95 transition-all"
+        className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-950 border border-zinc-900 text-white hover:text-[#6366f1] hover:bg-zinc-900 active:scale-95 transition-all"
       >
         <span className="material-symbols-outlined text-xl">
           {isPlaying ? "pause" : "play_arrow"}
@@ -104,7 +104,7 @@ export default function CustomAudioPlayer({ src, label }: CustomAudioPlayerProps
             {/* Active timeline bar progress */}
             <div
               style={{ width: `${progressPercent}%` }}
-              className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#adc6ff] rounded-full transition-all duration-75 relative"
+              className="h-full bg-[#6366f1] rounded-full transition-all duration-75 relative"
             />
           </div>
 

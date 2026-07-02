@@ -14,6 +14,21 @@ The Next.js 16 dashboard allows users to record microphone inputs, upload audio 
   <img src="assets/workspace.png" alt="Voxa AI Workspace" width="90%" style="border-radius: 8px; border: 1px solid #1f1f1f;" />
 </p>
 
+### 📄 AI PDF Reading Assistant
+The dedicated document workspace allows users to upload PDF files, extract page text, translate, track generation logs, and download/stream combined ElevenLabs TTS audio back.
+<p align="left">
+  <img src="assets/pdf_assistant.png" alt="Voxa AI PDF Assistant" width="90%" style="border-radius: 8px; border: 1px solid #1f1f1f;" />
+</p>
+
+#### 🔄 Under the Hood: The PDF Processing Gateway
+When a user uploads a document, the application runs a secure, multi-stage processing pipeline:
+* **Secure In-Memory Extraction**: Raw PDF byte streams are parsed directly in-memory using `pypdf`. Bypassing local disk storage protects client confidentiality.
+* **Contextual Neural Translation**: The parsed text is translated page-by-page into the target locale.
+* **Sentence-Aware Chunking**: To prevent ElevenLabs 10,000 character limit exceptions (`max_character_limit_exceeded`), the translated text is tokenized into chunks between 3,000 and 5,000 characters. It splits on paragraph boundaries (`\n\n`) or sentence endings (`. `), never cutting words or sentences in half.
+* **Live Progress Streaming**: The FastAPI backend yields real-time progress text (`Reading page 1...`, `Generating audio part x/y...`) to the Next.js client using line-delimited NDJSON streaming buffers, updating the button loader dynamically.
+* **Binary Audio Merger**: All chunked audio parts are written to temp files, compiled sequentially using a binary stream concatenator into a final `output.mp3` file, and served back to the player.
+
+
 ### 🌍 Google Meet Active Integration
 The Voxa AI Chrome Extension captures tab audio contextually, presenting subtitle streams in a side panel or as a floating overlay inside active Meet tabs.
 <p align="left">
@@ -74,12 +89,29 @@ The Chrome Extension downsamples meeting or tab audio to a clean 16kHz mono 16-b
 [JSON Response]         ──► (Sends transcripts & translations back to client)
 ```
 
+### 3. PDF Reading Assistant Pipeline Flow
+When uploading documents, the server processes them via `POST /pdf/translate`. Extracted text is translated, tokenized into sentence-aware blocks of 3,000–5,000 characters to stay within API limit bounds, and compiled into a joined MP3 play link:
+
+```
+[PDF Upload File] ──► [In-Memory Text Parser] ──► [Sentence-Aware Text Splitter]
+                                                               │
+                                                               ├──► Azure Neural Translation (each chunk)
+                                                               │
+                                                               ├──► ElevenLabs Audio Synthesis (individual MP3 files)
+                                                               │
+                                                               ├──► Binary File Merger (combines all chunks to output.mp3)
+                                                               │
+                                                               └──► Yields real-time progress text via NDJSON Stream
+```
+
 ---
 
 ## ✨ Core Features & Technical Stack
 
 * **WebSocket PCM Streaming:** Downsamples browser audio to 16kHz mono PCM and streams it continuously to achieve sub-second latencies.
 * **Server-Sent Events (SSE) Progress:** Visual step checklist updates are synchronized 100% with server execution milestones (ASR, post-refine, translate, TTS synthesis).
+* **AI PDF Reading Assistant:** Translates large PDF files using in-memory byte extraction, sentence-boundary text chunking (3k-5k char segments), and multi-part voice syntheses.
+* **Smart Audio Merger:** Sequentially synthesizes text segments and merges the resulting MP3 payloads into a single file with resilient warning fallbacks.
 * **ASR Transcript Correction:** Raw transcriptions from Whisper large-v3 are sent through **Claude 3.5 Sonnet via OpenRouter** to correct homophones, insert punctuation, and fix grammar before translation.
 * **Azure Translation Layer:** Fully contextual text translation into 45+ supported target locales using Azure Cognitive Services.
 * **Expressive Synthesizer:** Integrates ElevenLabs Voice Synthesis (using `eleven_multilingual_v2`) to generate natural speech playback.
@@ -95,6 +127,7 @@ Voxa-ai/
 │   └── app/
 │       ├── api/             # API Router Endpoints (REST & WebSockets)
 │       │   ├── health.py    # Health checks
+│       │   ├── pdf.py       # PDF extraction & chunked translation stream
 │       │   ├── speech.py    # REST Translation & serving output-audio
 │       │   └── websocket_api.py # WebSocket Stream Gateway
 │       ├── core/            # Config variables & settings
@@ -108,7 +141,7 @@ Voxa-ai/
 ├── Frontend/my-app/         # Next.js 16 Web Dashboard
 │   ├── public/              # Static assets & Packed extension voxa_entension.zip
 │   └── src/
-│       ├── app/             # Page routing & pages (Landing, workspace, tech)
+│       ├── app/             # Page routing & pages (Landing, workspace, pdf-reader, profile, settings)
 │       └── components/      # Responsive design systems
 │
 └── Extension/               # Chrome Extension source

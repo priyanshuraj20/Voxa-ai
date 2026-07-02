@@ -69,7 +69,7 @@ export default function ForgotPasswordForm() {
   };
 
   return (
-    <div className="glass-panel max-w-md w-full p-8 rounded-2xl border border-white/5 shadow-2xl relative z-10 flex flex-col gap-6">
+    <div className="max-w-md w-full p-8 rounded-xl border border-zinc-900 bg-zinc-950 flex flex-col gap-6 relative z-10">
       <div className="flex flex-col gap-2 text-center">
         <h2 className="text-2xl font-bold tracking-tight text-white font-geist">
           {step === "send" ? "Forgot password" : "Verify OTP"}
@@ -98,7 +98,7 @@ export default function ForgotPasswordForm() {
       {step === "send" ? (
         <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] font-mono text-[#cbc3d7]/50 font-bold mb-2 block">
+            <label className="text-[10px] uppercase tracking-[0.2em] font-mono text-zinc-500 font-bold mb-2 block">
               Email Address
             </label>
             <input
@@ -107,7 +107,7 @@ export default function ForgotPasswordForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="w-full px-4 py-3 bg-[#0f0d15] border border-white/5 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#8b5cf6]/50 transition-colors font-sans text-sm"
+              className="w-full px-4 py-3 bg-black border border-zinc-800 rounded-lg text-white placeholder-zinc-700 focus:outline-none focus:border-[#6366f1]/50 transition-colors font-sans text-sm"
             />
           </div>
 
@@ -131,7 +131,7 @@ export default function ForgotPasswordForm() {
       ) : (
         <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] font-mono text-[#cbc3d7]/50 font-bold mb-2 block">
+            <label className="text-[10px] uppercase tracking-[0.2em] font-mono text-zinc-500 font-bold mb-2 block">
               Verification Code (OTP)
             </label>
             <input
@@ -140,7 +140,7 @@ export default function ForgotPasswordForm() {
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               placeholder="Enter 6-digit OTP"
-              className="w-full px-4 py-3 bg-[#0f0d15] border border-white/5 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#8b5cf6]/50 transition-colors font-sans text-sm text-center tracking-[0.25em] font-mono"
+              className="w-full px-4 py-3 bg-black border border-zinc-800 rounded-lg text-white placeholder-zinc-700 focus:outline-none focus:border-[#6366f1]/50 transition-colors font-sans text-sm text-center tracking-[0.25em] font-mono"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function ForgotPasswordForm() {
 
       <div className="text-center text-xs text-zinc-400 font-sans mt-2">
         Remember your password?{" "}
-        <Link href="/login" className="text-[#8b5cf6] hover:text-[#7c3aed] transition-colors font-semibold">
+        <Link href="/login" className="text-[#6366f1] hover:text-[#4f46e5] transition-colors font-semibold">
           Log in
         </Link>
       </div>

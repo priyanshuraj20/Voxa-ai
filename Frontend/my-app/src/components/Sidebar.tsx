@@ -1,22 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { getAccessToken } from "@/lib/auth";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   // If we are on the landing page, we don't display a sidebar
   if (pathname === "/") return null;
 
   return (
-    <aside className="hidden md:flex flex-col h-full w-72 border-r border-white/5 bg-black/40 backdrop-blur-xl shrink-0 z-50">
+    <aside className="hidden md:flex flex-col h-full w-72 border-r border-zinc-900 bg-[#09090b]/80 backdrop-blur-xl shrink-0 z-50">
       {/* Branding Block: click to navigate back to dashboard */}
       <Link 
         href="/" 
-        className="p-stack-lg h-20 flex items-center gap-3 border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
+        className="p-stack-lg h-20 flex items-center gap-3 border-b border-zinc-900 hover:bg-zinc-900/50 transition-colors group"
       >
-        <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg shadow-primary/10 select-none overflow-hidden group-hover:border-primary/45 transition-colors">
+        <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center select-none overflow-hidden transition-colors">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -40,20 +42,20 @@ export default function Sidebar() {
             />
             <defs>
               <linearGradient id="voxa-sidebar-v-grad" x1="4.5" y1="4" x2="19.5" y2="4">
-                <stop stopColor="#d0bcff" />
-                <stop offset="0.5" stopColor="#8b5cf6" />
-                <stop offset="1" stopColor="#3b82f6" />
+                <stop stopColor="#a5b4fc" />
+                <stop offset="0.5" stopColor="#6366f1" />
+                <stop offset="1" stopColor="#38bdf8" />
               </linearGradient>
               <linearGradient id="voxa-sidebar-v-inner" x1="8.5" y1="9.5" x2="15.5" y2="9.5">
-                <stop stopColor="#ffb869" />
-                <stop offset="1" stopColor="#8b5cf6" />
+                <stop stopColor="#818cf8" />
+                <stop offset="1" stopColor="#6366f1" />
               </linearGradient>
             </defs>
           </svg>
         </div>
         <div className="flex flex-col">
-          <span className="font-headline-md text-headline-md font-bold text-on-background tracking-tight group-hover:text-white transition-colors">Voxa AI</span>
-          <span className="text-[9px] text-[#ffb869] font-mono tracking-widest uppercase leading-none mt-0.5">VOXA AI ACTIVE</span>
+          <span className="font-headline-md text-headline-md font-bold text-zinc-100 tracking-tight group-hover:text-white transition-colors">Voxa AI</span>
+          <span className="text-[9px] text-zinc-500 font-mono tracking-widest uppercase leading-none mt-0.5">VOXA AI ACTIVE</span>
         </div>
       </Link>
 
@@ -63,10 +65,16 @@ export default function Sidebar() {
           <li>
             <Link
               href="/workspace"
+              onClick={(e) => {
+                if (!getAccessToken()) {
+                  e.preventDefault();
+                  router.push("/login?required=true");
+                }
+              }}
               className={`flex items-center px-stack-lg py-4 font-label-md text-label-md transition-all group ${
                 pathname === "/workspace"
                   ? "sidebar-item-active font-bold"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-900/50"
               }`}
             >
               <span
@@ -81,11 +89,37 @@ export default function Sidebar() {
 
           <li>
             <Link
+              href="/pdf-reader"
+              onClick={(e) => {
+                const token = getAccessToken();
+                if (!token) {
+                  e.preventDefault();
+                  router.push("/login?required=true");
+                }
+              }}
+              className={`flex items-center px-stack-lg py-4 font-label-md text-label-md transition-all group ${
+                pathname === "/pdf-reader"
+                  ? "sidebar-item-active font-bold"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-900/50"
+              }`}
+            >
+              <span
+                className="material-symbols-outlined mr-4 text-[22px]"
+                style={pathname === "/pdf-reader" ? { fontVariationSettings: "'FILL' 1" } : {}}
+              >
+                picture_as_pdf
+              </span>
+              PDF Assistant
+            </Link>
+          </li>
+
+          <li>
+            <Link
               href="/install"
               className={`flex items-center px-stack-lg py-4 font-label-md text-label-md transition-all group ${
                 pathname === "/install"
                   ? "sidebar-item-active font-bold"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-900/50"
               }`}
             >
               <span
@@ -104,7 +138,7 @@ export default function Sidebar() {
               className={`flex items-center px-stack-lg py-4 font-label-md text-label-md transition-all group ${
                 pathname === "/technology"
                   ? "sidebar-item-active font-bold"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-900/50"
               }`}
             >
               <span
@@ -120,11 +154,11 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer Navigation */}
-      <div className="p-stack-lg border-t border-white/5 flex flex-col gap-5">
+      <div className="p-stack-lg border-t border-zinc-900 flex flex-col gap-5">
         <div className="flex flex-col gap-3">
           <Link
             href="#"
-            className="flex items-center text-on-surface-variant hover:text-on-surface transition-all font-label-md text-label-md"
+            className="flex items-center text-zinc-400 hover:text-white transition-all font-label-md text-label-md"
           >
             <span className="material-symbols-outlined mr-4 text-[22px]">settings</span>
             Preferences
@@ -132,19 +166,19 @@ export default function Sidebar() {
         </div>
 
         {/* Customized Profile Card for Priyanshu Raj */}
-        <div className="flex flex-col gap-3 p-3.5 bg-white/3 rounded-xl border border-white/5">
+        <div className="flex flex-col gap-3 p-3.5 bg-zinc-900/50 rounded-lg border border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#8b5cf6] to-[#adc6ff] flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-[#8b5cf6]/20 select-none">
+            <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white font-bold text-xs select-none">
               PR
             </div>
             <div className="flex flex-col">
-              <span className="text-[13px] font-semibold text-on-background leading-tight">Priyanshu Raj</span>
+              <span className="text-[13px] font-semibold text-zinc-200 leading-tight">Priyanshu Raj</span>
               <span className="text-[10px] text-zinc-500 font-mono tracking-wider uppercase leading-none mt-0.5">Lead Architect</span>
             </div>
           </div>
 
           {/* Social Platforms Links */}
-          <div className="flex items-center gap-3.5 px-1 pt-1.5 text-zinc-400 border-t border-white/5">
+          <div className="flex items-center gap-3.5 px-1 pt-1.5 text-zinc-500 border-t border-zinc-800">
             <a 
               href="https://linkedin.com" 
               target="_blank" 
@@ -174,7 +208,7 @@ export default function Sidebar() {
             </a>
             <a 
               href="mailto:priyanshuraj.work@gmail.com" 
-              className="hover:text-[#8b5cf6] transition-all hover:scale-110 active:scale-95 duration-200"
+              className="hover:text-[#6366f1] transition-all hover:scale-110 active:scale-95 duration-200"
               title="Send Email"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
@@ -183,9 +217,9 @@ export default function Sidebar() {
         </div>
 
         {/* Customized Developer Signature */}
-        <div className="flex flex-col items-center justify-center gap-1 py-1 select-none border-t border-white/[0.03] pt-4 text-center">
+        <div className="flex flex-col items-center justify-center gap-1 py-1 select-none border-t border-zinc-900 pt-4 text-center">
           <p className="text-[10px] text-zinc-500 font-mono tracking-wider leading-relaxed">
-            Fueled by <span className="text-[#ffb869] font-semibold">Diet Coke</span> 🥤 &amp; <span className="text-[#8b5cf6] font-semibold">iterating minds</span> 🧠
+            Voxa AI Multi-modal Gateway
           </p>
           <p className="text-[9px] text-zinc-600 font-mono tracking-widest uppercase mt-0.5">
             — Priyanshu Raj

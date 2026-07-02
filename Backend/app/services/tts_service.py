@@ -11,7 +11,7 @@ client = ElevenLabs(
 class TTSService:
 
     @staticmethod
-    def generate_speech(text: str):
+    def generate_speech(text: str, output_path: str = "output.mp3"):
 
         audio = client.text_to_speech.convert(
 
@@ -25,8 +25,8 @@ class TTSService:
 
         )
 
-        with open("output.mp3", "wb") as f:
+        with open(output_path, "wb") as f:
             for chunk in audio:
                 f.write(chunk)
 
-        return "output.mp3"
+        return output_path

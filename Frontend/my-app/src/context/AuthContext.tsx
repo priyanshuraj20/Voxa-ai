@@ -8,6 +8,8 @@ interface User {
   id: string;
   full_name: string;
   email: string;
+  preferred_source_language?: string;
+  preferred_target_language?: string;
 }
 
 interface AuthContextType {

@@ -70,6 +70,8 @@ async def register_user(    # register user service
         full_name=user.full_name,
         email=user.email,
         hashed_password=hashed_password,
+        preferred_source_language=user.preferred_source_language,
+        preferred_target_language=user.preferred_target_language,
     )
 #databse mein save 
     result = await users_collection.insert_one(
@@ -139,6 +141,8 @@ async def login_user(user: LoginUserSchema):
             "id": str(existing_user["_id"]),
             "full_name": existing_user["full_name"],
             "email": existing_user["email"],
+            "preferred_source_language": existing_user.get("preferred_source_language", "en-US"),
+            "preferred_target_language": existing_user.get("preferred_target_language", "hi-IN"),
         },
     }
 
@@ -344,5 +348,34 @@ async def reset_password(
     return {
 
         "message": "Password updated successfully."
+
+    }
+
+
+async def update_user_preferences(data, current_user):
+
+    await users_collection.update_one(
+
+        {
+            "_id": current_user["_id"]
+        },
+
+        {
+            "$set": {
+
+                "preferred_source_language": data.preferred_source_language,
+
+                "preferred_target_language": data.preferred_target_language,
+
+                "updated_at": datetime.utcnow()
+
+            }
+        }
+
+    )
+
+    return {
+
+        "message": "Preferences updated successfully."
 
     }

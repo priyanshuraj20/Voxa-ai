@@ -73,7 +73,7 @@ export default function LoadingOverlay() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="w-16 h-16 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center overflow-hidden shadow-2xl relative z-10"
+            className="w-16 h-16 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden relative z-10"
           >
             <svg
               viewBox="0 0 24 24"
@@ -98,19 +98,19 @@ export default function LoadingOverlay() {
               />
               <defs>
                 <linearGradient id="voxa-loader-v-grad" x1="4.5" y1="4" x2="19.5" y2="4">
-                  <stop stopColor="#d0bcff" />
-                  <stop offset="0.5" stopColor="#8b5cf6" />
-                  <stop offset="1" stopColor="#3b82f6" />
+                  <stop stopColor="#a5b4fc" />
+                  <stop offset="0.5" stopColor="#6366f1" />
+                  <stop offset="1" stopColor="#38bdf8" />
                 </linearGradient>
                 <linearGradient id="voxa-loader-v-inner" x1="8.5" y1="9.5" x2="15.5" y2="9.5">
-                  <stop stopColor="#ffb869" />
-                  <stop offset="1" stopColor="#8b5cf6" />
+                  <stop stopColor="#818cf8" />
+                  <stop offset="1" stopColor="#6366f1" />
                 </linearGradient>
               </defs>
             </svg>
           </motion.div>
           {/* Subtle neon drop shadow behind logo */}
-          <div className="absolute inset-0 w-16 h-16 bg-[#8b5cf6]/10 blur-xl rounded-full scale-110 pointer-events-none z-0" />
+          <div className="absolute inset-0 w-16 h-16 bg-[#6366f1]/5 blur-md rounded-full scale-110 pointer-events-none z-0" />
         </div>
 
         {/* Dynamic Title / Status */}
@@ -132,7 +132,7 @@ export default function LoadingOverlay() {
         {/* Indeterminate linear progress bar */}
         <div className="w-64 h-1 bg-white/10 overflow-hidden relative rounded-full">
           <motion.div
-            className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#adc6ff] w-1/3 rounded-full absolute left-0"
+            className="h-full bg-[#6366f1] w-1/3 rounded-full absolute left-0"
             animate={{ left: ["-33%", "100%"] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
           />
@@ -144,9 +144,9 @@ export default function LoadingOverlay() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="p-5 border border-white/10 bg-white/[0.04] rounded-xl text-center w-full max-w-sm shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-md"
+            className="p-5 border border-zinc-900 bg-zinc-950/40 rounded-lg text-center w-full max-w-sm"
           >
-            <span className="font-mono text-[10px] text-[#adc6ff] uppercase tracking-[0.22em] block mb-2 font-bold">
+            <span className="font-mono text-[10px] text-[#6366f1] uppercase tracking-[0.22em] block mb-2 font-bold">
               Cognitive Insight
             </span>
             <p className="text-[13.5px] text-zinc-200 font-normal font-sans leading-relaxed">

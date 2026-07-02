@@ -14,11 +14,11 @@ export default function Header() {
 
   if (isLanding) {
     return (
-      <header className="fixed top-0 w-full z-50 border-b border-white/5 bg-black/60 backdrop-blur-xl">
+      <header className="fixed top-0 w-full z-50 border-b border-zinc-900 bg-[#09090b]/80 backdrop-blur-xl">
         <div className="max-w-[1200px] mx-auto h-20 flex items-center justify-between px-6">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight hover:text-white transition-colors group">
-              <div className="w-8 h-8 rounded bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center overflow-hidden">
+              <div className="w-8 h-8 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -42,13 +42,13 @@ export default function Header() {
                   />
                   <defs>
                     <linearGradient id="voxa-header-v-grad" x1="4.5" y1="4" x2="19.5" y2="4">
-                      <stop stopColor="#d0bcff" />
-                      <stop offset="0.5" stopColor="#8b5cf6" />
-                      <stop offset="1" stopColor="#3b82f6" />
+                      <stop stopColor="#a5b4fc" />
+                      <stop offset="0.5" stopColor="#6366f1" />
+                      <stop offset="1" stopColor="#38bdf8" />
                     </linearGradient>
                     <linearGradient id="voxa-header-v-inner" x1="8.5" y1="9.5" x2="15.5" y2="9.5">
-                      <stop stopColor="#ffb869" />
-                      <stop offset="1" stopColor="#8b5cf6" />
+                      <stop stopColor="#818cf8" />
+                      <stop offset="1" stopColor="#6366f1" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -56,10 +56,10 @@ export default function Header() {
               <span className="font-bold text-white font-headline-md">Voxa AI</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6 font-sans">
-              <Link href="/install" className="text-sm text-[#cbc3d7] hover:text-white transition-colors">
+              <Link href="/install" className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Install Extension
               </Link>
-              <Link href="/technology" className="text-sm text-[#cbc3d7] hover:text-white transition-colors">
+              <Link href="/technology" className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Architecture
               </Link>
             </nav>
@@ -67,19 +67,19 @@ export default function Header() {
           <div className="flex items-center gap-4">
             {!user ? (
               <>
-                <Link href="/login" className="text-sm font-semibold text-[#cbc3d7] hover:text-white transition-colors px-3 py-2">
+                <Link href="/login" className="text-sm font-semibold text-zinc-400 hover:text-white transition-colors px-3 py-2">
                   Login
                 </Link>
-                <Link href="/register" className="bg-[#8b5cf6] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#7c3aed] transition-colors shadow-lg shadow-[#8b5cf6]/15">
+                <Link href="/register" className="bg-[#6366f1] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#4f46e5] transition-colors">
                   Register
                 </Link>
               </>
             ) : (
               <>
-                <Link href="/workspace" className="text-sm font-semibold text-[#cbc3d7] hover:text-white transition-colors px-3 py-2">
+                <Link href="/workspace" className="text-sm font-semibold text-zinc-400 hover:text-white transition-colors px-3 py-2">
                   Workspace
                 </Link>
-                <Link href="/profile" className="text-sm font-semibold text-[#cbc3d7] hover:text-white transition-colors px-3 py-2">
+                <Link href="/profile" className="text-sm font-semibold text-zinc-400 hover:text-white transition-colors px-3 py-2">
                   Profile
                 </Link>
                 <button 
@@ -87,7 +87,7 @@ export default function Header() {
                     await logout();
                     router.push("/login");
                   }}
-                  className="bg-zinc-900/60 hover:bg-zinc-900 border border-white/5 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors active:scale-98"
+                  className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors active:scale-98"
                 >
                   Logout
                 </button>
@@ -104,23 +104,23 @@ export default function Header() {
     <div className="fixed top-0 left-0 w-full z-50 flex flex-col">
       {/* Top Banner Alert from Stitch */}
       {showBanner && (
-        <div className="bg-gradient-to-r from-[#8b5cf6]/20 to-[#3b82f6]/10 border-b border-[#8b5cf6]/20 px-6 py-2.5 flex items-center justify-between z-20 transition-all">
+        <div className="bg-[#121214] border-b border-zinc-800 px-6 py-2.5 flex items-center justify-between z-20 transition-all">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded bg-[#8b5cf6]/20 flex items-center justify-center text-[#d0bcff]">
+            <div className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
               <span className="material-symbols-outlined text-base">download_for_offline</span>
             </div>
-            <p className="text-[12px] md:text-sm font-medium text-[#e9ddff]">
+            <p className="text-[12px] md:text-sm font-medium text-zinc-300">
               Sync <span className="font-bold text-white">Voxa AI</span> Chrome extension to enable cross-tab translation in your browser.
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/install" className="text-[12px] md:text-sm text-primary hover:underline font-bold flex items-center gap-1">
+            <Link href="/install" className="text-[12px] md:text-sm text-[#6366f1] hover:underline font-bold flex items-center gap-1">
               Download &amp; Sync Extension
               <span className="material-symbols-outlined text-xs">open_in_new</span>
             </Link>
             <button 
               onClick={() => setShowBanner(false)}
-              className="text-[#cbc3d7] hover:text-white transition-colors flex items-center justify-center p-0.5"
+              className="text-zinc-400 hover:text-white transition-colors flex items-center justify-center p-0.5"
             >
               <span className="material-symbols-outlined text-sm">close</span>
             </button>
@@ -130,29 +130,32 @@ export default function Header() {
 
 
       {/* Top Header Menu */}
-      <header className="h-20 flex justify-between items-center px-6 border-b border-white/5 z-10 bg-black/40 backdrop-blur-xl">
+      <header className="h-20 flex justify-between items-center px-6 border-b border-zinc-900 z-10 bg-[#09090b]/80 backdrop-blur-xl">
         {/* Left Side Pill */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center bg-[#2c2832]/40 rounded-full px-4 py-1.5 border border-white/10 backdrop-blur-sm select-none">
-            <span className="font-label-md text-[11px] text-[#cbc3d7] uppercase tracking-wider">Browser Source</span>
-            <span className="material-symbols-outlined mx-2 text-[#8b5cf6]/50 text-sm select-none">east</span>
-            <span className="font-label-md text-[11px] text-[#d0bcff] font-bold uppercase tracking-wider">Active Layer</span>
+          <div className="flex items-center bg-zinc-900 rounded-lg px-4 py-1.5 border border-zinc-800 backdrop-blur-sm select-none">
+            <span className="font-label-md text-[11px] text-zinc-400 uppercase tracking-wider">Browser Source</span>
+            <span className="material-symbols-outlined mx-2 text-zinc-600 text-sm select-none">east</span>
+            <span className="font-label-md text-[11px] text-[#6366f1] font-bold uppercase tracking-wider">Active Layer</span>
           </div>
         </div>
 
         {/* Right Side Info */}
         <div className="flex items-center gap-8 font-mono text-xs">
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-[9px] text-[#cbc3d7]/50 uppercase tracking-[0.2em] font-bold">Sync Status</span>
-            <span className="text-[#d0bcff] font-bold text-sm">Connected</span>
+            <span className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-bold">Sync Status</span>
+            <span className="text-[#6366f1] font-bold text-sm">Connected</span>
           </div>
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-[9px] text-[#cbc3d7]/50 uppercase tracking-[0.2em] font-bold">Extension Version</span>
-            <span className="text-[#adc6ff] font-bold text-sm">v2.4.0</span>
+            <span className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-bold">Extension Version</span>
+            <span className="text-[#38bdf8] font-bold text-sm">v2.4.0</span>
           </div>
-          {user && (
+          {user ? (
             <>
-              <Link href="/profile" className="text-sm font-semibold text-[#cbc3d7] hover:text-white transition-colors">
+              <Link href="/workspace" className="font-sans text-sm font-semibold text-zinc-400 hover:text-white transition-colors">
+                Workspace
+              </Link>
+              <Link href="/profile" className="font-sans text-sm font-semibold text-zinc-400 hover:text-white transition-colors">
                 Profile
               </Link>
               <button 
@@ -160,13 +163,22 @@ export default function Header() {
                   await logout();
                   router.push("/login");
                 }}
-                className="text-sm font-semibold text-zinc-400 hover:text-red-400 transition-colors"
+                className="font-sans text-sm font-semibold text-zinc-400 hover:text-red-400 transition-colors"
               >
                 Logout
               </button>
             </>
+          ) : (
+            <>
+              <Link href="/login" className="font-sans text-sm font-semibold text-zinc-400 hover:text-white transition-colors">
+                Login
+              </Link>
+              <Link href="/register" className="bg-[#6366f1] text-white px-4 py-2 rounded-lg font-sans text-xs font-semibold hover:bg-[#4f46e5] transition-colors">
+                Register
+              </Link>
+            </>
           )}
-          <button className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-label-md text-xs px-5 py-2.5 rounded-full transition-all active:scale-95 shadow-lg shadow-[#8b5cf6]/20 font-bold">
+          <button className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white font-label-md text-xs px-5 py-2.5 rounded-lg transition-all active:scale-95 font-bold">
             Settings
           </button>
         </div>

@@ -35,7 +35,7 @@ export default function InstallPage() {
               <a
                 href="/voxa_entension.zip"
                 download="voxa_entension.zip"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-[#8b5cf6] text-white hover:bg-[#7c3aed] transition-colors text-sm font-semibold shadow-md active:scale-98 select-none"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-[#6366f1] text-white hover:bg-[#4f46e5] transition-colors text-sm font-semibold active:scale-98 select-none"
               >
                 <span className="material-symbols-outlined text-sm">download</span>
                 Download Extension package (voxa_entension.zip)
@@ -48,7 +48,7 @@ export default function InstallPage() {
               
               <div className="flex flex-col gap-4">
                 <div className="flex gap-4 items-start border border-zinc-900 bg-zinc-950/40 p-4 rounded-xl">
-                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#d0bcff]">
+                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#6366f1]">
                     1
                   </div>
                   <div className="space-y-1">
@@ -60,7 +60,7 @@ export default function InstallPage() {
                 </div>
 
                 <div className="flex gap-4 items-start border border-zinc-900 bg-zinc-950/40 p-4 rounded-xl">
-                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#d0bcff]">
+                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#6366f1]">
                     2
                   </div>
                   <div className="space-y-1">
@@ -72,7 +72,7 @@ export default function InstallPage() {
                 </div>
 
                 <div className="flex gap-4 items-start border border-zinc-900 bg-zinc-950/40 p-4 rounded-xl">
-                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#d0bcff]">
+                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#6366f1]">
                     3
                   </div>
                   <div className="space-y-1">
@@ -84,7 +84,7 @@ export default function InstallPage() {
                 </div>
 
                 <div className="flex gap-4 items-start border border-zinc-900 bg-zinc-950/40 p-4 rounded-xl">
-                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#d0bcff]">
+                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#6366f1]">
                     4
                   </div>
                   <div className="space-y-1">
@@ -96,7 +96,7 @@ export default function InstallPage() {
                 </div>
 
                 <div className="flex gap-4 items-start border border-zinc-900 bg-zinc-950/40 p-4 rounded-xl">
-                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#d0bcff]">
+                  <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-[#6366f1]">
                     5
                   </div>
                   <div className="space-y-1">
@@ -155,7 +155,7 @@ export default function InstallPage() {
           <span className="material-symbols-outlined text-[22px]">dashboard</span>
           <span className="text-[10px] font-medium font-sans">Workspace</span>
         </a>
-        <a href="/install" className="flex flex-col items-center gap-1 text-[#8b5cf6] flex-1 py-1">
+        <a href="/install" className="flex flex-col items-center gap-1 text-[#6366f1] flex-1 py-1">
           <span className="material-symbols-outlined text-[22px]">download</span>
           <span className="text-[10px] font-medium font-sans">Install</span>
         </a>

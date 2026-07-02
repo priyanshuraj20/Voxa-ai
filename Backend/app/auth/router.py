@@ -62,7 +62,11 @@ async def get_me(
 
         "full_name": current_user["full_name"],
 
-        "email": current_user["email"]
+        "email": current_user["email"],
+
+        "preferred_source_language": current_user.get("preferred_source_language", "en-US"),
+
+        "preferred_target_language": current_user.get("preferred_target_language", "hi-IN"),
 
     }
 
@@ -113,3 +117,14 @@ async def reset_password_route(
     data: ResetPasswordSchema
 ):
     return await reset_password(data)
+
+
+from app.auth.schemas import UserPreferencesSchema
+from app.auth.service import update_user_preferences
+
+@router.put("/preferences")
+async def update_preferences(
+    data: UserPreferencesSchema,
+    current_user = Depends(get_current_user)
+):
+    return await update_user_preferences(data, current_user)

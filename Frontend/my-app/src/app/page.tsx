@@ -627,39 +627,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Final CTA wrapped inside a clean flat container */}
-        <section className="max-w-[1200px] mx-auto px-6 py-12 relative z-10">
-          <div className="relative rounded-xl border border-zinc-900 bg-zinc-900/50 overflow-hidden">
-            <div className="relative z-10 px-8 py-20 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6 text-white font-geist">
-                Synthesize translations instantly.
-              </h2>
-              <p className="text-zinc-400 mb-10 max-w-xl mx-auto font-light font-sans text-sm">
-                Experience natural human voice playback, customized speaker
-                diarization, and contextual ASR transcript correction.
-              </p>
-              <div className="flex justify-center gap-4 flex-col sm:flex-row items-center">
-                <Link
-                  href="/workspace"
-                  onClick={handleWorkspaceClick}
-                  className="bg-[#6366f1] text-white px-8 py-3.5 rounded-lg font-bold hover:bg-[#4f46e5] transition-colors text-sm active:scale-98 select-none"
-                >
-                  Open Workspace
-                </Link>
-                <Link
-                  href="/pdf-reader"
-                  onClick={handleWorkspaceClick}
-                  className="border border-zinc-800 bg-[#6366f1]/10 text-white px-8 py-3.5 rounded-lg font-bold hover:bg-[#6366f1]/20 hover:border-[#6366f1]/30 transition-colors text-sm active:scale-98 select-none flex items-center gap-1.5"
-                >
-                  PDF Assistant
-                  <span className="material-symbols-outlined text-sm">
-                    picture_as_pdf
-                  </span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}

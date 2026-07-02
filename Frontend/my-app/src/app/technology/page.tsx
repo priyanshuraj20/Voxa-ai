@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
 export default function TechnologyPage() {
-  const [activeTab, setActiveTab] = useState<"overall" | "speech" | "pdf" | "auth" | "structure">("overall");
+  const [activeTab, setActiveTab] = useState<"overall" | "speech" | "pdf" | "auth" | "extension" | "structure">("overall");
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-zinc-300 relative font-sans">
@@ -75,6 +75,17 @@ export default function TechnologyPage() {
               >
                 Authentication
                 {activeTab === "auth" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366f1]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("extension")}
+                className={`pb-4 text-sm relative transition-all ${
+                  activeTab === "extension" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                Chrome Extension
+                {activeTab === "extension" && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366f1]" />
                 )}
               </button>
@@ -495,7 +506,171 @@ export default function TechnologyPage() {
               </div>
             )}
 
-            {/* TAB CONTENT 5: Project Structure */}
+            {/* TAB CONTENT 5: Chrome Extension Flow & Architecture */}
+            {activeTab === "extension" && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                {/* Visual Architecture Flow UI */}
+                <div className="border border-zinc-900 bg-zinc-950/40 p-6 md:p-8 rounded-xl flex flex-col items-center gap-4 overflow-hidden relative shadow-lg">
+                  <div className="w-full text-left border-b border-zinc-900 pb-3 mb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[#38bdf8] text-lg">extension</span>
+                      <h4 className="text-white font-semibold text-xs uppercase tracking-wider font-mono">Chrome Extension Pipeline</h4>
+                    </div>
+                    <span className="text-[9px] font-mono text-zinc-500">Real-Time Voice Translation Loop</span>
+                  </div>
+
+                  {/* Flow Nodes Diagram */}
+                  <div className="flex flex-col items-center gap-4 w-full text-left max-w-lg font-sans">
+                    {/* Node 1: Remote Speaker */}
+                    <div className="w-full p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 flex items-center gap-4 hover:border-zinc-700 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-[#6366f1] shrink-0">
+                        <span className="material-symbols-outlined text-xl">record_voice_over</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-[#6366f1] font-bold">1. Input Audio Source</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">Speaker Talks in Meeting</h5>
+                        <p className="text-zinc-500 font-light mt-1">Other participants (Google Meet / Zoom) speak. Audio is sent as standard tab outputs to their speakers.</p>
+                      </div>
+                    </div>
+
+                    <div className="text-[#6366f1] text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 2: Chrome Tab Capture API */}
+                    <div className="w-full p-4 rounded-xl border border-[#38bdf8]/30 bg-zinc-900/40 flex items-center gap-4 hover:border-[#38bdf8]/50 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-[#38bdf8] shrink-0">
+                        <span className="material-symbols-outlined text-xl">settings_ethernet</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-[#38bdf8] font-bold">2. Capture & Resample</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">Offscreen Document Intercept</h5>
+                        <p className="text-zinc-500 font-light mt-1">Chrome Tab Capture API captures tab audio streams. Offscreen resampler downsamples it to 16kHz mono 16-bit signed integer PCM arrays.</p>
+                      </div>
+                    </div>
+
+                    <div className="text-[#38bdf8] text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 3: WebSocket Streaming */}
+                    <div className="w-full p-4 rounded-xl border border-amber-500/20 bg-zinc-900/40 flex items-center gap-4 hover:border-amber-500/40 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-amber-500 shrink-0">
+                        <span className="material-symbols-outlined text-xl">sensors</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-amber-500 font-bold">3. Network Streaming</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">WebSocket Binary Uplink</h5>
+                        <p className="text-zinc-500 font-light mt-1">Continuous binary arrays are streamed over persistent WebSockets directly to the FastAPI server at <span className="font-mono text-[10px] text-zinc-400">ws://localhost:8000/ws</span>.</p>
+                      </div>
+                    </div>
+
+                    <div className="text-amber-500 text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 4: FastAPI VAD & Buffering */}
+                    <div className="w-full p-4 rounded-xl border border-emerald-500/20 bg-zinc-900/40 flex items-center gap-4 hover:border-emerald-500/40 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-emerald-500 shrink-0">
+                        <span className="material-symbols-outlined text-xl">dns</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-emerald-500 font-bold">4. Server Orchestration</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">VAD Filter & In-Memory Packaging</h5>
+                        <p className="text-zinc-500 font-light mt-1">Calculates RMS amplitude to filter silences. Appends 44-byte WAV header completely in-memory to format bytes for transcription.</p>
+                      </div>
+                    </div>
+
+                    <div className="text-emerald-500 text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 5: AI Pipeline */}
+                    <div className="w-full p-4 rounded-xl border border-fuchsia-500/20 bg-zinc-900/40 flex items-center gap-4 hover:border-fuchsia-500/40 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-fuchsia-500 shrink-0">
+                        <span className="material-symbols-outlined text-xl">psychology</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-fuchsia-500 font-bold">5. AI Translation Pipeline</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">ASR + Refinement + Translation</h5>
+                        <p className="text-zinc-500 font-light mt-1">Whisper Large v3 transcribes audio ➔ Claude LLM corrects punctuation & grammar ➔ Azure NMT translates into target language locales.</p>
+                      </div>
+                    </div>
+
+                    <div className="text-fuchsia-500 text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 6: Voice Synthesis */}
+                    <div className="w-full p-4 rounded-xl border border-teal-500/20 bg-zinc-900/40 flex items-center gap-4 hover:border-teal-500/40 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-teal-500 shrink-0">
+                        <span className="material-symbols-outlined text-xl">volume_up</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-teal-500 font-bold">6. Voice Output Synthesis</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">ElevenLabs TTS Engine</h5>
+                        <p className="text-zinc-500 font-light mt-1">Converts translated text string into high-fidelity expressive voice output using multilingual models, saving it dynamically as output.mp3.</p>
+                      </div>
+                    </div>
+
+                    <div className="text-teal-500 text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 7: Subtitle Overlay */}
+                    <div className="w-full p-4 rounded-xl border border-rose-500/30 bg-zinc-900/40 flex items-center gap-4 hover:border-rose-500/50 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-rose-500 shrink-0">
+                        <span className="material-symbols-outlined text-xl">closed_caption</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-rose-500 font-bold">7. Client Presenter</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">Captions Overlay & Voice Playback</h5>
+                        <p className="text-zinc-500 font-light mt-1">Sends JSON response back to WebSocket client. Chrome extension injects overlay text subtitles in-tab and plays the translated spoken voice directly.</p>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Step-by-Step Technical Details */}
+                <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 md:p-8 space-y-6">
+                  <h3 className="text-lg font-semibold font-geist text-white">How the Extension Voice Translation Loop Works</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm font-sans font-light leading-relaxed">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-white font-semibold font-geist text-sm mb-1.5 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]"></span>
+                          1. Tab Capture & Resampling
+                        </h4>
+                        <p className="text-zinc-400 text-xs font-sans">
+                          When users join a Google Meet or Zoom call, their browser executes standard audio streaming in the tab. The Chrome Extension uses the Tab Capture API to grab the raw audio output stream. Because extensions cannot process heavy media logic in background service workers directly, it spawns an ephemeral <strong>Offscreen Document</strong>. The offscreen wrapper uses the Web Audio API to resample the audio from standard 44.1kHz stereo down to a highly optimized 16kHz mono 16-bit signed integer PCM feed, dramatically reducing transmission overhead.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="text-white font-semibold font-geist text-sm mb-1.5 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                          2. Continuous WebSocket Uplink
+                        </h4>
+                        <p className="text-zinc-400 text-xs font-sans">
+                          Rather than uploading bulky audio files, the extension streams binary PCM chunks continuously every 100ms over a persistent WebSocket connection to the FastAPI server. If the meeting is silent, the extension automatically injects tiny heartbeat silence packets to maintain the state of the socket, preventing proxy servers or load balancers from cutting the connection.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-white font-semibold font-geist text-sm mb-1.5 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          3. Real-Time VAD & In-Memory WAV
+                        </h4>
+                        <p className="text-zinc-400 text-xs font-sans">
+                          On the backend, the server maintains a sliding audio buffer. A Voice Activity Detection (VAD) algorithm calculates the Root Mean Square (RMS) amplitude of incoming bytes. If the volume stays below 50.0, the server skips model computation to prevent expensive API calls. Once active voice is detected, the server dynamically prepends a standard 44-byte WAV header in-memory to the PCM bytes, allowing the API to read it as a standard audio file without incurring disk write latencies.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="text-white font-semibold font-geist text-sm mb-1.5 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                          4. AI Translation & Subtitle Return
+                        </h4>
+                        <p className="text-zinc-400 text-xs font-sans">
+                          The structured WAV payload is sent to Groq Whisper v3 for sub-second speech recognition. The raw transcript text is corrected by Claude 3.5 Sonnet to restore correct grammar and punctuation, translated by Azure Translator, and finally converted back to speech by ElevenLabs. The resulting transcript, translation, and synthetic audio file URL are returned over the active WebSocket, letting the extension inject subtitles and trigger audio playback.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT 6: Project Structure */}
             {activeTab === "structure" && (
               <div className="space-y-8 max-w-3xl animate-in fade-in duration-300">
                 <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 space-y-4">

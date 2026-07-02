@@ -117,21 +117,6 @@ export default function Header() {
               </>
             ) : (
               <>
-                {/* Landing page compact stats */}
-                <div className="hidden md:flex items-center gap-4 font-mono text-[10px] pr-4 select-none border-r border-zinc-900 mr-2 text-right">
-                  <div className="flex flex-col items-end">
-                    <span className="text-[7.5px] text-zinc-500 uppercase tracking-wider font-bold">TTS Left</span>
-                    <span className="text-[#10b981] font-bold">
-                      {credits ? credits.elevenlabs.left.toLocaleString() : "5,750"}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-[7.5px] text-zinc-500 uppercase tracking-wider font-bold">NMT Left</span>
-                    <span className="text-[#38bdf8] font-bold">
-                      {credits ? `${(credits.azure.left / 1000).toFixed(0)}K` : "1.8M"}
-                    </span>
-                  </div>
-                </div>
                 <Link href="/workspace" className="text-sm font-semibold text-zinc-400 hover:text-white transition-colors px-3 py-2">
                   Workspace
                 </Link>
@@ -205,30 +190,6 @@ export default function Header() {
           <div className="hidden sm:flex flex-col items-end">
             <span className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-bold">Extension Version</span>
             <span className="text-[#38bdf8] font-bold text-sm">v2.4.0</span>
-          </div>
-          {/* Unified API Limits Indicators */}
-          <div className="hidden md:flex items-center gap-6 border-l border-zinc-800 pl-6 select-none">
-            {/* Groq ASR */}
-            <div className="flex flex-col items-end">
-              <span className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">ASR (Groq)</span>
-              <span className="text-[#a5b4fc] font-bold text-xs">
-                {credits ? `${credits.groq.left_rpd.toLocaleString()} RPD` : "14.1K RPD"}
-              </span>
-            </div>
-            {/* Azure Translation */}
-            <div className="flex flex-col items-end">
-              <span className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">NMT (Azure)</span>
-              <span className="text-[#38bdf8] font-bold text-xs">
-                {credits ? `${(credits.azure.left / 1000).toFixed(0)}K Chars` : "1.8M Chars"}
-              </span>
-            </div>
-            {/* ElevenLabs TTS */}
-            <div className="flex flex-col items-end">
-              <span className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">TTS (ElevenLabs)</span>
-              <span className="text-[#10b981] font-bold text-xs">
-                {credits ? `${credits.elevenlabs.left.toLocaleString()} Chars` : "5,750 Chars"}
-              </span>
-            </div>
           </div>
           {user ? (
             <>

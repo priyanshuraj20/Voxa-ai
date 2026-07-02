@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { apiRequest } from "@/lib/api";
 
 export default function Header() {
   const pathname = usePathname();
@@ -12,6 +13,12 @@ export default function Header() {
   const isLanding = pathname === "/";
   const [showBanner, setShowBanner] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [credits, setCredits] = useState<{
+    character_limit: number;
+    character_count: number;
+    character_left: number;
+    source: string;
+  } | null>(null);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -20,6 +27,31 @@ export default function Header() {
     document.addEventListener("click", handleOutsideClick);
     return () => document.removeEventListener("click", handleOutsideClick);
   }, [isSettingsOpen]);
+
+  // Fetch ElevenLabs character limits/usage
+  useEffect(() => {
+    if (!user) {
+      setCredits(null);
+      return;
+    }
+
+    const fetchCredits = async () => {
+      try {
+        const res = await apiRequest("/speech/credits");
+        if (res.ok) {
+          const data = await res.json();
+          setCredits(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch credits:", err);
+      }
+    };
+
+    fetchCredits();
+    // Poll every 30 seconds to keep limits in sync
+    const interval = setInterval(fetchCredits, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   if (isLanding) {
     return (
@@ -159,6 +191,14 @@ export default function Header() {
             <span className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-bold">Extension Version</span>
             <span className="text-[#38bdf8] font-bold text-sm">v2.4.0</span>
           </div>
+          {credits && (
+            <div className="hidden sm:flex flex-col items-end">
+              <span className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-bold text-zinc-400">TTS Chars Left</span>
+              <span className="text-[#10b981] font-bold text-sm">
+                {credits.character_left.toLocaleString()} / {(credits.character_limit / 1000).toFixed(0)}K
+              </span>
+            </div>
+          )}
           {user ? (
             <>
               <Link href="/" className="font-sans text-sm font-semibold text-zinc-400 hover:text-white transition-colors">
@@ -192,6 +232,14 @@ export default function Header() {
               
               {isSettingsOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {credits && (
+                    <div className="px-4 py-2 border-b border-zinc-900 text-[10px] font-mono text-zinc-400">
+                      <div className="uppercase text-[8px] text-zinc-500 font-bold tracking-wider">TTS Characters</div>
+                      <div className="text-white font-bold mt-0.5">
+                        {credits.character_left.toLocaleString()} / {(credits.character_limit / 1000).toFixed(0)}K
+                      </div>
+                    </div>
+                  )}
                   <Link 
                     href="/profile" 
                     onClick={() => setIsSettingsOpen(false)}

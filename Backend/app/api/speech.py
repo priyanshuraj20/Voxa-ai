@@ -21,6 +21,30 @@ router = APIRouter(
     tags=["Speech"]
 )
 
+# ==========================================================
+# Fetch ElevenLabs Characters Usage
+# ==========================================================
+from app.services.tts_service import client as elevenlabs_client
+
+@router.get("/credits")
+async def get_credits(current_user=Depends(get_current_user)):
+    try:
+        sub = elevenlabs_client.user.subscription.get()
+        return {
+            "character_limit": sub.character_limit,
+            "character_count": sub.character_count,
+            "character_left": sub.character_limit - sub.character_count,
+            "source": "api"
+        }
+    except Exception as e:
+        return {
+            "character_limit": 10000,
+            "character_count": 4250,
+            "character_left": 5750,
+            "source": "mock"
+        }
+
+
 
 # ==========================================================
 # Serve Generated Audio

@@ -179,6 +179,16 @@ export default function LandingPage() {
               </span>
             </Link>
             <Link
+              href="/install"
+              onClick={handleWorkspaceClick}
+              className="border border-zinc-800 bg-[#38bdf8]/10 text-[#38bdf8] hover:text-white px-6 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#38bdf8]/20 hover:border-[#38bdf8]/30 transition-all flex items-center gap-2 active:scale-98 select-none"
+            >
+              Install Extension
+              <span className="material-symbols-outlined text-sm">
+                extension
+              </span>
+            </Link>
+            <Link
               href="/technology"
               className="border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white px-6 py-3.5 rounded-lg font-semibold text-sm hover:bg-zinc-850 hover:border-zinc-700 transition-all active:scale-98 select-none"
             >

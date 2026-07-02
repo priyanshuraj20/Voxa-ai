@@ -12,6 +12,7 @@ export default function Sidebar() {
   const router = useRouter();
   const { logout, user } = useAuth();
   const [isPrefOpen, setIsPrefOpen] = useState(false);
+  const [activeLimitTab, setActiveLimitTab] = useState<"tts" | "asr" | "llm" | "nmt">("tts");
   const [credits, setCredits] = useState<{
     elevenlabs: { limit: number; count: number; left: number; source: string };
     openrouter: { is_free_tier: boolean; limit_usd: number | null; usage_usd: number; source: string };
@@ -241,27 +242,141 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* TTS Character Usage Card */}
-        <div className="flex flex-col gap-2 p-3.5 bg-zinc-950/40 rounded-lg border border-zinc-900 select-none">
-          <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 uppercase tracking-wider font-bold">
-            <span>TTS Limit Left</span>
-            <span className="text-[#10b981] font-bold">
-              {credits ? `${credits.elevenlabs.left.toLocaleString()} Chars` : "5,750 Chars"}
-            </span>
+        {/* Interactive API Quota Card */}
+        <div className="flex flex-col gap-3 p-3.5 bg-zinc-950/40 rounded-lg border border-zinc-900 select-none">
+          {/* Mini Tab Switcher */}
+          <div className="grid grid-cols-4 gap-1 p-0.5 bg-zinc-900/60 rounded border border-zinc-850 text-[9px] font-mono tracking-wider font-bold">
+            <button
+              onClick={() => setActiveLimitTab("tts")}
+              className={`py-1 rounded text-center transition-all ${
+                activeLimitTab === "tts"
+                  ? "bg-[#6366f1] text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-300"
+              }`}
+            >
+              TTS
+            </button>
+            <button
+              onClick={() => setActiveLimitTab("asr")}
+              className={`py-1 rounded text-center transition-all ${
+                activeLimitTab === "asr"
+                  ? "bg-[#6366f1] text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-300"
+              }`}
+            >
+              ASR
+            </button>
+            <button
+              onClick={() => setActiveLimitTab("llm")}
+              className={`py-1 rounded text-center transition-all ${
+                activeLimitTab === "llm"
+                  ? "bg-[#6366f1] text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-300"
+              }`}
+            >
+              LLM
+            </button>
+            <button
+              onClick={() => setActiveLimitTab("nmt")}
+              className={`py-1 rounded text-center transition-all ${
+                activeLimitTab === "nmt"
+                  ? "bg-[#6366f1] text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-300"
+              }`}
+            >
+              NMT
+            </button>
           </div>
-          {/* Progress Bar */}
-          <div className="w-full h-1.5 rounded-full bg-zinc-900 border border-zinc-850 overflow-hidden mt-1">
-            <div 
-              className="h-full bg-gradient-to-r from-[#6366f1] to-[#38bdf8] transition-all duration-500"
-              style={{ 
-                width: `${credits ? (credits.elevenlabs.left / credits.elevenlabs.limit) * 100 : 57.5}%` 
-              }}
-            />
-          </div>
-          <div className="flex justify-between text-[9px] font-mono text-zinc-600 mt-0.5">
-            <span>Usage: {credits ? credits.elevenlabs.count.toLocaleString() : "4,250"}</span>
-            <span>Limit: {credits ? (credits.elevenlabs.limit / 1000).toFixed(0) : "10"}K</span>
-          </div>
+
+          {/* Dynamic Content Block */}
+          {activeLimitTab === "tts" && (
+            <div className="space-y-1.5 animate-in fade-in duration-200">
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 uppercase tracking-wider font-bold">
+                <span>ElevenLabs TTS</span>
+                <span className="text-[#10b981] font-bold">
+                  {credits ? `${credits.elevenlabs.left.toLocaleString()} Chars` : "5,750 Chars"}
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-zinc-900 border border-zinc-850 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#6366f1] to-[#38bdf8] transition-all duration-500"
+                  style={{ 
+                    width: `${credits ? (credits.elevenlabs.left / credits.elevenlabs.limit) * 100 : 57.5}%` 
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-[9px] font-mono text-zinc-655">
+                <span>Usage: {credits ? credits.elevenlabs.count.toLocaleString() : "4,250"}</span>
+                <span>Limit: {credits ? (credits.elevenlabs.limit / 1000).toFixed(0) : "10"}K</span>
+              </div>
+            </div>
+          )}
+
+          {activeLimitTab === "asr" && (
+            <div className="space-y-1.5 animate-in fade-in duration-200">
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 uppercase tracking-wider font-bold">
+                <span>Groq Whisper</span>
+                <span className="text-[#a5b4fc] font-bold">
+                  {credits ? `${credits.groq.left_rpd.toLocaleString()} RPD` : "14,152 RPD"}
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-zinc-900 border border-zinc-850 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#a5b4fc] to-[#6366f1] transition-all duration-500"
+                  style={{ 
+                    width: `${credits ? (credits.groq.left_rpd / credits.groq.limit_rpd) * 100 : 98.2}%` 
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-[9px] font-mono text-zinc-655">
+                <span>Used: {credits ? credits.groq.used_rpd.toLocaleString() : "248"}</span>
+                <span>Limit: {credits ? (credits.groq.limit_rpd / 1000).toFixed(1) : "14.4"}K</span>
+              </div>
+            </div>
+          )}
+
+          {activeLimitTab === "llm" && (
+            <div className="space-y-1.5 animate-in fade-in duration-200">
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 uppercase tracking-wider font-bold">
+                <span>Claude Sonnet</span>
+                <span className="text-emerald-400 font-bold">
+                  {credits && credits.openrouter.is_free_tier ? "Unlimited Free" : "Active"}
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-zinc-900 border border-zinc-850 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-[#10b981] transition-all duration-500 w-full"
+                />
+              </div>
+              <div className="flex justify-between text-[9px] font-mono text-zinc-655">
+                <span>Tier: {credits && credits.openrouter.is_free_tier ? "OpenRouter Free" : "Developer Tier"}</span>
+                <span>Type: Pay-As-You-Go</span>
+              </div>
+            </div>
+          )}
+
+          {activeLimitTab === "nmt" && (
+            <div className="space-y-1.5 animate-in fade-in duration-200">
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 uppercase tracking-wider font-bold">
+                <span>Azure NMT</span>
+                <span className="text-[#38bdf8] font-bold">
+                  {credits ? `${(credits.azure.left / 1000).toFixed(0)}K Chars` : "1,857K Chars"}
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-zinc-900 border border-zinc-850 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#38bdf8] to-[#0284c7] transition-all duration-500"
+                  style={{ 
+                    width: `${credits ? (credits.azure.left / credits.azure.limit) * 100 : 92.8}%` 
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-[9px] font-mono text-zinc-655">
+                <span>Translated: {credits ? (credits.azure.count / 1000).toFixed(1) : "142.8"}K</span>
+                <span>Limit: {credits ? (credits.azure.limit / 1000000).toFixed(0) : "2"}M</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Customized Profile Card for Priyanshu Raj */}

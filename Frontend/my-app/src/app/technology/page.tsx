@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
 export default function TechnologyPage() {
-  const [activeTab, setActiveTab] = useState<"overall" | "speech" | "pdf" | "auth" | "extension" | "structure">("overall");
+  const [activeTab, setActiveTab] = useState<"overall" | "speech" | "pdf" | "auth" | "extension" | "limits" | "structure">("overall");
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-zinc-300 relative font-sans">
@@ -86,6 +86,17 @@ export default function TechnologyPage() {
               >
                 Chrome Extension
                 {activeTab === "extension" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366f1]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("limits")}
+                className={`pb-4 text-sm relative transition-all ${
+                  activeTab === "limits" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                API Limits
+                {activeTab === "limits" && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366f1]" />
                 )}
               </button>
@@ -670,7 +681,155 @@ export default function TechnologyPage() {
               </div>
             )}
 
-            {/* TAB CONTENT 6: Project Structure */}
+            {/* TAB CONTENT 6: API Limits & Token Consumption */}
+            {activeTab === "limits" && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                {/* Visual Token Flowchart UI */}
+                <div className="border border-zinc-900 bg-zinc-950/40 p-6 md:p-8 rounded-xl flex flex-col items-center gap-4 overflow-hidden relative shadow-lg">
+                  <div className="w-full text-left border-b border-zinc-900 pb-3 mb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-emerald-400 text-lg">monetization_on</span>
+                      <h4 className="text-white font-semibold text-xs uppercase tracking-wider font-mono">Token & Quota Consumption Loop</h4>
+                    </div>
+                    <span className="text-[9px] font-mono text-zinc-500">Per-Request Resource Allocation</span>
+                  </div>
+
+                  {/* Flow Nodes Diagram */}
+                  <div className="flex flex-col items-center gap-4 w-full text-left max-w-lg font-sans">
+                    {/* Node 1: Request Trigger */}
+                    <div className="w-full p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 flex items-center gap-4 hover:border-zinc-700 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-white shrink-0">
+                        <span className="material-symbols-outlined text-xl">upload_file</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-zinc-500 font-bold">1. Entry Point</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">User Action (Speech/PDF)</h5>
+                        <p className="text-zinc-500 font-light mt-1">E.g., 10-second mic recording is uploaded, containing ~30 spoken words.</p>
+                      </div>
+                    </div>
+
+                    <div className="text-zinc-700 text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 2: Groq Whisper */}
+                    <div className="w-full p-4 rounded-xl border border-indigo-500/20 bg-zinc-900/40 flex items-center gap-4 hover:border-indigo-500/40 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-indigo-400 shrink-0">
+                        <span className="material-symbols-outlined text-xl">mic</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-indigo-400 font-bold">2. ASR - Groq Whisper v3</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">Deduction: Requests Per Day (RPD)</h5>
+                        <p className="text-zinc-500 font-light mt-1">Deducts **1 request** from Groq daily rate limit (14,400 RPD base limit). Audio duration is calculated but does not subtract dollars.</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] font-mono text-[#a5b4fc] font-bold bg-[#a5b4fc]/5 border border-[#a5b4fc]/20 px-2 py-0.5 rounded">1 Req</span>
+                      </div>
+                    </div>
+
+                    <div className="text-indigo-500 text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 3: OpenRouter Claude */}
+                    <div className="w-full p-4 rounded-xl border border-fuchsia-500/20 bg-zinc-900/40 flex items-center gap-4 hover:border-fuchsia-500/40 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-fuchsia-400 shrink-0">
+                        <span className="material-symbols-outlined text-xl">psychology</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-fuchsia-400 font-bold">3. LLM Refinement - Claude 3.5 Sonnet</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">Deduction: Input/Output Token Count</h5>
+                        <p className="text-zinc-500 font-light mt-1">Prompt instructions (~180 tokens) + raw transcript (~35 tokens) ➔ outputs clean transcript (~35 tokens). Consumed via OpenRouter API credits.</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] font-mono text-fuchsia-400 font-bold bg-fuchsia-400/5 border border-fuchsia-400/20 px-2 py-0.5 rounded">~250 Tok</span>
+                      </div>
+                    </div>
+
+                    <div className="text-fuchsia-500 text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 4: Azure Translation */}
+                    <div className="w-full p-4 rounded-xl border border-sky-500/20 bg-zinc-900/40 flex items-center gap-4 hover:border-sky-500/40 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-sky-400 shrink-0">
+                        <span className="material-symbols-outlined text-xl">translate</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-sky-400 font-bold">4. NMT - Azure Translator</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">Deduction: Raw Character Count</h5>
+                        <p className="text-zinc-500 font-light mt-1">Deducts the exact UTF-8 character length (e.g., 185 characters) from the Azure Translator monthly free quota (2 Million character limit).</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] font-mono text-sky-400 font-bold bg-sky-400/5 border border-sky-400/20 px-2 py-0.5 rounded">185 Chars</span>
+                      </div>
+                    </div>
+
+                    <div className="text-sky-500 text-xs font-bold text-center select-none">↓</div>
+
+                    {/* Node 5: ElevenLabs TTS */}
+                    <div className="w-full p-4 rounded-xl border border-emerald-500/20 bg-zinc-900/40 flex items-center gap-4 hover:border-emerald-500/40 transition-all select-none">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-emerald-400 shrink-0">
+                        <span className="material-symbols-outlined text-xl">volume_up</span>
+                      </div>
+                      <div className="flex-1 text-xs">
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-emerald-400 font-bold">5. TTS - ElevenLabs Multilingual</span>
+                        <h5 className="text-white font-semibold font-geist text-[13px] mt-0.5">Deduction: Plan Character Quota</h5>
+                        <p className="text-zinc-500 font-light mt-1">Deducts the length of the translated text string (e.g., 210 characters) from your ElevenLabs billing plan quota (starts at 10,000 free chars/month).</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-400/5 border border-emerald-400/20 px-2 py-0.5 rounded">210 Chars</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Technical Allocation Guide */}
+                <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 md:p-8 space-y-6">
+                  <h3 className="text-lg font-semibold font-geist text-white">How API Quotas & Limits Are Deducted</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm font-sans font-light leading-relaxed">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-white font-semibold font-geist text-sm mb-1.5 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                          ASR & Rate Limits (Groq)
+                        </h4>
+                        <p className="text-zinc-400 text-xs font-sans">
+                          Groq's Whisper v3 implementation uses a rate-limiting model instead of a credit ledger. Every audio clip submitted counts as a single request. If multiple requests are sent concurrently, the server blocks with a `429 Too Many Requests` response. To optimize this, the Extension streams audio over WebSockets and accumulates data in a sliding 3-second buffer, preventing sub-second request overload.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="text-white font-semibold font-geist text-sm mb-1.5 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></span>
+                          LLM Token Counting (OpenRouter)
+                        </h4>
+                        <p className="text-zinc-400 text-xs font-sans">
+                          OpenRouter tracks balance in USD ($). When calling Claude 3.5 Sonnet, the prompt (instruction template + inputs) is tokenized into integer IDs. Every 100 words consumes roughly 130 tokens. Punctuation correction and diarization outputs are billed at a higher rate per token. If you run out of credits, OpenRouter blocks transcription improvement, and the server automatically bypasses the LLM layer, passing the raw Whisper transcript directly to the translation engine.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-white font-semibold font-geist text-sm mb-1.5 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                          Azure Character Allocations
+                        </h4>
+                        <p className="text-zinc-400 text-xs font-sans">
+                          Azure Translator bills strictly by character count, regardless of token metrics or language complexity. Spaces, emojis, and punctuation are counted. Our system optimizes consumption by only translating refined transcripts (after Claude's post-processing), preventing double-billing on garbled or accidental background noise captured by the microphone.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="text-white font-semibold font-geist text-sm mb-1.5 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          ElevenLabs TTS Synthesis Credits
+                        </h4>
+                        <p className="text-zinc-400 text-xs font-sans">
+                          ElevenLabs is the most resource-intensive API. Character credits are deducted based on the length of the *translated* output text string (not the source language). To avoid accidental over-drafting, our PDF Assistant segments documents and lets users select specific sections to translate and play, rather than auto-synthesizing the entire document at once.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT 7: Project Structure */}
             {activeTab === "structure" && (
               <div className="space-y-8 max-w-3xl animate-in fade-in duration-300">
                 <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 space-y-4">

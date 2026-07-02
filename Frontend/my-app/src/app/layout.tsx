@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { LoadingProvider } from "@/context/LoadingContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 // Load Inter font for readable body copy
 const inter = Inter({
@@ -46,9 +47,12 @@ export default function RootLayout({
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} bg-black text-white antialiased custom-scrollbar`}
       >
         <LoadingProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </LoadingProvider>
       </body>
     </html>
   );
 }
+

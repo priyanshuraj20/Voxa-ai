@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const isLanding = pathname === "/";
   const [showBanner, setShowBanner] = useState(true);
 
@@ -62,9 +65,34 @@ export default function Header() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/workspace" className="bg-[#8b5cf6] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#7c3aed] transition-colors shadow-lg shadow-[#8b5cf6]/15">
-              Launch Workspace
-            </Link>
+            {!user ? (
+              <>
+                <Link href="/login" className="text-sm font-semibold text-[#cbc3d7] hover:text-white transition-colors px-3 py-2">
+                  Login
+                </Link>
+                <Link href="/register" className="bg-[#8b5cf6] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#7c3aed] transition-colors shadow-lg shadow-[#8b5cf6]/15">
+                  Register
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/workspace" className="text-sm font-semibold text-[#cbc3d7] hover:text-white transition-colors px-3 py-2">
+                  Workspace
+                </Link>
+                <Link href="/profile" className="text-sm font-semibold text-[#cbc3d7] hover:text-white transition-colors px-3 py-2">
+                  Profile
+                </Link>
+                <button 
+                  onClick={async () => {
+                    await logout();
+                    router.push("/login");
+                  }}
+                  className="bg-zinc-900/60 hover:bg-zinc-900 border border-white/5 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors active:scale-98"
+                >
+                  Logout
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -122,6 +150,22 @@ export default function Header() {
             <span className="text-[9px] text-[#cbc3d7]/50 uppercase tracking-[0.2em] font-bold">Extension Version</span>
             <span className="text-[#adc6ff] font-bold text-sm">v2.4.0</span>
           </div>
+          {user && (
+            <>
+              <Link href="/profile" className="text-sm font-semibold text-[#cbc3d7] hover:text-white transition-colors">
+                Profile
+              </Link>
+              <button 
+                onClick={async () => {
+                  await logout();
+                  router.push("/login");
+                }}
+                className="text-sm font-semibold text-zinc-400 hover:text-red-400 transition-colors"
+              >
+                Logout
+              </button>
+            </>
+          )}
           <button className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-label-md text-xs px-5 py-2.5 rounded-full transition-all active:scale-95 shadow-lg shadow-[#8b5cf6]/20 font-bold">
             Settings
           </button>
@@ -130,3 +174,4 @@ export default function Header() {
     </div>
   );
 }
+

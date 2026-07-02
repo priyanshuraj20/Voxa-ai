@@ -2,11 +2,23 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { getAccessToken } from "@/lib/auth";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { logout } = useAuth();
+  const [isPrefOpen, setIsPrefOpen] = useState(false);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    if (!isPrefOpen) return;
+    const handleOutsideClick = () => setIsPrefOpen(false);
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [isPrefOpen]);
 
   // If we are on the landing page, we don't display a sidebar
   if (pathname === "/") return null;
@@ -156,13 +168,45 @@ export default function Sidebar() {
       {/* Footer Navigation */}
       <div className="p-stack-lg border-t border-zinc-900 flex flex-col gap-5">
         <div className="flex flex-col gap-3">
-          <Link
-            href="#"
-            className="flex items-center text-zinc-400 hover:text-white transition-all font-label-md text-label-md"
-          >
-            <span className="material-symbols-outlined mr-4 text-[22px]">settings</span>
-            Preferences
-          </Link>
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsPrefOpen(!isPrefOpen);
+              }}
+              className="flex items-center text-zinc-400 hover:text-white transition-all font-label-md text-label-md w-full text-left"
+            >
+              <span className="material-symbols-outlined mr-4 text-[22px]">settings</span>
+              Preferences
+              <span className={`material-symbols-outlined text-xs ml-auto transition-transform duration-200 ${isPrefOpen ? 'rotate-180' : ''}`}>
+                keyboard_arrow_up
+              </span>
+            </button>
+            
+            {isPrefOpen && (
+              <div className="absolute left-0 bottom-8 w-48 bg-[#09090b] border border-zinc-800 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <Link 
+                  href="/profile" 
+                  onClick={() => setIsPrefOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors w-full text-left font-sans"
+                >
+                  <span className="material-symbols-outlined text-sm">person</span>
+                  Profile Settings
+                </Link>
+                <button 
+                  onClick={async () => {
+                    setIsPrefOpen(false);
+                    await logout();
+                    router.push("/login");
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:text-red-400 hover:bg-zinc-900 transition-colors w-full text-left border-t border-zinc-850 font-sans"
+                >
+                  <span className="material-symbols-outlined text-sm text-red-500/80">logout</span>
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Customized Profile Card for Priyanshu Raj */}

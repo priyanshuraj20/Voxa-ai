@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
@@ -11,6 +11,15 @@ export default function Header() {
   const { user, logout } = useAuth();
   const isLanding = pathname === "/";
   const [showBanner, setShowBanner] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    if (!isSettingsOpen) return;
+    const handleOutsideClick = () => setIsSettingsOpen(false);
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [isSettingsOpen]);
 
   if (isLanding) {
     return (
@@ -152,21 +161,9 @@ export default function Header() {
           </div>
           {user ? (
             <>
-              <Link href="/workspace" className="font-sans text-sm font-semibold text-zinc-400 hover:text-white transition-colors">
-                Workspace
+              <Link href="/" className="font-sans text-sm font-semibold text-zinc-400 hover:text-white transition-colors">
+                Home
               </Link>
-              <Link href="/profile" className="font-sans text-sm font-semibold text-zinc-400 hover:text-white transition-colors">
-                Profile
-              </Link>
-              <button 
-                onClick={async () => {
-                  await logout();
-                  router.push("/login");
-                }}
-                className="font-sans text-sm font-semibold text-zinc-400 hover:text-red-400 transition-colors"
-              >
-                Logout
-              </button>
             </>
           ) : (
             <>
@@ -178,9 +175,46 @@ export default function Header() {
               </Link>
             </>
           )}
-          <button className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white font-label-md text-xs px-5 py-2.5 rounded-lg transition-all active:scale-95 font-bold">
-            Settings
-          </button>
+          {user && (
+            <div className="relative">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsSettingsOpen(!isSettingsOpen);
+                }}
+                className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white font-label-md text-xs px-5 py-2.5 rounded-lg transition-all active:scale-95 font-bold flex items-center gap-1.5"
+              >
+                Settings
+                <span className={`material-symbols-outlined text-xs transition-transform duration-200 ${isSettingsOpen ? 'rotate-180' : ''}`}>
+                  keyboard_arrow_down
+                </span>
+              </button>
+              
+              {isSettingsOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <Link 
+                    href="/profile" 
+                    onClick={() => setIsSettingsOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors w-full text-left font-sans"
+                  >
+                    <span className="material-symbols-outlined text-sm">person</span>
+                    Profile
+                  </Link>
+                  <button 
+                    onClick={async () => {
+                      setIsSettingsOpen(false);
+                      await logout();
+                      router.push("/login");
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:text-red-400 hover:bg-zinc-900 transition-colors w-full text-left border-t border-zinc-900 font-sans"
+                  >
+                    <span className="material-symbols-outlined text-sm text-red-500/80">logout</span>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
     </div>

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import CustomAudioPlayer from "@/components/ui/CustomAudioPlayer";
 
 const LANGUAGES = [
   { code: "en-US", name: "English (US)" },
@@ -49,6 +50,8 @@ export default function PdfReaderPage() {
   const [pdfProgress, setPdfProgress] = useState("");
   const [pdfError, setPdfError] = useState("");
   const [isPlayingPdfAudio, setIsPlayingPdfAudio] = useState(false);
+  const [pdfProcessingStep, setPdfProcessingStep] = useState(0);
+  const playingAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Restore states from sessionStorage
   useEffect(() => {
@@ -98,6 +101,7 @@ export default function PdfReaderPage() {
 
     setPdfError("");
     setIsPdfProcessing(true);
+    setPdfProcessingStep(1);
     setPdfProgress("Reading page 1...");
 
     try {
@@ -157,6 +161,16 @@ export default function PdfReaderPage() {
             const data = JSON.parse(trimmed);
             if (data.status === "processing") {
               setPdfProgress(data.message);
+              const msg = data.message.toLowerCase();
+              if (msg.includes("reading page") || msg.includes("parsing")) {
+                setPdfProcessingStep(1);
+              } else if (msg.includes("translating")) {
+                setPdfProcessingStep(2);
+              } else if (msg.includes("generating audio") || msg.includes("audio part")) {
+                setPdfProcessingStep(3);
+              } else if (msg.includes("merging") || msg.includes("concatenating") || msg.includes("saving")) {
+                setPdfProcessingStep(4);
+              }
             } else if (data.status === "completed") {
               setPdfExtractedText(data.extracted_text);
               setPdfTranslatedText(data.translated_text);
@@ -193,10 +207,17 @@ export default function PdfReaderPage() {
     } finally {
       setIsPdfProcessing(false);
       setPdfProgress("");
+      setPdfProcessingStep(0);
     }
   };
 
   const handleClearPdf = () => {
+    if (playingAudioRef.current) {
+      playingAudioRef.current.pause();
+      playingAudioRef.current = null;
+    }
+    setIsPlayingPdfAudio(false);
+    setPdfProcessingStep(0);
     setPdfFileObj(null);
     setPdfFileName("");
     setPdfExtractedText("");
@@ -209,29 +230,47 @@ export default function PdfReaderPage() {
       sessionStorage.removeItem("pdf_extracted_text");
       sessionStorage.removeItem("pdf_translated_text");
       sessionStorage.removeItem("pdf_audio_url");
+      window.location.reload();
     }
   };
 
   const playPdfSpeech = () => {
     if (!pdfAudioUrl) return;
 
+    if (isPlayingPdfAudio && playingAudioRef.current) {
+      playingAudioRef.current.pause();
+      playingAudioRef.current = null;
+      setIsPlayingPdfAudio(false);
+      return;
+    }
+
     try {
+      if (playingAudioRef.current) {
+        playingAudioRef.current.pause();
+      }
       const audio = new Audio(`${pdfAudioUrl}?t=${Date.now()}`);
+      playingAudioRef.current = audio;
       setIsPlayingPdfAudio(true);
 
-      audio.onended = () => setIsPlayingPdfAudio(false);
+      audio.onended = () => {
+        setIsPlayingPdfAudio(false);
+        playingAudioRef.current = null;
+      };
       audio.onerror = () => {
         setPdfError("Failed to play synthesized speech audio.");
         setIsPlayingPdfAudio(false);
+        playingAudioRef.current = null;
       };
 
       audio.play().catch((e) => {
         setPdfError(`Audio play failed: ${e.message}`);
         setIsPlayingPdfAudio(false);
+        playingAudioRef.current = null;
       });
     } catch (err) {
       setPdfError("Audio synthesis playback failed.");
       setIsPlayingPdfAudio(false);
+      playingAudioRef.current = null;
     }
   };
 
@@ -371,7 +410,19 @@ export default function PdfReaderPage() {
                     </div>
 
                     <div className="flex-1 p-6 flex flex-col justify-start">
-                      {!pdfExtractedText ? (
+                      {isPdfProcessing ? (
+                        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border border-zinc-900 rounded-lg bg-black/20 animate-pulse select-none">
+                          <span className="material-symbols-outlined text-3xl text-[#6366f1] mb-3">
+                            document_scanner
+                          </span>
+                          <p className="text-xs text-zinc-300 font-semibold mb-1">
+                            Extracting Plaintext Chunks...
+                          </p>
+                          <p className="text-[10px] text-zinc-500 font-mono">
+                            Running pypdf analyzer on backend
+                          </p>
+                        </div>
+                      ) : !pdfExtractedText ? (
                         <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-lg p-6 bg-white/[0.01] hover:bg-white/[0.02] hover:border-white/20 transition-all duration-200 cursor-pointer relative">
                           <input
                             type="file"
@@ -447,7 +498,85 @@ export default function PdfReaderPage() {
                     </div>
 
                     <div className="flex-1 p-6 flex flex-col justify-start">
-                      {!pdfTranslatedText ? (
+                      {isPdfProcessing ? (
+                        <div className="space-y-4 py-2 select-none animate-in fade-in duration-300 w-full text-left">
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-[#cbc3d7]/60 border-b border-white/5 pb-2 font-bold mb-3">
+                            PDF Processing Pipeline
+                          </div>
+                          
+                          <div className="space-y-3">
+                            {/* Step 1: Uploading & Parsing */}
+                            <div className="flex items-center gap-3 text-xs">
+                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                                pdfProcessingStep > 1 
+                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                  : pdfProcessingStep === 1
+                                    ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                    : "border-zinc-800 text-zinc-600"
+                              }`}>
+                                {pdfProcessingStep > 1 ? "✓" : "1"}
+                              </span>
+                              <span className={pdfProcessingStep === 1 ? "text-white font-medium" : "text-zinc-500"}>
+                                Uploading & parsing PDF page-by-page (PyPDF)
+                              </span>
+                            </div>
+
+                            {/* Step 2: Translation */}
+                            <div className="flex items-center gap-3 text-xs">
+                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                                pdfProcessingStep > 2 
+                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                  : pdfProcessingStep === 2
+                                    ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                    : "border-zinc-800 text-zinc-600"
+                              }`}>
+                                {pdfProcessingStep > 2 ? "✓" : "2"}
+                              </span>
+                              <span className={pdfProcessingStep === 2 ? "text-white font-medium" : "text-zinc-500"}>
+                                Neural Text Translation (Azure Translator)
+                              </span>
+                            </div>
+
+                            {/* Step 3: Synthesis */}
+                            <div className="flex items-center gap-3 text-xs">
+                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                                pdfProcessingStep > 3 
+                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                  : pdfProcessingStep === 3
+                                    ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                    : "border-zinc-800 text-zinc-600"
+                              }`}>
+                                {pdfProcessingStep > 3 ? "✓" : "3"}
+                              </span>
+                              <span className={pdfProcessingStep === 3 ? "text-white font-medium" : "text-zinc-500"}>
+                                Speech Synthesis Chunks (ElevenLabs)
+                              </span>
+                            </div>
+
+                            {/* Step 4: Merging */}
+                            <div className="flex items-center gap-3 text-xs">
+                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
+                                pdfProcessingStep > 4 
+                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                  : pdfProcessingStep === 4
+                                    ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
+                                    : "border-zinc-800 text-zinc-600"
+                              }`}>
+                                {pdfProcessingStep > 4 ? "✓" : "4"}
+                              </span>
+                              <span className={pdfProcessingStep === 4 ? "text-white font-medium" : "text-zinc-500"}>
+                                Sequential Audio Merging & Packaging
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Live message display */}
+                          <div className="mt-4 p-3 bg-zinc-900/60 rounded-lg border border-zinc-850 text-[11px] font-mono text-zinc-400 flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#adc6ff] animate-ping shrink-0" />
+                            <span>Status: {pdfProgress || "Initializing..."}</span>
+                          </div>
+                        </div>
+                      ) : !pdfTranslatedText ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border border-zinc-900/50 border-dashed rounded-lg bg-black/20">
                           <span className="material-symbols-outlined text-3xl text-zinc-700 mb-3">
                             translate
@@ -466,21 +595,22 @@ export default function PdfReaderPage() {
                     </div>
                   </div>
 
-                  {/* Speech playback trigger button */}
-                  <button
-                    onClick={playPdfSpeech}
-                    disabled={!pdfAudioUrl || isPlayingPdfAudio}
-                    className={`w-full h-[40px] flex items-center justify-center gap-2 rounded-lg font-bold tracking-wider font-mono text-[11px] uppercase transition-all active:scale-98 ${
-                      !pdfAudioUrl || isPlayingPdfAudio
-                        ? "bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed"
-                        : "bg-[#6366f1] text-white hover:bg-[#4f46e5]"
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-sm">
-                      volume_up
-                    </span>
-                    Play PDF Speech
-                  </button>
+                  {/* Speech playback trigger component */}
+                  {pdfAudioUrl ? (
+                    <div className="w-full flex justify-center">
+                      <CustomAudioPlayer src={pdfAudioUrl} label="PDF Speech Output" />
+                    </div>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full h-[40px] flex items-center justify-center gap-2 rounded-lg font-bold tracking-wider font-mono text-[11px] uppercase bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed select-none"
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        volume_up
+                      </span>
+                      Play PDF Speech
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

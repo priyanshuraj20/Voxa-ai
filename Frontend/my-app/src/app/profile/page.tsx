@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/api";
 import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import ShaderBackground from "@/components/ui/ShaderBackground";
 import { Button } from "@/components/ui/Button";
 import { LANGUAGES } from "@/constants/languages";
@@ -123,12 +124,14 @@ export default function ProfilePage() {
   };
 
   return (
-    <>
+    <div className="flex flex-col h-screen overflow-hidden bg-black text-[#e7e0ed] relative font-sans">
       <Header />
-      <main className="bg-black text-[#e7e0ed] min-h-screen relative z-10 font-sans overflow-hidden pt-32 pb-12 flex flex-col items-center justify-start px-6">
-        <ShaderBackground />
+      <div className="flex flex-1 pt-[120px] overflow-hidden relative z-10 min-h-0">
+        <Sidebar />
+        <main className="flex-1 flex flex-col relative overflow-y-auto bg-transparent px-6 pb-12">
+          <ShaderBackground />
 
-        <div className="w-full max-w-2xl relative z-10 flex flex-col gap-8">
+          <div className="w-full max-w-2xl mx-auto mt-8 relative z-10 flex flex-col gap-8">
           {/* Page Heading */}
           <div className="flex flex-col gap-1.5">
             <h1 className="text-3xl font-bold tracking-tight text-white font-geist">User Profile</h1>
@@ -317,6 +320,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
-    </>
+      </div>
+    </div>
   );
 }

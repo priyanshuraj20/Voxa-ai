@@ -116,7 +116,7 @@ export default function LandingPage() {
             <Link
               href="/workspace"
               onClick={handleWorkspaceClick}
-              className="bg-[#6366f1] text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#4f46e5] transition-all flex items-center gap-2 active:scale-98 select-none"
+              className="bg-[#6366f1] text-white px-6 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#4f46e5] transition-all flex items-center gap-2 active:scale-98 select-none"
             >
               Launch Workspace
               <span className="material-symbols-outlined text-sm">
@@ -124,8 +124,18 @@ export default function LandingPage() {
               </span>
             </Link>
             <Link
+              href="/pdf-reader"
+              onClick={handleWorkspaceClick}
+              className="border border-zinc-800 bg-[#6366f1]/10 text-white px-6 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#6366f1]/20 hover:border-[#6366f1]/30 transition-all flex items-center gap-2 active:scale-98 select-none"
+            >
+              PDF Assistant
+              <span className="material-symbols-outlined text-sm">
+                picture_as_pdf
+              </span>
+            </Link>
+            <Link
               href="/technology"
-              className="border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-zinc-850 hover:border-zinc-700 transition-all active:scale-98 select-none"
+              className="border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white px-6 py-3.5 rounded-lg font-semibold text-sm hover:bg-zinc-850 hover:border-zinc-700 transition-all active:scale-98 select-none"
             >
               System Architecture
             </Link>
@@ -454,13 +464,23 @@ export default function LandingPage() {
                 Experience natural human voice playback, customized speaker
                 diarization, and contextual ASR transcript correction.
               </p>
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-4 flex-col sm:flex-row items-center">
                 <Link
                   href="/workspace"
                   onClick={handleWorkspaceClick}
-                  className="bg-[#6366f1] text-white px-10 py-3.5 rounded-lg font-bold hover:bg-[#4f46e5] transition-colors text-sm active:scale-98"
+                  className="bg-[#6366f1] text-white px-8 py-3.5 rounded-lg font-bold hover:bg-[#4f46e5] transition-colors text-sm active:scale-98 select-none"
                 >
                   Open Workspace
+                </Link>
+                <Link
+                  href="/pdf-reader"
+                  onClick={handleWorkspaceClick}
+                  className="border border-zinc-800 bg-[#6366f1]/10 text-white px-8 py-3.5 rounded-lg font-bold hover:bg-[#6366f1]/20 hover:border-[#6366f1]/30 transition-colors text-sm active:scale-98 select-none flex items-center gap-1.5"
+                >
+                  PDF Assistant
+                  <span className="material-symbols-outlined text-sm">
+                    picture_as_pdf
+                  </span>
                 </Link>
               </div>
             </div>

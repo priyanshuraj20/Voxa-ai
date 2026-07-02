@@ -4,30 +4,8 @@ import React, { useState } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
-interface ComponentCardProps {
-  icon: string;
-  title: string;
-  tech: string;
-  desc: string;
-}
-
-function ComponentCard({ icon, title, tech, desc }: ComponentCardProps) {
-  return (
-    <div className="relative border border-zinc-900 bg-zinc-950/40 p-6 flex flex-col gap-4 rounded-xl group transition-all duration-300">
-      <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[#6366f1] select-none">
-        <span className="material-symbols-outlined text-xl">{icon}</span>
-      </div>
-      <div>
-        <h4 className="font-semibold text-white font-geist text-sm mb-1">{title}</h4>
-        <span className="font-mono text-[9px] text-zinc-500 tracking-wider uppercase font-bold">{tech}</span>
-        <p className="text-zinc-400 text-xs leading-relaxed mt-2.5 font-sans font-light">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function TechnologyPage() {
-  const [activeTab, setActiveTab] = useState<"pipeline" | "data" | "structure">("pipeline");
+  const [activeTab, setActiveTab] = useState<"overall" | "speech" | "pdf" | "auth" | "structure">("overall");
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-zinc-300 relative font-sans">
@@ -43,38 +21,60 @@ export default function TechnologyPage() {
             
             {/* Page Title */}
             <section className="select-none">
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 mb-3 inline-block border border-zinc-800 bg-zinc-900/40 px-2.5 py-1 rounded">
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#6366f1] mb-3 inline-block border border-[#6366f1]/20 bg-[#6366f1]/5 px-2.5 py-1 rounded">
                 System Engineering & Architecture
               </span>
               <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-white font-geist mt-2 mb-4">
                 The Neural Engine
               </h1>
               <p className="text-zinc-400 text-sm leading-relaxed font-light font-sans">
-                Explore the engineering of Voxa AI's translation pipeline. We stream, transcribe, correct, translate, and synthesize audio with sub-second latencies using optimized AI orchestration.
+                Explore the technical pipelines powering Voxa AI. Learn how we stream, parse, authenticate, translate, and synthesize multi-modal data in real-time.
               </p>
             </section>
 
             {/* Interactive Navigation Tabs */}
-            <div className="flex border-b border-zinc-900 gap-6 select-none font-geist font-medium">
+            <div className="flex flex-wrap border-b border-zinc-900 gap-6 select-none font-geist font-medium">
               <button
-                onClick={() => setActiveTab("pipeline")}
+                onClick={() => setActiveTab("overall")}
                 className={`pb-4 text-sm relative transition-all ${
-                  activeTab === "pipeline" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                  activeTab === "overall" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
-                Pipeline Architecture
-                {activeTab === "pipeline" && (
+                Overall Architecture
+                {activeTab === "overall" && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366f1]" />
                 )}
               </button>
               <button
-                onClick={() => setActiveTab("data")}
+                onClick={() => setActiveTab("speech")}
                 className={`pb-4 text-sm relative transition-all ${
-                  activeTab === "data" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                  activeTab === "speech" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
-                System Data Flow
-                {activeTab === "data" && (
+                Speech Pipeline
+                {activeTab === "speech" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366f1]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("pdf")}
+                className={`pb-4 text-sm relative transition-all ${
+                  activeTab === "pdf" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                PDF Assistant
+                {activeTab === "pdf" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366f1]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("auth")}
+                className={`pb-4 text-sm relative transition-all ${
+                  activeTab === "auth" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                Authentication
+                {activeTab === "auth" && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366f1]" />
                 )}
               </button>
@@ -91,182 +91,441 @@ export default function TechnologyPage() {
               </button>
             </div>
 
-            {/* Tab Content 1: Pipeline Flow */}
-            {activeTab === "pipeline" && (
-              <div className="space-y-10">
-                
-                {/* Architecture Timeline Visualizer */}
-                <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 flex flex-col gap-6 select-none relative overflow-hidden">
-                  <h3 className="font-semibold text-white text-xs font-geist uppercase tracking-widest font-mono text-zinc-500">Stream Processing Pipeline</h3>
+            {/* TAB CONTENT 1: Overall Architecture */}
+            {activeTab === "overall" && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="relative border border-zinc-900 bg-zinc-950/40 p-8 rounded-xl flex flex-col items-center gap-5 overflow-hidden">
                   
-                  {/* Visual Flow Blocks */}
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-[10px] text-zinc-600 py-2">
-                    <div className="flex flex-col items-center bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-center shrink-0 w-28">
-                      <span className="material-symbols-outlined text-[#6366f1] text-lg mb-1">web</span>
-                      <span className="text-white font-bold text-[9px]">Browser Tab</span>
-                      <span className="text-[8px] text-zinc-500">Capture Feed</span>
-                    </div>
-
-                    <span className="material-symbols-outlined text-zinc-700 hidden md:block">east</span>
-                    <span className="material-symbols-outlined text-zinc-700 md:hidden">south</span>
-
-                    <div className="flex flex-col items-center bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-center shrink-0 w-28">
-                      <span className="material-symbols-outlined text-zinc-400 text-lg mb-1">extension</span>
-                      <span className="text-white font-bold text-[9px]">Chrome Ext</span>
-                      <span className="text-[8px] text-zinc-500">16kHz Int16</span>
-                    </div>
-
-                    <span className="material-symbols-outlined text-zinc-700 hidden md:block">east</span>
-                    <span className="material-symbols-outlined text-zinc-700 md:hidden">south</span>
-
-                    <div className="flex flex-col items-center bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-center shrink-0 w-32">
-                      <span className="material-symbols-outlined text-[#6366f1] text-lg mb-1">sync_alt</span>
-                      <span className="text-white font-bold text-[9px]">WebSocket API</span>
-                      <span className="text-[8px] text-zinc-500">FastAPI Gateway</span>
-                    </div>
-
-                    <span className="material-symbols-outlined text-zinc-700 hidden md:block">east</span>
-                    <span className="material-symbols-outlined text-zinc-700 md:hidden">south</span>
-
-                    <div className="flex flex-col items-center bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-center shrink-0 w-28">
-                      <span className="material-symbols-outlined text-zinc-400 text-lg mb-1">psychology</span>
-                      <span className="text-white font-bold text-[9px]">Groq Whisper</span>
-                      <span className="text-[8px] text-zinc-500">Speech-To-Text</span>
-                    </div>
-
-                    <span className="material-symbols-outlined text-zinc-700 hidden md:block">east</span>
-                    <span className="material-symbols-outlined text-zinc-700 md:hidden">south</span>
-
-                    <div className="flex flex-col items-center bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-center shrink-0 w-28">
-                      <span className="material-symbols-outlined text-[#6366f1] text-lg mb-1">magic_button</span>
-                      <span className="text-white font-bold text-[9px]">OpenRouter</span>
-                      <span className="text-[8px] text-zinc-500">Claude Post-Refine</span>
-                    </div>
-
-                    <span className="material-symbols-outlined text-zinc-700 hidden md:block">east</span>
-                    <span className="material-symbols-outlined text-zinc-700 md:hidden">south</span>
-
-                    <div className="flex flex-col items-center bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-center shrink-0 w-28">
-                      <span className="material-symbols-outlined text-zinc-400 text-lg mb-1">translate</span>
-                      <span className="text-white font-bold text-[9px]">Azure Neural</span>
-                      <span className="text-[8px] text-zinc-500">Translation</span>
-                    </div>
+                  {/* User Node */}
+                  <div className="w-52 p-4 rounded-xl border border-zinc-800 bg-zinc-900/60 flex flex-col items-center shadow-lg shadow-zinc-950/50">
+                    <span className="material-symbols-outlined text-[#6366f1] text-2xl mb-1">person</span>
+                    <span className="text-white font-bold text-xs font-mono">USER</span>
+                    <span className="text-[9px] text-zinc-500 font-sans mt-0.5 text-center">Initiates record or uploads PDF</span>
                   </div>
 
-                  <div className="bg-zinc-900/60 rounded-lg p-4 border border-zinc-800 text-xs text-zinc-400 leading-relaxed font-sans font-light">
-                    <span className="text-[#6366f1] font-bold font-mono uppercase tracking-wider text-[9px] mr-2 inline-block px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">Pipeline Summary</span>
-                    The Chrome Extension captures internal audio, resamples it to 16kHz, and streams 16-bit Mono Int16 PCM chunks via WebSockets to FastAPI. The backend runs the audio through Groq Whisper for speech-to-text, refines and punctuates using Claude Sonnet 4, translates via Azure Translator, and synthesizes speech via ElevenLabs TTS.
+                  <span className="text-[#6366f1] text-lg font-bold select-none">↓</span>
+
+                  {/* Next.js Frontend Node */}
+                  <div className="w-56 p-4 rounded-xl border border-zinc-800 bg-zinc-900/60 flex flex-col items-center shadow-lg shadow-zinc-950/50">
+                    <span className="material-symbols-outlined text-[#38bdf8] text-2xl mb-1">web</span>
+                    <span className="text-white font-bold text-xs font-mono">Next.js Frontend</span>
+                    <span className="text-[9px] text-zinc-500 font-sans mt-0.5 text-center">React view layer, state context</span>
                   </div>
-                </div>
 
-                {/* Component Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <ComponentCard
-                    icon="audio_file"
-                    title="Tab Audio Worklet"
-                    tech="Chrome TabCapture API"
-                    desc="Captures live tab sound in a Service Worker context, utilizing an Offscreen Document to downsample the stream into compact 16kHz mono PCM chunks."
-                  />
-                  <ComponentCard
-                    icon="bolt"
-                    title="Groq Whisper ASR"
-                    tech="Speech-to-Text Decoder"
-                    desc="Streams audio file containers to the Groq Cloud endpoint. Whisper-large-v3 converts spoken words into raw text strings in sub-second inference steps."
-                  />
-                  <ComponentCard
-                    icon="auto_awesome"
-                    title="Claude Sonnet 4"
-                    tech="Transcript Refinement"
-                    desc="Corrects typical speech-to-text spelling errors, homophones, boundary punctuation, and proper nouns in real-time, matching local context patterns."
-                  />
-                  <ComponentCard
-                    icon="translate"
-                    title="Azure Translator"
-                    tech="Contextual Translation"
-                    desc="Translates corrected transcript text into target locales using Azure Neural Machine Translation models, respecting localized grammar structures."
-                  />
-                  <ComponentCard
-                    icon="settings_voice"
-                    title="ElevenLabs Vocoder"
-                    tech="Voice Synthesis"
-                    desc="Converts translations back to speech using the eleven_multilingual_v2 model to generate high-fidelity, expressive, human-like voice streams."
-                  />
-                  <ComponentCard
-                    icon="extension"
-                    title="Floating Subtitle Overlay"
-                    tech="Extension Content Script"
-                    desc="Injects customized HTML side panels and tab overlay widgets directly inside Google Meet pages to sync visual subtitles and audio feeds."
-                  />
-                </div>
-              </div>
-            )}
+                  <span className="text-[#6366f1] text-lg font-bold select-none">↓</span>
 
-            {/* Tab Content 2: Data Flow */}
-            {activeTab === "data" && (
-              <div className="space-y-8 max-w-3xl">
-                <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 space-y-6">
-                  <h3 className="font-semibold text-white text-xs font-geist uppercase tracking-widest font-mono text-zinc-500">WebSocket Protocol Specs</h3>
-                  
-                  <div className="space-y-4 font-sans font-light">
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] uppercase font-mono text-[#38bdf8] tracking-wider font-bold">1. Audio Input (Binary Packets)</span>
-                      <p className="text-xs text-zinc-400 leading-relaxed">
-                        The client pushes raw Int16 mono PCM packets representing sound waves sampled at 16,000Hz.
-                      </p>
-                      <pre className="p-4 bg-zinc-900/60 rounded-lg text-xs font-mono border border-zinc-800 text-zinc-300">
-                        [Binary ArrayBuffer: size 8192 bytes (4096 samples)]
-                      </pre>
+                  {/* JWT Authentication Layer Node */}
+                  <div className="w-60 p-4 rounded-xl border border-zinc-800 bg-zinc-900/60 flex flex-col items-center shadow-lg shadow-zinc-950/50">
+                    <span className="material-symbols-outlined text-[#ffb869] text-2xl mb-1">verified_user</span>
+                    <span className="text-white font-bold text-xs font-mono">JWT Auth Layer</span>
+                    <span className="text-[9px] text-zinc-500 font-sans mt-0.5 text-center">Credential validation, route guarding</span>
+                  </div>
+
+                  <span className="text-[#6366f1] text-lg font-bold select-none">↓</span>
+
+                  {/* FastAPI Backend Node */}
+                  <div className="w-64 p-4 rounded-xl border border-[#10b981]/30 bg-zinc-900/60 flex flex-col items-center shadow-lg shadow-zinc-950/50">
+                    <span className="material-symbols-outlined text-[#10b981] text-2xl mb-1">bolt</span>
+                    <span className="text-white font-bold text-xs font-mono">FastAPI Backend</span>
+                    <span className="text-[9px] text-zinc-500 font-sans mt-0.5 text-center">API routing, pipeline control middleware</span>
+                  </div>
+
+                  <span className="text-zinc-700 text-lg font-bold select-none">↓</span>
+
+                  {/* Pipelines Branches side-by-side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-2">
+                    
+                    {/* Left Pipeline Box: Speech */}
+                    <div className="border border-zinc-900 bg-zinc-950/80 p-5 rounded-xl flex flex-col gap-3 relative">
+                      <div className="flex items-center gap-2 border-b border-zinc-900 pb-3">
+                        <span className="material-symbols-outlined text-[#6366f1] text-sm">interpreter_mode</span>
+                        <h4 className="text-white font-semibold text-xs uppercase tracking-wider font-mono">Speech Pipeline</h4>
+                      </div>
+                      <div className="flex flex-col gap-2 font-mono text-[10px] text-zinc-400">
+                        <div className="bg-zinc-900/30 p-2.5 rounded border border-zinc-800/80 flex justify-between items-center">
+                          <span>ASR Transcription</span>
+                          <span className="text-white font-bold">Groq Whisper v3</span>
+                        </div>
+                        <div className="bg-zinc-900/30 p-2.5 rounded border border-zinc-800/80 flex justify-between items-center">
+                          <span>LLM Refinement</span>
+                          <span className="text-[#6366f1] font-bold">Claude 3.5 Sonnet</span>
+                        </div>
+                        <div className="bg-zinc-900/30 p-2.5 rounded border border-zinc-800/80 flex justify-between items-center">
+                          <span>Neural Translation</span>
+                          <span className="text-[#38bdf8] font-bold">Azure Translator</span>
+                        </div>
+                        <div className="bg-zinc-900/30 p-2.5 rounded border border-zinc-800/80 flex justify-between items-center">
+                          <span>Audio Synthesis</span>
+                          <span className="text-[#10b981] font-bold">ElevenLabs TTS</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="h-px bg-zinc-900 my-4" />
-
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] uppercase font-mono text-[#6366f1] tracking-wider font-bold">2. Translation Updates (JSON Response)</span>
-                      <p className="text-xs text-zinc-400 leading-relaxed">
-                        The server responds with transcripts and translated texts upon decoding audio buffer frames.
-                      </p>
-                      <pre className="p-4 bg-zinc-900/60 rounded-lg text-xs font-mono border border-zinc-800 text-zinc-300">
-{`{
-  "transcript": "Hello, welcome to our workspace session today.",
-  "translation": "नमस्ते, आज हमारे कार्यक्षेत्र सत्र में आपका स्वागत है।"
-}`}
-                      </pre>
+                    {/* Right Pipeline Box: PDF */}
+                    <div className="border border-zinc-900 bg-zinc-950/80 p-5 rounded-xl flex flex-col gap-3 relative">
+                      <div className="flex items-center gap-2 border-b border-zinc-900 pb-3">
+                        <span className="material-symbols-outlined text-[#ffb869] text-sm">picture_as_pdf</span>
+                        <h4 className="text-white font-semibold text-xs uppercase tracking-wider font-mono">PDF Pipeline</h4>
+                      </div>
+                      <div className="flex flex-col gap-2 font-mono text-[10px] text-zinc-400">
+                        <div className="bg-zinc-900/30 p-2.5 rounded border border-zinc-800/80 flex justify-between items-center">
+                          <span>Plaintext Extraction</span>
+                          <span className="text-white font-bold">PyPDF Package</span>
+                        </div>
+                        <div className="bg-zinc-900/30 p-2.5 rounded border border-zinc-800/80 flex justify-between items-center">
+                          <span>Segment Translation</span>
+                          <span className="text-[#38bdf8] font-bold">Azure Translator</span>
+                        </div>
+                        <div className="bg-zinc-900/30 p-2.5 rounded border border-zinc-800/80 flex justify-between items-center">
+                          <span>MP3 Voice Synthesis</span>
+                          <span className="text-[#10b981] font-bold">ElevenLabs TTS</span>
+                        </div>
+                        <div className="bg-zinc-900/30 p-2.5 rounded border border-zinc-800/80 flex justify-between items-center">
+                          <span>Sequential Merge</span>
+                          <span className="text-zinc-500">Byte-Stream Concat</span>
+                        </div>
+                      </div>
                     </div>
+
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Tab Content 3: Structure */}
+            {/* TAB CONTENT 2: Speech Pipeline Flow */}
+            {activeTab === "speech" && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="relative pl-8 border-l border-zinc-800 space-y-8">
+                  
+                  {/* Step 1 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#6366f1] border border-black shadow-[0_0_10px_#6366f1]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#6366f1] font-bold">Step 1 — Client Capture</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">User presses Record</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        The frontend UI triggers capture. The browser downsamples audio to 16,000Hz mono 16-bit PCM chunks to minimize network bandwidth.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#6366f1] border border-black shadow-[0_0_10px_#6366f1]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#6366f1] font-bold">Step 2 — Network Uplink</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Uplink to FastAPI Server</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Audio arrays are streamed to the backend using either REST endpoints or high-speed binary WebSocket packets.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">POST /api/speech/translate-and-speak</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">ws://localhost:8000/ws</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#6366f1] border border-black shadow-[0_0_10px_#6366f1]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#6366f1] font-bold">Step 3 — Speech Recognition</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">ASR via Groq Whisper API</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        FastAPI converts incoming audio payloads into temporary WAV containers and calls the Groq Whisper model to generate text transcripts.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Model: whisper-large-v3</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Endpoint: /v1/audio/transcriptions</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 4 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#6366f1] border border-black shadow-[0_0_10px_#6366f1]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#6366f1] font-bold">Step 4 — Transcript Improvement</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Claude LLM Contextual Post-Refinement</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        An LLM service improves grammar, punctuates boundaries, and fixes spelling errors on the raw transcription text to improve translation accuracy.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">API: OpenRouter completions</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Model: Claude 3.5 Sonnet</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 5 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#6366f1] border border-black shadow-[0_0_10px_#6366f1]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#6366f1] font-bold">Step 5 — Translation Engine</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Azure Neural Translation</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        The refined transcription text is translated into the user's preferred target language using neural machine translation.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">API: Azure Translator API v3.0</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Endpoint: /translate</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 6 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#6366f1] border border-black shadow-[0_0_10px_#6366f1]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#6366f1] font-bold">Step 6 — Voice Synthesis</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">ElevenLabs TTS Engine</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Converts the translated text into expressive, natural human speech. Returns a high-fidelity MP3 voice file stream to the client.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">API: ElevenLabs Voice Synthesis</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Model: eleven_multilingual_v2</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 7 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#6366f1] border border-black shadow-[0_0_10px_#6366f1]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#6366f1] font-bold">Step 7 — Output Delivery</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Frontend Presentation & Playback</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        The web app receives the final payload, updates transcription panels, shows translated texts, and triggers the audio context nodes to play speech.
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT 3: PDF Translation Flow */}
+            {activeTab === "pdf" && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="relative pl-8 border-l border-zinc-800 space-y-8">
+                  
+                  {/* Step 1 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#ffb869] border border-black shadow-[0_0_10px_#ffb869]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#ffb869] font-bold">Step 1 — Document Intake</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Upload PDF</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        The user uploads a PDF file (up to 100 pages and 10 MB limit) inside the PDF Assistant interface.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Endpoint: POST /api/pdf/translate</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Format: Multipart Form-Data</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#ffb869] border border-black shadow-[0_0_10px_#ffb869]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#ffb869] font-bold">Step 2 — File Parsing</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Text Extraction via PyPDF</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Backend maps the uploaded binary stream, checks encryption blocks, and parses text page-by-page. Returns progressive progress status to the client.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Library: PyPDF.PdfReader</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Status Response: Server-Sent Events (SSE)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#ffb869] border border-black shadow-[0_0_10px_#ffb869]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#ffb869] font-bold">Step 3 — Translation Segmenting</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Azure Translator Execution</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Extracted text content is split into 3,000 to 5,000 character boundaries, preserving complete paragraphs, and translated using the Azure Translation Engine.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Azure API Version: 3.0</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Chunk Limit: Max 5000 characters</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 4 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#ffb869] border border-black shadow-[0_0_10px_#ffb869]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#ffb869] font-bold">Step 4 — Voice Synthesis</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">ElevenLabs Voice synthesis Chunks</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        The backend invokes ElevenLabs voice synthesis APIs for each translated text block in parallel streams, writing raw voice buffers to discrete chunk MP3 containers.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 5 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#ffb869] border border-black shadow-[0_0_10px_#ffb869]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#ffb869] font-bold">Step 5 — Audio Merging</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Sequential MP3 Concatenation</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Backend combines the generated MP3 chunk files into a single master MP3 container, ready to be served to the frontend.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 6 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#ffb869] border border-black shadow-[0_0_10px_#ffb869]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#ffb869] font-bold">Step 6 — Stream Output</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Stream & Play</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Sends final payload of extracted text, translated text, and voice audio URL. The frontend plays the synthesized voice audio dynamically.
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT 4: Authentication Flow */}
+            {activeTab === "auth" && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="relative pl-8 border-l border-zinc-800 space-y-8">
+                  
+                  {/* Step 1 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#10b981] border border-black shadow-[0_0_10px_#10b981]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#10b981] font-bold">Step 1 — Registration</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Register account</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        The user inputs name, email, and password. The client makes a secure registration request.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Endpoint: POST /api/auth/register</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#10b981] border border-black shadow-[0_0_10px_#10b981]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#10b981] font-bold">Step 2 — Encryption</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Password Hash (bcrypt)</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        For maximum data security, passwords are encrypted on the backend using bcrypt salt-rounds before database persistence.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Algorithm: bcrypt</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#10b981] border border-black shadow-[0_0_10px_#10b981]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#10b981] font-bold">Step 3 — Persistence</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">MongoDB Storage</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Saves verified profile attributes (hashed credentials, full name, preferred languages) into the MongoDB documents database.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 4 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#10b981] border border-black shadow-[0_0_10px_#10b981]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#10b981] font-bold">Step 4 — Verification</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Login</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Validates the user's email, compares the password hash dynamically, and starts a session payload.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Endpoint: POST /api/auth/login</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 5 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#10b981] border border-black shadow-[0_0_10px_#10b981]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#10b981] font-bold">Step 5 — Security Token</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">JWT Token Issuance</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Generates a cryptographically signed JSON Web Token (JWT) on success, which the client persists in cookie/session memory.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Signing: HS256 algorithm</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 6 */}
+                  <div className="relative">
+                    <div className="absolute -left-[38px] top-1.5 w-4 h-4 rounded-full bg-[#10b981] border border-black shadow-[0_0_10px_#10b981]" />
+                    <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-xl flex flex-col gap-2">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#10b981] font-bold">Step 6 — Authorization Guard</span>
+                      <h4 className="text-white font-semibold font-geist text-sm">Protected Routes & Workspace Access</h4>
+                      <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                        Axios interceptors append the JWT token to requests. Backend verify routes guard access based on user session status.
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Middleware: Depends(get_current_user)</span>
+                        <span className="font-mono text-[8px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-zinc-400 font-bold">Authorization: Bearer &lt;Token&gt;</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT 5: Project Structure */}
             {activeTab === "structure" && (
-              <div className="space-y-8 max-w-3xl">
+              <div className="space-y-8 max-w-3xl animate-in fade-in duration-300">
                 <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 space-y-4">
                   <h3 className="font-semibold text-white text-xs font-geist uppercase tracking-widest font-mono text-zinc-500">File Directory Map</h3>
                   <pre className="p-6 bg-zinc-900/60 rounded-lg text-xs font-mono border border-zinc-800 text-zinc-300 leading-relaxed overflow-x-auto">
 {`Voxa-ai/
-247: ├── Backend/                 # Python FastAPI Server & AI Services
-248: │   └── app/
-249: │       ├── api/             # API Router Gateways
-250: │       │   ├── health.py    # Health Check
-251: │       │   ├── speech.py    # REST Translation
-252: │       │   └── websocket_api.py # WebSocket Stream Gateway
-253: │       ├── core/            # Environment settings
-254: │       └── services/        # Logic handlers
-255: │           ├── speech_service.py # Groq Whisper
-256: │           ├── translation_service.py # Azure translator
-257: │           └── tts_service.py # ElevenLabs synthesizer
-258: │
-259: ├── Frontend/my-app/         # Next.js 16 Web Dashboard & Showcases
-260: │   ├── public/              # Static assets & Packed extension voxa_entension.zip
-261: │   └── src/
-262: │       ├── app/             # Landing, workspace, and technology routes
-263: │       └── components/      # Responsive design systems
-264: │
-265: └── Extension/               # Chrome Extension Manifest V3
-266:     ├── background/          # Background worker capturing meeting frames
-267:     ├── content/             # Injected overlays
-268:     ├── offscreen/           # Audio worklet capture tab contexts
-269:     └── sidepanel/           # Sidebar configuration logs`}
+├── Backend/                 # Python FastAPI Server & AI Services
+│   └── app/
+│       ├── api/             # API Router Gateways
+│       │   ├── health.py    # Health Check
+│       │   ├── speech.py    # REST Translation & Synthesis
+│       │   ├── pdf.py       # PDF Parsing & Translation
+│       │   └── websocket_api.py # WebSocket Stream Gateway
+│       ├── core/            # Config & database setups
+│       └── services/        # Logic handlers
+│           ├── speech_service.py # Groq Whisper
+│           ├── translation_service.py # Azure translator
+│           └── tts_service.py # ElevenLabs synthesizer
+│
+├── Frontend/my-app/         # Next.js 16 Web Dashboard & Showcases
+│   ├── public/              # Static assets
+│   └── src/
+│       ├── app/             # App routes (workspace, technology, profile)
+│       └── components/      # UI components & shared navigation
+│
+└── Extension/               # Chrome Extension Manifest V3
+    ├── background/          # Service Worker audio capture listeners
+    ├── content/             # Visual subtitle overlays
+    ├── offscreen/           # Audio downsampling offscreen pages
+    └── sidepanel/           # Sidebar configuration settings`}
                   </pre>
                 </div>
               </div>

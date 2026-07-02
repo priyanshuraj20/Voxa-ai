@@ -10,6 +10,8 @@ from fastapi.responses import RedirectResponse
 from app.database import check_database_connection
 
 
+from app.auth.router import router as auth_router
+
 
 app = FastAPI(
     title="LiveLingua API",
@@ -31,7 +33,9 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     await check_database_connection()
-   
+
+
+app.include_router(auth_router)   
 app.include_router(health_router)
 app.include_router(speech_router)
 app.include_router(translation_router)

@@ -16,3 +16,7 @@ class UserResponseSchema(BaseModel):
     id: str
     full_name: str
     email: EmailStr
+
+class LoginUserSchema(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=8)

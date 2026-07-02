@@ -90,7 +90,7 @@ export default function LandingPage() {
             className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.95] mb-6 max-w-4xl mx-auto font-geist text-white pb-2"
           >
             Real-time multilingual <br className="hidden sm:inline" />
-            Speech & Document Translation Platform..
+            Speech & Document Translation Platform.
           </motion.h1>
 
           {/* Description */}

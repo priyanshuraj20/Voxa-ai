@@ -7,6 +7,8 @@ from app.api.websocket_api import router as websocket_router
 from app.core.config import FRONTEND_URL
 from fastapi.responses import RedirectResponse
 
+from app.database import check_database_connection
+
 
 
 app = FastAPI(
@@ -25,6 +27,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_event():
+    await check_database_connection()
    
 app.include_router(health_router)
 app.include_router(speech_router)

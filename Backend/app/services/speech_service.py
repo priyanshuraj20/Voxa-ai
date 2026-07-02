@@ -3,6 +3,10 @@ import tempfile
 from groq import Groq
 from app.core.config import GROQ_API_KEY
 
+
+print("OPENAI =", os.getenv("OPENROUTER_API_KEY"))
+print("GROQ =", os.getenv("GROQ_API_KEY"))
+
 # Initialize the Groq cloud instance
 client = Groq(api_key=GROQ_API_KEY)
 

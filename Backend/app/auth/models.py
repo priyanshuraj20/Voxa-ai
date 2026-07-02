@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 
 def create_user_document(
@@ -14,3 +14,15 @@ def create_user_document(
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow(),
     }
+
+def create_otp_expiry():
+
+    return datetime.now(
+
+        timezone.utc
+
+    ) + timedelta(
+
+        minutes=5
+
+    )

@@ -9,6 +9,8 @@ ENV_PATH = os.path.join(BASE_DIR, ".env")
 
 load_dotenv(ENV_PATH, override=True)
 
+# TRANSLATIONS_COLLECTION = "translations"
+
 # =========================
 # MongoDB
 # =========================
@@ -45,7 +47,7 @@ AZURE_TRANSLATOR_ENDPOINT = os.getenv(
     "AZURE_TRANSLATOR_ENDPOINT",
     "https://api.cognitive.microsofttranslator.com"
 )
-
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 # =========================
 # URLs
 # =========================

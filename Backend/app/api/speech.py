@@ -12,6 +12,9 @@ from app.services.translation_service import (
     clean_lang_code,
 )
 from app.services.tts_service import TTSService
+from fastapi import Depends
+from app.auth.dependency import get_current_user
+
 
 router = APIRouter(
     prefix="/speech",
@@ -43,6 +46,7 @@ async def get_output_audio():
 # ==========================================================
 @router.post("/translate-and-speak")
 async def translate_and_speak(
+    current_user=Depends(get_current_user),
     file: UploadFile = File(...),
     source_lang: str = Form("en"),
     target_lang: str = Form("hi-IN"),
@@ -83,6 +87,19 @@ async def translate_and_speak(
                 source_lang=source_lang,
                 target_lang=target_lang,
             )
+#             await save_translation(
+
+#                 current_user=current_user,
+
+#                  source_text=transcript,
+
+#                 translated_text=translated,
+
+#                 source_language=source_lang,
+
+#                 target_language=target_lang,
+
+# # )
 
             print("\n" + "=" * 100)
             print("TRANSCRIPT")

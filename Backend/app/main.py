@@ -10,6 +10,8 @@ from fastapi.responses import RedirectResponse
 from app.database import check_database_connection
 
 
+
+
 from app.auth.router import router as auth_router
 
 

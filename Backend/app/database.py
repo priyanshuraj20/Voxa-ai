@@ -6,6 +6,9 @@ from app.core.config import (
     DATABASE_NAME,
     USERS_COLLECTION,
 )
+# from app.core.config import TRANSLATIONS_COLLECTION
+
+
 
 # Initialize logger
 logger = logging.getLogger(__name__)
@@ -14,7 +17,9 @@ logger = logging.getLogger(__name__)
 client = AsyncIOMotorClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
 
 db = client[DATABASE_NAME]
+
 users_collection = db[USERS_COLLECTION]
+# translations_collection = db[TRANSLATIONS_COLLECTION]
 
 # Call this function inside your framework's startup event (e.g., FastAPI lifespan)
 async def check_database_connection():
@@ -26,3 +31,5 @@ async def check_database_connection():
         logger.critical(f"Database connection failed: {e}")
         # Insert your fallback logic here (e.g., sys.exit(1) to stop the server)
         raise e
+
+users_collection = db[USERS_COLLECTION]

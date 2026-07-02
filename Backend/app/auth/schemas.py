@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 
 
+
 class RegisterUserSchema(BaseModel):
     full_name: str = Field(..., min_length=3, max_length=100)
     email: EmailStr
@@ -20,3 +21,29 @@ class UserResponseSchema(BaseModel):
 class LoginUserSchema(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
+
+
+
+class ChangePasswordSchema(BaseModel):
+    old_password: str = Field(min_length=8)
+    new_password: str = Field(min_length=8)
+
+class ForgotPasswordSchema(BaseModel):
+
+    email: EmailStr
+
+class VerifyOTPSchema(BaseModel):
+
+    email: EmailStr
+
+    otp: str
+
+class ResetPasswordSchema(BaseModel):
+
+    email: EmailStr
+
+    otp: str
+
+    new_password: str = Field(
+        min_length=8
+    )

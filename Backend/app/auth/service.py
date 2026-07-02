@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-
+from datetime import datetime,timezone
 from app.database import users_collection
 
 from app.auth.password import hash_password
@@ -26,7 +26,17 @@ from app.auth.jwt import (
 from app.auth.schemas import (
     RegisterUserSchema,
     LoginUserSchema,
+    ForgotPasswordSchema,
+    VerifyOTPSchema,
+    ResetPasswordSchema
 )
+from app.auth.password import verify_password, hash_password
+
+
+
+from app.auth.email import send_reset_otp
+from app.auth.otp import generate_otp
+from app.auth.models import create_otp_expiry
 
 async def get_user_by_email(email: str):
 
@@ -130,4 +140,209 @@ async def login_user(user: LoginUserSchema):
             "full_name": existing_user["full_name"],
             "email": existing_user["email"],
         },
+    }
+
+
+
+async def logout_user(current_user):
+
+    await users_collection.update_one(
+        {
+            "_id": current_user["_id"]
+        },
+        {
+            "$set": {
+                "refresh_token": None
+            }
+        }
+    )
+
+    return {
+        "message": "Logout successful."
+    }
+
+
+async def refresh_access_token(current_user):
+
+    access_token = create_access_token(
+        {
+            "user_id": str(current_user["_id"]),
+            "email": current_user["email"],
+            "type": "access"
+        }
+    )
+
+    return {
+
+        "access_token": access_token
+
+    }
+
+
+async def change_password(data, current_user):
+
+    if not verify_password(
+        data.old_password,
+        current_user["password"]
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Old password is incorrect."
+        )
+
+    new_password = hash_password(data.new_password)
+
+    await users_collection.update_one(
+        {
+            "_id": current_user["_id"]
+        },
+        {
+            "$set": {
+                "password": new_password
+            }
+        }
+    )
+
+    return {
+        "message": "Password changed successfully."
+    }
+
+
+
+async def forgot_password(
+    user: ForgotPasswordSchema
+):
+
+    existing_user = await get_user_by_email(user.email)
+
+    if not existing_user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found."
+        )
+
+    otp = generate_otp()
+
+    expiry = create_otp_expiry()
+
+    await users_collection.update_one(
+
+        {
+            "_id": existing_user["_id"]
+        },
+
+        {
+            "$set": {
+
+                "reset_otp": otp,
+
+                "reset_otp_expiry": expiry
+
+            }
+        }
+
+    )
+
+    send_reset_otp(
+        user.email,
+        otp
+    )
+
+    return {
+
+        "message": "OTP sent successfully."
+
+    }
+
+
+
+
+async def verify_otp(
+    data: VerifyOTPSchema
+):
+
+    user = await get_user_by_email(data.email)
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found."
+        )
+
+    if user.get("reset_otp") != data.otp:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid OTP."
+        )
+
+    if datetime.now(timezone.utc) > user["reset_otp_expiry"]:
+        raise HTTPException(
+            status_code=400,
+            detail="OTP Expired."
+        )
+
+    return {
+
+        "message": "OTP verified."
+
+    }
+
+
+async def reset_password(
+    data: ResetPasswordSchema
+):
+
+    user = await get_user_by_email(data.email)
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found."
+        )
+
+    if user.get("reset_otp") != data.otp:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid OTP."
+        )
+
+    if datetime.now(timezone.utc) > user["reset_otp_expiry"]:
+        raise HTTPException(
+            status_code=400,
+            detail="OTP Expired."
+        )
+
+    new_password = hash_password(
+        data.new_password
+    )
+
+    await users_collection.update_one(
+
+        {
+            "_id": user["_id"]
+        },
+
+        {
+            "$set": {
+
+                "password": new_password
+
+            },
+
+            "$unset": {
+
+                "reset_otp": "",
+
+                "reset_otp_expiry": ""
+
+            }
+
+        }
+
+    )
+
+    return {
+
+        "message": "Password updated successfully."
+
     }

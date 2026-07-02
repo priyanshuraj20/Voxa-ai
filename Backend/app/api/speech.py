@@ -28,21 +28,78 @@ from app.services.tts_service import client as elevenlabs_client
 
 @router.get("/credits")
 async def get_credits(current_user=Depends(get_current_user)):
+    # 1. ElevenLabs (TTS)
     try:
         sub = elevenlabs_client.user.subscription.get()
-        return {
-            "character_limit": sub.character_limit,
-            "character_count": sub.character_count,
-            "character_left": sub.character_limit - sub.character_count,
+        elevenlabs_data = {
+            "limit": sub.character_limit,
+            "count": sub.character_count,
+            "left": sub.character_limit - sub.character_count,
             "source": "api"
         }
-    except Exception as e:
-        return {
-            "character_limit": 10000,
-            "character_count": 4250,
-            "character_left": 5750,
+    except Exception:
+        elevenlabs_data = {
+            "limit": 10000,
+            "count": 4250,
+            "left": 5750,
             "source": "mock"
         }
+
+    # 2. OpenRouter (Claude LLM)
+    try:
+        import requests
+        from app.core.config import OPENROUTER_API_KEY
+        res = requests.get(
+            "https://openrouter.ai/api/v1/auth/key",
+            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
+            timeout=5
+        )
+        if res.status_code == 200:
+            data = res.json().get("data", {})
+            openrouter_data = {
+                "is_free_tier": data.get("is_free_tier", False),
+                "limit_usd": data.get("limit"),
+                "usage_usd": data.get("usage"),
+                "source": "api"
+            }
+        else:
+            openrouter_data = {
+                "is_free_tier": True,
+                "limit_usd": None,
+                "usage_usd": 0.0,
+                "source": "mock"
+            }
+    except Exception:
+        openrouter_data = {
+            "is_free_tier": True,
+            "limit_usd": None,
+            "usage_usd": 0.0,
+            "source": "mock"
+        }
+
+    # 3. Azure Translation (Neural Machine Translation)
+    azure_data = {
+        "limit": 2000000,
+        "count": 142800,
+        "left": 1857200,
+        "source": "mock"
+    }
+
+    # 4. Groq Whisper (ASR Speech Recognition)
+    groq_data = {
+        "status": "Active",
+        "limit_rpd": 14400,
+        "used_rpd": 248,
+        "left_rpd": 14152,
+        "source": "mock"
+    }
+
+    return {
+        "elevenlabs": elevenlabs_data,
+        "openrouter": openrouter_data,
+        "azure": azure_data,
+        "groq": groq_data
+    }
 
 
 

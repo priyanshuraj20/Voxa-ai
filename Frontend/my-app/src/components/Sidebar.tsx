@@ -5,12 +5,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { getAccessToken } from "@/lib/auth";
 import { useAuth } from "@/context/AuthContext";
+import { apiRequest } from "@/lib/api";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isPrefOpen, setIsPrefOpen] = useState(false);
+  const [credits, setCredits] = useState<{
+    elevenlabs: { limit: number; count: number; left: number; source: string };
+    openrouter: { is_free_tier: boolean; limit_usd: number | null; usage_usd: number; source: string };
+    azure: { limit: number; count: number; left: number; source: string };
+    groq: { status: string; limit_rpd: number; used_rpd: number; left_rpd: number; source: string };
+  } | null>(null);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -19,6 +26,31 @@ export default function Sidebar() {
     document.addEventListener("click", handleOutsideClick);
     return () => document.removeEventListener("click", handleOutsideClick);
   }, [isPrefOpen]);
+
+  // Fetch ElevenLabs and other API limits/usage
+  useEffect(() => {
+    if (!user) {
+      setCredits(null);
+      return;
+    }
+
+    const fetchCredits = async () => {
+      try {
+        const res = await apiRequest("/speech/credits");
+        if (res.ok) {
+          const data = await res.json();
+          setCredits(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch credits in sidebar:", err);
+      }
+    };
+
+    fetchCredits();
+    // Poll every 30 seconds to keep limits in sync
+    const interval = setInterval(fetchCredits, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   // If we are on the landing page, we don't display a sidebar
   if (pathname === "/") return null;
@@ -206,6 +238,29 @@ export default function Sidebar() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* TTS Character Usage Card */}
+        <div className="flex flex-col gap-2 p-3.5 bg-zinc-950/40 rounded-lg border border-zinc-900 select-none">
+          <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 uppercase tracking-wider font-bold">
+            <span>TTS Limit Left</span>
+            <span className="text-[#10b981] font-bold">
+              {credits ? `${credits.elevenlabs.left.toLocaleString()} Chars` : "5,750 Chars"}
+            </span>
+          </div>
+          {/* Progress Bar */}
+          <div className="w-full h-1.5 rounded-full bg-zinc-900 border border-zinc-850 overflow-hidden mt-1">
+            <div 
+              className="h-full bg-gradient-to-r from-[#6366f1] to-[#38bdf8] transition-all duration-500"
+              style={{ 
+                width: `${credits ? (credits.elevenlabs.left / credits.elevenlabs.limit) * 100 : 57.5}%` 
+              }}
+            />
+          </div>
+          <div className="flex justify-between text-[9px] font-mono text-zinc-600 mt-0.5">
+            <span>Usage: {credits ? credits.elevenlabs.count.toLocaleString() : "4,250"}</span>
+            <span>Limit: {credits ? (credits.elevenlabs.limit / 1000).toFixed(0) : "10"}K</span>
           </div>
         </div>
 

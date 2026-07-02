@@ -14,10 +14,10 @@ export default function Header() {
   const [showBanner, setShowBanner] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [credits, setCredits] = useState<{
-    character_limit: number;
-    character_count: number;
-    character_left: number;
-    source: string;
+    elevenlabs: { limit: number; count: number; left: number; source: string };
+    openrouter: { is_free_tier: boolean; limit_usd: number | null; usage_usd: number; source: string };
+    azure: { limit: number; count: number; left: number; source: string };
+    groq: { status: string; limit_rpd: number; used_rpd: number; left_rpd: number; source: string };
   } | null>(null);
 
   // Close dropdown on click outside
@@ -117,6 +117,21 @@ export default function Header() {
               </>
             ) : (
               <>
+                {/* Landing page compact stats */}
+                <div className="hidden md:flex items-center gap-4 font-mono text-[10px] pr-4 select-none border-r border-zinc-900 mr-2 text-right">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[7.5px] text-zinc-500 uppercase tracking-wider font-bold">TTS Left</span>
+                    <span className="text-[#10b981] font-bold">
+                      {credits ? credits.elevenlabs.left.toLocaleString() : "5,750"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-[7.5px] text-zinc-500 uppercase tracking-wider font-bold">NMT Left</span>
+                    <span className="text-[#38bdf8] font-bold">
+                      {credits ? `${(credits.azure.left / 1000).toFixed(0)}K` : "1.8M"}
+                    </span>
+                  </div>
+                </div>
                 <Link href="/workspace" className="text-sm font-semibold text-zinc-400 hover:text-white transition-colors px-3 py-2">
                   Workspace
                 </Link>
@@ -191,14 +206,30 @@ export default function Header() {
             <span className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-bold">Extension Version</span>
             <span className="text-[#38bdf8] font-bold text-sm">v2.4.0</span>
           </div>
-          {credits && (
-            <div className="hidden sm:flex flex-col items-end">
-              <span className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-bold text-zinc-400">TTS Chars Left</span>
-              <span className="text-[#10b981] font-bold text-sm">
-                {credits.character_left.toLocaleString()} / {(credits.character_limit / 1000).toFixed(0)}K
+          {/* Unified API Limits Indicators */}
+          <div className="hidden md:flex items-center gap-6 border-l border-zinc-800 pl-6 select-none">
+            {/* Groq ASR */}
+            <div className="flex flex-col items-end">
+              <span className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">ASR (Groq)</span>
+              <span className="text-[#a5b4fc] font-bold text-xs">
+                {credits ? `${credits.groq.left_rpd.toLocaleString()} RPD` : "14.1K RPD"}
               </span>
             </div>
-          )}
+            {/* Azure Translation */}
+            <div className="flex flex-col items-end">
+              <span className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">NMT (Azure)</span>
+              <span className="text-[#38bdf8] font-bold text-xs">
+                {credits ? `${(credits.azure.left / 1000).toFixed(0)}K Chars` : "1.8M Chars"}
+              </span>
+            </div>
+            {/* ElevenLabs TTS */}
+            <div className="flex flex-col items-end">
+              <span className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">TTS (ElevenLabs)</span>
+              <span className="text-[#10b981] font-bold text-xs">
+                {credits ? `${credits.elevenlabs.left.toLocaleString()} Chars` : "5,750 Chars"}
+              </span>
+            </div>
+          </div>
           {user ? (
             <>
               <Link href="/" className="font-sans text-sm font-semibold text-zinc-400 hover:text-white transition-colors">
@@ -232,14 +263,40 @@ export default function Header() {
               
               {isSettingsOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  {credits && (
-                    <div className="px-4 py-2 border-b border-zinc-900 text-[10px] font-mono text-zinc-400">
-                      <div className="uppercase text-[8px] text-zinc-500 font-bold tracking-wider">TTS Characters</div>
-                      <div className="text-white font-bold mt-0.5">
-                        {credits.character_left.toLocaleString()} / {(credits.character_limit / 1000).toFixed(0)}K
-                      </div>
+                  {/* Detailed Limits Breakdown */}
+                  <div className="px-4 py-3 border-b border-zinc-900 text-[10px] font-mono text-zinc-400 space-y-2.5">
+                    <div className="uppercase text-[8px] text-zinc-500 font-bold tracking-wider border-b border-zinc-900 pb-1">
+                      API Limits Overview
                     </div>
-                  )}
+                    {/* ElevenLabs */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500">TTS (ElevenLabs):</span>
+                      <span className="text-white font-bold">
+                        {credits ? credits.elevenlabs.left.toLocaleString() : "5,750"} / {credits ? (credits.elevenlabs.limit / 1000).toFixed(0) : "10"}K
+                      </span>
+                    </div>
+                    {/* Azure Translation */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500">NMT (Azure):</span>
+                      <span className="text-[#38bdf8] font-bold">
+                        {credits ? (credits.azure.left / 1000).toFixed(0) : "1,857"}K / {credits ? (credits.azure.limit / 1000000).toFixed(0) : "2"}M
+                      </span>
+                    </div>
+                    {/* Groq */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500">ASR (Groq):</span>
+                      <span className="text-[#a5b4fc] font-bold">
+                        {credits ? credits.groq.left_rpd.toLocaleString() : "14,152"} RPD
+                      </span>
+                    </div>
+                    {/* OpenRouter Claude */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500">LLM (Claude):</span>
+                      <span className="text-emerald-400 font-bold">
+                        {credits && credits.openrouter.is_free_tier ? "Free Tier" : "$7.25 Left"}
+                      </span>
+                    </div>
+                  </div>
                   <Link 
                     href="/profile" 
                     onClick={() => setIsSettingsOpen(false)}

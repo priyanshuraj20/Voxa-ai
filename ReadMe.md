@@ -89,8 +89,8 @@ The Chrome Extension downsamples meeting or tab audio to a clean 16kHz mono 16-b
 [JSON Response]         ──► (Sends transcripts & translations back to client)
 ```
 
-### 3. PDF Reading Assistant Pipeline Flow
-When uploading documents, the server processes them via `POST /pdf/translate`. Extracted text is translated, tokenized into sentence-aware blocks of 3,000–5,000 characters to stay within API limit bounds, and compiled into a joined MP3 play link:
+### 3. PDF Reading Assistant Pipeline Flow (Privacy & Ephemeral Security)
+When uploading documents, the server processes them via `POST /pdf/translate`. Large text streams are tokenized into sentence-aware blocks of 3,000–5,000 characters to stay within API limit bounds, translated, and compiled into a joined MP3 play link:
 
 ```
 [PDF Upload File] ──► [In-Memory Text Parser] ──► [Sentence-Aware Text Splitter]
@@ -103,6 +103,40 @@ When uploading documents, the server processes them via `POST /pdf/translate`. E
                                                                │
                                                                └──► Yields real-time progress text via NDJSON Stream
 ```
+
+#### 🔒 Data Privacy & Zero Retention Policies:
+* **Zero Database Storage**: No PDF binary, text dump, or translated transcript is ever written or stored in a persistent backend database.
+* **In-Memory Buffer Processing**: The backend handles the uploaded file directly in-memory as a byte array (`BytesIO`). 
+* **Transient File Disposal**: Temporary chunk MP3 files created during speech synthesis are immediately deleted and destroyed (`os.remove()`) as soon as the binary merge is completed.
+* **Session-Bound Persistence**: The frontend caches the translation text and metadata inside the browser's `sessionStorage`. This data remains locally contained and is wiped out automatically when the user closes the browser tab.
+
+### 4. Authentication & Security Redirection Flow
+All core features and workspace pages require active user authorization. The security layer manages access validation, route protection, token expiration, and Sandbox OTP fallbacks:
+
+```
+[Unauthenticated User]
+      │
+      ├─► Tries to access guarded routes (/workspace, /profile, /pdf-reader)
+      │   │
+      │   ▼ (Client-side mount check: checks for valid JWT cookie)
+      │   Intercepts click and redirects immediately to /login?required=true
+      │
+      ▼
+[User Credentials Submit]
+      │
+      ├─► POST /auth/token ──► Validates hashes against SQLite DB
+      │                         │
+      │                         ▼
+      │                    Returns JWT Bearer Access Token
+      │
+      ▼ (Client saves JWT securely in cookies)
+Access Granted & Profile default preferences loaded contextually
+```
+
+#### 🔑 Sandbox OTP Recovery Fallback:
+To bypass sandbox limits on free transactional email keys (which restrict OTP delivery only to the account owner):
+* **Resilient Exception Catching**: If the Resend API email transmission fails, the server catches the exception and outputs the code directly to the secure terminal console (`🔑 OTP FOR TESTING (recipient): <otp>`), allowing sandbox testing environments to log in seamlessly.
+
 
 ---
 

@@ -46,8 +46,53 @@ const features = [
   },
 ];
 
+const platformData = {
+  meet: {
+    title: "Google Meet Overlay Subtitles",
+    desc: "Seamless translation injection inside active Google Meet tabs. Captures and translates the audio of other participants in real-time, showing original and translated captions side-by-side without lagging behind the conversation.",
+    image: "/assets/google_meet.png",
+    bulletpoints: [
+      "Translates speaker voices directly into dynamic glassmorphic overlays.",
+      "Synchronizes original speech with contextual translation output.",
+      "Minimal interface overhead that preserves active screenshare views."
+    ]
+  },
+  zoom: {
+    title: "Zoom Web Sidepanel Widget",
+    desc: "Enables sidebar translation logging for webinars and virtual classrooms. Streams tab audio context to our translation gateway, printing timestamped captions in a dedicated widget so you never miss a slide discussion.",
+    image: "/assets/zoom_mockup.png",
+    bulletpoints: [
+      "Integrates as a Manifest V3 side panel directly in Chrome.",
+      "Chronological transcription logging with download capability (.txt).",
+      "Adapts to dual-speaker setups and screenshared audio streams."
+    ]
+  },
+  teams: {
+    title: "Microsoft Teams Stream Captions",
+    desc: "Converts MS Teams conference tab audio to real-time translated subtitles. Processes incoming streams through concurrent Whisper and translation threads to keep response latencies consistently under one second.",
+    image: "/assets/teams_mockup.png",
+    bulletpoints: [
+      "Maintains sync across multi-user remote boardrooms.",
+      "High-accuracy voice segmentation using LLM-driven post-correction.",
+      "Visual status sync alerts to verify active streaming connection."
+    ]
+  },
+  browser: {
+    title: "Universal Tab Translation (YouTube, Webinars)",
+    desc: "Captures and translates tab audio on any website. Translate live streaming news, podcasts, or online video modules dynamically. Downsamples raw feeds to 16kHz PCM to maintain maximum model accuracy.",
+    image: "/assets/browser_audio_mockup.png",
+    bulletpoints: [
+      "Injects floating subtitles onto standard HTML5 video elements.",
+      "Low bandwidth mono-resampling preserves network resources.",
+      "Persistent WebSocket channels ensure zero connection dropouts."
+    ]
+  }
+};
+
+
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
+  const [activePlatform, setActivePlatform] = useState<"meet" | "zoom" | "teams" | "browser">("meet");
   const router = useRouter();
 
   useEffect(() => {
@@ -371,6 +416,125 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Chrome Extension Integration Showcase Section */}
+        <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10 select-none">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column: Platform switcher and descriptions */}
+            <div className="space-y-8">
+              <div>
+                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#38bdf8] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded">
+                  Active Overlay Integration
+                </span>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white font-geist mt-4">
+                  Chrome Extension Overlay for Meetings & Tabs
+                </h2>
+                <p className="text-zinc-400 text-sm leading-relaxed font-sans font-light mt-4">
+                  Translate voices live directly from your browser tabs. Inject overlays, subtitles, and floating side panels onto Google Meet, Zoom, MS Teams, or any streaming video.
+                </p>
+              </div>
+
+              {/* Platform Quick Switcher Tabs */}
+              <div className="bg-zinc-950/60 border border-zinc-900/80 p-1.5 rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button
+                  onClick={() => setActivePlatform("meet")}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-mono tracking-wider transition-all duration-200 select-none border ${
+                    activePlatform === "meet"
+                      ? "bg-[#6366f1] text-white border-[#6366f1] shadow-lg shadow-[#6366f1]/20 font-bold"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-xs">video_call</span>
+                  MEET
+                </button>
+                <button
+                  onClick={() => setActivePlatform("zoom")}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-mono tracking-wider transition-all duration-200 select-none border ${
+                    activePlatform === "zoom"
+                      ? "bg-[#6366f1] text-white border-[#6366f1] shadow-lg shadow-[#6366f1]/20 font-bold"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-xs">groups</span>
+                  ZOOM
+                </button>
+                <button
+                  onClick={() => setActivePlatform("teams")}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-mono tracking-wider transition-all duration-200 select-none border ${
+                    activePlatform === "teams"
+                      ? "bg-[#6366f1] text-white border-[#6366f1] shadow-lg shadow-[#6366f1]/20 font-bold"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-xs">co_present</span>
+                  TEAMS
+                </button>
+                <button
+                  onClick={() => setActivePlatform("browser")}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-mono tracking-wider transition-all duration-200 select-none border ${
+                    activePlatform === "browser"
+                      ? "bg-[#6366f1] text-white border-[#6366f1] shadow-lg shadow-[#6366f1]/20 font-bold"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-xs">language</span>
+                  TABS
+                </button>
+              </div>
+
+              {/* Dynamic Feature Details */}
+              <motion.div
+                key={activePlatform}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4"
+              >
+                <h3 className="text-xl font-semibold font-geist text-white">
+                  {platformData[activePlatform].title}
+                </h3>
+                <p className="text-zinc-400 text-xs leading-relaxed font-sans font-light">
+                  {platformData[activePlatform].desc}
+                </p>
+
+                {/* Key Bulletpoints */}
+                <ul className="space-y-3 pt-2">
+                  {platformData[activePlatform].bulletpoints.map((bullet, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-xs text-zinc-300 font-sans font-light">
+                      <span className="w-5 h-5 rounded-full bg-[#6366f1]/10 border border-[#6366f1]/20 flex items-center justify-center text-[#6366f1] shrink-0 mt-0.5">
+                        <span className="material-symbols-outlined text-[10px] font-bold">check</span>
+                      </span>
+                      <span>{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </div>
+
+            {/* Right Column: Premium Interactive Mockup Image Frame */}
+            <div className="relative group">
+              {/* Outer Glow Effect */}
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#6366f1] via-[#818cf8] to-[#38bdf8] opacity-10 blur-xl group-hover:opacity-15 transition duration-1000"></div>
+              
+              <motion.div
+                key={activePlatform}
+                initial={{ opacity: 0, scale: 0.98, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="relative border border-zinc-900 bg-zinc-950/80 p-3 rounded-2xl shadow-2xl overflow-hidden aspect-[16/9] flex items-center justify-center"
+              >
+                {/* Image Mockup Rendering */}
+                <img
+                  src={platformData[activePlatform].image}
+                  alt={platformData[activePlatform].title}
+                  className="w-full h-full object-cover rounded-xl border border-zinc-900/60"
+                  loading="lazy"
+                />
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
 
         {/* Stats / Trust Section */}
         <section className="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900 relative z-10">

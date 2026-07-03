@@ -23,6 +23,9 @@ app = FastAPI(
 )
 
 
+from app.core.rate_limit import RateLimitMiddleware
+app.add_middleware(RateLimitMiddleware)
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
@@ -32,6 +35,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.on_event("startup")
 async def startup_event():

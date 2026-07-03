@@ -1,6 +1,8 @@
 from fastapi import HTTPException, status
 from datetime import datetime,timezone
 from app.database import users_collection
+from app.auth.dependency import invalidate_user_cache
+
 
 from app.auth.password import hash_password
 
@@ -161,6 +163,8 @@ async def logout_user(current_user):
         }
     )
 
+    invalidate_user_cache(current_user["_id"])
+
     return {
         "message": "Logout successful."
     }
@@ -206,6 +210,8 @@ async def change_password(data, current_user):
             }
         }
     )
+
+    invalidate_user_cache(current_user["_id"])
 
     return {
         "message": "Password changed successfully."
@@ -373,6 +379,8 @@ async def update_user_preferences(data, current_user):
         }
 
     )
+
+    invalidate_user_cache(current_user["_id"])
 
     return {
 

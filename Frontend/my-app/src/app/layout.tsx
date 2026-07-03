@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { AuthProvider } from "@/context/AuthContext";
+import DevToolsProtection from "@/components/security/DevToolsProtection";
 
 // Load Inter font for readable body copy
 const inter = Inter({
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} bg-black text-white antialiased custom-scrollbar`}
       >
+        <DevToolsProtection />
         <LoadingProvider>
           <AuthProvider>
             {children}
@@ -55,4 +57,5 @@ export default function RootLayout({
     </html>
   );
 }
+
 

@@ -9,10 +9,10 @@ from app.auth.jwt import verify_token
 
 logger = logging.getLogger(__name__)
 
-# Pattern for spam emails e.g., userjnwwrn99@gmail.com
+
 SPAM_EMAIL_PATTERN = re.compile(r"^user[a-z0-9]{8}@gmail\.com$", re.IGNORECASE)
 
-# Whitelist of emails that are exempted from rate limits (presentation accounts)
+# my emails which will not get blocked:::::
 WHITELISTED_EMAILS = {
     "priyanshurajrock2@gmail.com",
     "code.priyanshu20@gmail.com",

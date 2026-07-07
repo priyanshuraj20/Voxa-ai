@@ -15,7 +15,6 @@ router = APIRouter(
 )
 
 def split_text_into_chunks(text: str, max_size: int = 5000) -> list[str]:
-    # Splits text by paragraph/sentence borders without splitting words in the middle
     paragraphs = text.split("\n\n")
     chunks = []
     current_chunk = []
@@ -23,7 +22,6 @@ def split_text_into_chunks(text: str, max_size: int = 5000) -> list[str]:
     
     for para in paragraphs:
         if len(para) > max_size:
-            # First append what we have so far
             if current_chunk:
                 chunks.append("\n\n".join(current_chunk))
                 current_chunk = []
@@ -79,8 +77,10 @@ def split_text_into_chunks(text: str, max_size: int = 5000) -> list[str]:
         
     return [c.strip() for c in chunks if c.strip()]
 
+
+
+
 def merge_mp3_files(file_paths: list[str], output_path: str):
-    # Combines standard MP3 chunks sequentially using simple file streams
     with open(output_path, "wb") as outfile:
         for path in file_paths:
             if os.path.exists(path):
@@ -140,7 +140,6 @@ async def translate_pdf(
 
     async def event_generator():
         try:
-            # Yield initial status
             yield json.dumps({"status": "processing", "message": "Reading page 1..."}) + "\n"
 
             # Re-read and extract text page-by-page
@@ -195,7 +194,7 @@ async def translate_pdf(
                     TTSService.generate_speech(chunk_text, chunk_file_path)
                     chunk_files.append(chunk_file_path)
                 except Exception as tts_err:
-                    print(f"❌ ElevenLabs chunk generation error: {tts_err}")
+                    print(f" ElevenLabs chunk generation error: {tts_err}")
                     audio_failed = True
                     break
 
@@ -223,7 +222,7 @@ async def translate_pdf(
                     if os.path.exists(f):
                         os.remove(f)
             except Exception as merge_err:
-                print(f"❌ Failed merging chunked mp3 files: {merge_err}")
+                print(f" Failed merging chunked mp3 files: {merge_err}")
                 yield json.dumps({
                     "status": "warning",
                     "extracted_text": extracted_text,

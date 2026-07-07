@@ -14,6 +14,7 @@ from app.services.translation_service import (
 from app.services.tts_service import TTSService
 from fastapi import Depends
 from app.auth.dependency import get_current_user
+from app.services.tts_service import client as elevenlabs_client
 
 
 router = APIRouter(
@@ -21,10 +22,7 @@ router = APIRouter(
     tags=["Speech"]
 )
 
-# ==========================================================
-# Fetch ElevenLabs Characters Usage
-# ==========================================================
-from app.services.tts_service import client as elevenlabs_client
+
 
 @router.get("/credits")
 async def get_credits(current_user=Depends(get_current_user)):
@@ -101,11 +99,6 @@ async def get_credits(current_user=Depends(get_current_user)):
         "groq": groq_data
     }
 
-
-
-# ==========================================================
-# Serve Generated Audio
-# ==========================================================
 @router.get("/output-audio")
 async def get_output_audio():
     file_path = "output.mp3"
@@ -121,10 +114,6 @@ async def get_output_audio():
         detail="Audio file not found"
     )
 
-
-# ==========================================================
-# Speech → STT → Translation → TTS
-# ==========================================================
 @router.post("/translate-and-speak")
 async def translate_and_speak(
     current_user=Depends(get_current_user),
@@ -133,9 +122,8 @@ async def translate_and_speak(
     target_lang: str = Form("hi-IN"),
 ):
 
-    # ---------------------------------------
     # Validate Languages
-    # ---------------------------------------
+   
     if clean_lang_code(source_lang) == clean_lang_code(target_lang):
         raise HTTPException(
             status_code=400,
@@ -144,15 +132,14 @@ async def translate_and_speak(
 
     def event_generator():
         try:
-            # Step 1: Uploading/Uplink completed, starting Speech Recognition (Groq Whisper)
+           #Uploading completed strting speech recognization
             yield json.dumps({"step": 2}) + "\n"
 
-            # =====================================
             # STEP 1 : Speech To Text
-            # =====================================
+      
             transcript = transcribe_audio(file, language=source_lang)
 
-            # Step 2: Speech Recognition completed, starting Transcript Correction (Claude Sonnet 4)
+            # Step 2: Speech Recognition completed, starting Transcript Correction
             yield json.dumps({"step": 3}) + "\n"
             
             transcript = improve_transcript(transcript)
@@ -160,9 +147,8 @@ async def translate_and_speak(
             # Step 3: Transcript Correction completed, starting Translation (Azure)
             yield json.dumps({"step": 4}) + "\n"
 
-            # =====================================
             # STEP 2 : Translation
-            # =====================================
+        
             translated = translate_text(
                 text=transcript,
                 source_lang=source_lang,
@@ -207,14 +193,14 @@ async def translate_and_speak(
                 audio_file = TTSService.generate_speech(translated)
 
                 if audio_file and os.path.exists(audio_file):
-                    print(f"✅ Audio Generated Successfully : {audio_file}")
-                    print(f"📦 Size : {os.path.getsize(audio_file)} bytes")
+                    print(f" Audio Generated Successfully : {audio_file}")
+                    print(f" Size : {os.path.getsize(audio_file)} bytes")
                     output_audio_url = f"{BACKEND_URL}/speech/output-audio"
                 else:
-                    print("❌ output.mp3 was not generated.")
+                    print(" output.mp3 was not generated.")
 
             except Exception as tts_error:
-                print("\n❌ TTS ERROR")
+                print("\n TTS ERROR")
                 traceback.print_exc()
                 output_audio_url = None
 
@@ -228,7 +214,7 @@ async def translate_and_speak(
             }) + "\n"
 
         except Exception as e:
-            print("\n❌ PIPELINE FAILED")
+            print("\n PIPELINE FAILED")
             traceback.print_exc()
             yield json.dumps({
                 "step": 0,

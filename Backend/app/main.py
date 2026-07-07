@@ -1,4 +1,4 @@
-print("MAIN.PY LOADED")
+print("main.py LOADED")
 from fastapi import FastAPI
 from app.api.health import router as health_router
 from app.api.speech import router as speech_router
@@ -15,6 +15,9 @@ from app.database import check_database_connection
 
 from app.auth.router import router as auth_router
 
+from app.core.rate_limit import RateLimitMiddleware
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(
     title="Voxa Ai",
@@ -23,10 +26,8 @@ app = FastAPI(
 )
 
 
-from app.core.rate_limit import RateLimitMiddleware
 app.add_middleware(RateLimitMiddleware)
 
-from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,7 +36,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.on_event("startup")
 async def startup_event():

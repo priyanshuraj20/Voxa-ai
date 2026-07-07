@@ -19,13 +19,12 @@ def clean_lang_code(lang: str) -> str:
     
     lang_lower = lang.lower().strip()
     
-    # Handle Chinese Simplified/Traditional explicitly
     if "zh-cn" in lang_lower or "zh-hans" in lang_lower:
         return "zh-Hans"
     if "zh-tw" in lang_lower or "zh-hk" in lang_lower or "zh-hant" in lang_lower:
         return "zh-Hant"
         
-    # Standard splitting (e.g. 'hi-IN' -> 'hi')
+
     return lang_lower.split("-")[0]
 
 def translate_text(text: str,source_lang: str = "en", target_lang: str = "hi") -> str:
@@ -69,6 +68,6 @@ def translate_text(text: str,source_lang: str = "en", target_lang: str = "hi") -
             
         return text
     except Exception as e:
-        print(f"❌ Error during Azure translation: {e}")
+        print(f" Error during Azure translation: {e}")
         # Return fallback original text if API fails to prevent system crash
         return text

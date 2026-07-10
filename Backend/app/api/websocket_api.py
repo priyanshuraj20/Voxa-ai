@@ -8,6 +8,12 @@ from app.services.translation_service import translate_text
 from app.services.tts_service import TTSService
 from app.services.postprocess_service import improve_transcript
 
+def safe_print(msg: str):
+    try:
+        print(msg)
+    except UnicodeEncodeError:
+        print(msg.encode('ascii', errors='replace').decode('ascii'))
+
 router = APIRouter()
 
 # 16kHz mono 16-bit PCM configuration
@@ -21,9 +27,9 @@ async def websocket_endpoint(websocket: WebSocket, source_lang: str = "en", targ
     Handles streaming PCM audio from the Chrome extension, processes it in chunks,
     and returns transcripts and translations.
     """
-    print(f"🔌 WebSocket connection requested. Source: {source_lang}, Target: {target_lang}, Voice: {voice_id}")
+    safe_print(f"[WS] Connection requested. Source: {source_lang}, Target: {target_lang}, Voice: {voice_id}")
     await websocket.accept()
-    print("✅ WebSocket connection accepted.")
+    safe_print("[WS] Connection accepted.")
     
     import array
     import math
@@ -58,9 +64,9 @@ async def websocket_endpoint(websocket: WebSocket, source_lang: str = "en", targ
                         source_lang = cmd.get("source_lang", source_lang)
                         target_lang = cmd.get("target_lang", target_lang)
                         voice_id = cmd.get("voice_id", voice_id)
-                        print(f"🔄 Dynamic Language Switch: Source={source_lang}, Target={target_lang}, Voice={voice_id}")
+                        safe_print(f"[WS] Dynamic Language Switch: Source={source_lang}, Target={target_lang}, Voice={voice_id}")
                 except Exception as json_ex:
-                    print(f"Failed to parse text command frame: {json_ex}")
+                    safe_print(f"Failed to parse text command frame: {json_ex}")
                 continue
             else:
                 continue
@@ -73,7 +79,7 @@ async def websocket_endpoint(websocket: WebSocket, source_lang: str = "en", targ
                 # User is speaking
                 if not is_speaking:
                     is_speaking = True
-                    print(f"🗣️ Voice activity started... (RMS: {rms:.1f})")
+                    safe_print(f"[VAD] Voice activity started... (RMS: {rms:.1f})")
                 audio_buffer.extend(data)
                 silence_counter = 0
             else:
@@ -89,18 +95,18 @@ async def websocket_endpoint(websocket: WebSocket, source_lang: str = "en", targ
             # Condition A: Silence limit reached after active speaking
             if is_speaking and silence_counter >= SILENCE_LIMIT:
                 if len(audio_buffer) >= MIN_AUDIO_BYTES:
-                    print(f"⏹️ Voice activity ended (~1.2s silence). Processing buffer ({len(audio_buffer)} bytes)...")
+                    safe_print(f"[VAD] Voice activity ended (~1.2s silence). Processing buffer ({len(audio_buffer)} bytes)...")
                     should_process = True
                 else:
                     # Too short, discard and reset
-                    print(f"🔇 Discarded short noise chunk ({len(audio_buffer)} bytes)")
+                    safe_print(f"[VAD] Discarded short noise chunk ({len(audio_buffer)} bytes)")
                     audio_buffer.clear()
                     is_speaking = False
                     silence_counter = 0
             
             # Condition B: Max buffer duration exceeded to prevent long latency
             elif is_speaking and len(audio_buffer) >= MAX_AUDIO_BYTES:
-                print(f"⏸️ Max speaking buffer duration reached ({len(audio_buffer)} bytes). Splitting stream...")
+                safe_print(f"[VAD] Max speaking buffer duration reached ({len(audio_buffer)} bytes). Splitting stream...")
                 should_process = True
             
             if should_process:
@@ -132,11 +138,11 @@ async def websocket_endpoint(websocket: WebSocket, source_lang: str = "en", targ
                     if transcript and transcript.strip():
                         # Refine transcript using Claude via OpenRouter
                         transcript = improve_transcript(transcript)
-                        print(f"🗣️ Refined Transcript: {transcript}")
+                        safe_print(f"[ASR] Refined Transcript: {transcript}")
                         
                         # 2. Translate using Azure Translation API
                         translated = translate_text(transcript, source_lang=source_lang, target_lang=target_lang)
-                        print(f"🌍 Translated: {translated}")
+                        safe_print(f"[Translator] Translated: {translated}")
                         
                         # 3. Synthesize Speech using ElevenLabs directly to base64
                         import base64
@@ -144,7 +150,7 @@ async def websocket_endpoint(websocket: WebSocket, source_lang: str = "en", targ
                             audio_bytes = TTSService.generate_speech_bytes(translated, voice_id=voice_id)
                             audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
                         except Exception as tts_ex:
-                            print(f"❌ ElevenLabs WebSocket synthesis failed: {tts_ex}")
+                            safe_print(f"[TTS] ElevenLabs WebSocket synthesis failed: {tts_ex}")
                             audio_base64 = None
                         
                         # Send JSON result back to the extension
@@ -154,7 +160,7 @@ async def websocket_endpoint(websocket: WebSocket, source_lang: str = "en", targ
                             "audio": audio_base64
                         })
                 except Exception as ex:
-                    print(f"❌ Error during WebSocket chunk processing: {ex}")
+                    safe_print(f"[WS] Error during WebSocket chunk processing: {ex}")
                     traceback.print_exc()
                 finally:
                     # Clean up the temporary audio file
@@ -162,8 +168,8 @@ async def websocket_endpoint(websocket: WebSocket, source_lang: str = "en", targ
                         os.remove(temp_wav_path)
                         
     except WebSocketDisconnect:
-        print("🔌 WebSocket disconnected cleanly.")
+        safe_print("[WS] Disconnected cleanly.")
     except Exception as e:
-        print(f"❌ WebSocket error: {e}")
+        safe_print(f"[WS] Error: {e}")
     finally:
-        print("INFO:     connection closed")
+        safe_print("INFO:     connection closed")

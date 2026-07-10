@@ -114,6 +114,7 @@ async function startCapture(streamId) {
     };
 
     sourceNode.connect(processorNode);
+    processorNode.connect(audioContext.destination);
     sourceNode.connect(audioContext.destination); // Play original captured audio back to user's speakers
 
     // Connect real-time translation channel

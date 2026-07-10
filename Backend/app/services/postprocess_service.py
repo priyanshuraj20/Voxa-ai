@@ -67,6 +67,7 @@ Transcript:
                     }
                 ],
                 "temperature": 0,
+                "max_tokens": 1000,
             },
             timeout=60,
         )

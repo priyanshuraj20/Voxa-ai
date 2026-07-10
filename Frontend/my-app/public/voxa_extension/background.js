@@ -143,6 +143,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
         return { success: true };
 
+      case "translation-error":
+        await chrome.storage.local.set({ isTranslating: false });
+        activeCaptureTabId = null;
+        if (isOffscreenActive) {
+          try {
+            await chrome.offscreen.closeDocument();
+            isOffscreenActive = false;
+          } catch (err) {
+            console.error("Error closing offscreen:", err);
+          }
+        }
+        // Broadcast error to tab to update UI and notify user
+        if (sender.tab && sender.tab.id) {
+          chrome.tabs.sendMessage(sender.tab.id, { action: "show-error", error: message.error }).catch(e => {});
+        } else {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0] && tabs[0].id) {
+              chrome.tabs.sendMessage(tabs[0].id, { action: "show-error", error: message.error }).catch(e => {});
+            }
+          });
+        }
+        return { success: true };
+
       case "update-active-settings":
         // Sync parameters dynamically while the stream is actively running
         if (isOffscreenActive) {

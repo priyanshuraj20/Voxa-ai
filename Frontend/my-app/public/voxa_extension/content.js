@@ -419,6 +419,9 @@
       if (container.style.display === "flex") {
         syncState();
       }
+    } else if (message.action === "show-error") {
+      alert(`Voxa Translate: ${message.error}`);
+      syncState();
     }
   });
 

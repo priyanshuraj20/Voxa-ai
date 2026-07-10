@@ -17,6 +17,8 @@
  *    synced directly to the slider's volume setting.
  */
 
+import CONFIG from './config.js';
+
 let mediaStream = null;
 let audioContext = null;
 let sourceNode = null;
@@ -130,8 +132,9 @@ function connectWebSocket() {
   }
 
   // Fetch API server configurations (Fallback to localhost if missing)
-  const backendHost = "localhost:8000";
-  const wsUrl = `ws://${backendHost}/ws?source_lang=${currentSourceLang}&target_lang=${currentTargetLang}&voice_id=${currentVoiceId}`;
+  const backendUrl = CONFIG.BACKEND_URL || "http://localhost:8000";
+  const baseWsUrl = backendUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
+  const wsUrl = `${baseWsUrl}/ws?source_lang=${currentSourceLang}&target_lang=${currentTargetLang}&voice_id=${currentVoiceId}`;
 
   console.log("🔌 Offscreen connecting to WebSocket:", wsUrl);
   socket = new WebSocket(wsUrl);
@@ -161,10 +164,20 @@ function connectWebSocket() {
 
   socket.onerror = (err) => {
     console.error("❌ WebSocket error inside offscreen:", err);
+    chrome.runtime.sendMessage({
+      action: "translation-error",
+      error: "WebSocket connection error. Please make sure the backend server is running and config.js is configured correctly."
+    }).catch(e => console.error("Failed to send translation-error message:", e));
   };
 
-  socket.onclose = () => {
+  socket.onclose = (event) => {
     console.log("🔌 WebSocket closed inside offscreen.");
+    if (!event.wasClean) {
+      chrome.runtime.sendMessage({
+        action: "translation-error",
+        error: `WebSocket disconnected unexpectedly (code: ${event.code}).`
+      }).catch(e => console.error("Failed to send translation-error message:", e));
+    }
   };
 }
 

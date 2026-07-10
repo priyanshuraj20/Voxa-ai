@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Voxa Real-Time Audio Translator",
+  "version": "2.0.0",
+  "description": "Injects a transparent, draggable overlay to capture tab audio and play real-time voice translations.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "tabCapture",
+    "offscreen",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Toggle Translation Console"
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}

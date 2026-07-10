@@ -1,6 +1,6 @@
 import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from "./auth";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+const BASE_URL = (import.meta.env as any).VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
 export async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
   const token = getAccessToken();

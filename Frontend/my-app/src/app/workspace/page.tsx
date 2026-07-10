@@ -4,16 +4,13 @@
 import React, { useRef, useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getAccessToken } from "@/lib/auth";
-
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import CustomAudioPlayer from "@/components/ui/CustomAudioPlayer";
 import { LANGUAGES } from "@/constants/languages";
 
-// List of wave bars delays and heights to create a natural, organic audio wave visualization
 const waveformBars = [
   { delay: "0.1s", height: "30%" },
   { delay: "0.3s", height: "60%" },
@@ -32,7 +29,7 @@ export default function WorkspacePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Route protection redirect checks
+  // Route protection
   useEffect(() => {
     const token = getAccessToken();
     if (!token) {
@@ -42,47 +39,69 @@ export default function WorkspacePage() {
     }
   }, [user, loading, router]);
 
-  // ==========================================
-  // React State variables
-  // ==========================================
-  const [isRecording, setIsRecording] = useState(false); // Tracks if microphone is actively capturing voice
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null); // Stores raw audio data block in webm format
-  const [audioUrl, setAudioUrl] = useState<string | null>(null); // URL representation of the recorded audio for local playing
-  const [isProcessing, setIsProcessing] = useState(false); // Tracks if upload translation fetch is pending
-  const [isPlayingTTS, setIsPlayingTTS] = useState(false); // Tracks if synthesized translation voice is playing
-  const [copied, setCopied] = useState(false); // Visual feedback state when copying translation output
-  const [error, setError] = useState(""); // Error alert state
-  const [processingStep, setProcessingStep] = useState<number>(0); // Pipeline processing step tracking
+  // Operational Mode State
+  const [mode, setMode] = useState<"batch" | "realtime">("batch");
+
+  // States
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isPlayingTTS, setIsPlayingTTS] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+  const [processingStep, setProcessingStep] = useState<number>(0);
 
   const [sourceLang, setSourceLang] = useState("en");
-  // Translation metrics from FastAPI backend
-  const [transcript, setTranscript] = useState(""); // Real-time transcribed text of the spoken English input
-  const [targetLang, setTargetLang] = useState("hi-IN"); // Target translation language
+  const [targetLang, setTargetLang] = useState("hi-IN");
+  const [transcript, setTranscript] = useState("");
   const [outputText, setOutputText] = useState(
-    "Welcome to the applied technology conference. Today we will explore the future of neural translation.",
-  ); // Target translated text returned from the server
-  const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(null); // URL path to access synthesized TTS speech on the server
+    "Welcome to the applied technology conference. Today we will explore the future of neural translation."
+  );
+  const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(null);
 
-  // ==========================================
-  // References for non-reactive items
-  // ==========================================
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null); // Ref to hold standard browser MediaRecorder instance
-  const audioChunksRef = useRef<Blob[]>([]); // Array to aggregate raw chunks of recorded audio stream
-  const audioPlayerRef = useRef<HTMLAudioElement | null>(null); // Ref to play back recorded local audio file
-  const playingAudioRef = useRef<HTMLAudioElement | null>(null); // Ref to manage active TTS playing audio
+  // Refs for Batch Mode
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const playingAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // ==========================================
-  // Clipboard copying helper
-  // ==========================================
+  // Refs for Real-Time Streaming Mode
+  const socketRef = useRef<WebSocket | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const processorNodeRef = useRef<ScriptProcessorNode | null>(null);
+  const sourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  // Clean up WebGL, WS, and Audio contexts on unmount
+  useEffect(() => {
+    return () => {
+      if (socketRef.current) socketRef.current.close();
+      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+        audioContextRef.current.close();
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
+  // Synchronize language shifts dynamically over active WebSocket without reconnects
+  useEffect(() => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      console.log("🔄 Syncing updated languages to WebSocket:", sourceLang, targetLang);
+      socketRef.current.send(JSON.stringify({
+        action: "switch_languages",
+        source_lang: sourceLang,
+        target_lang: targetLang
+      }));
+    }
+  }, [sourceLang, targetLang]);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(outputText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  // ==========================================
-  // LANGUAGE HELPERS
-  // ==========================================
 
   const swapLanguages = () => {
     const temp = sourceLang;
@@ -95,42 +114,165 @@ export default function WorkspacePage() {
       setError("Source and Target language cannot be the same.");
       return false;
     }
-
     return true;
   };
 
   // ==========================================
-  // AUDIO RECORDING FUNCTIONS
+  // REAL-TIME WEBSOCKET STREAMING MODE
   // ==========================================
 
-  // Initiates microphone capture stream and creates the MediaRecorder instance
+  const startRealtimeStreaming = async () => {
+    setError("");
+    setTranscript("");
+    setOutputText("Listening to stream... Speak now.");
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      const backendUrl = (import.meta.env as any).VITE_BACKEND_URL || "http://127.0.0.1:8000";
+      const wsUrl = backendUrl.replace("http://", "ws://").replace("https://", "wss://") + `/ws?source_lang=${sourceLang}&target_lang=${targetLang}`;
+      
+      console.log("🔌 Connecting to real-time WebSocket:", wsUrl);
+      const socket = new WebSocket(wsUrl);
+      socket.binaryType = "arraybuffer";
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        console.log("✅ Real-time WebSocket connection opened.");
+        
+        // Start Audio Context downsampling to 16kHz PCM mono
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const audioContext = new AudioContextClass({ sampleRate: 16000 });
+        audioContextRef.current = audioContext;
+
+        const sourceNode = audioContext.createMediaStreamSource(stream);
+        sourceNodeRef.current = sourceNode;
+
+        const processorNode = audioContext.createScriptProcessor(4096, 1, 1);
+        processorNodeRef.current = processorNode;
+
+        processorNode.onaudioprocess = (e) => {
+          const inputData = e.inputBuffer.getChannelData(0);
+          const int16Buffer = new Int16Array(inputData.length);
+          for (let i = 0; i < inputData.length; i++) {
+            const s = Math.max(-1, Math.min(1, inputData[i]));
+            int16Buffer[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+          }
+
+          if (socket.readyState === WebSocket.OPEN) {
+            socket.send(int16Buffer.buffer);
+          }
+        };
+
+        sourceNode.connect(processorNode);
+        processorNode.connect(audioContext.destination);
+        
+        setIsRecording(true);
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log("📨 Real-time transcript chunk:", data);
+          if (data.transcript) {
+            setTranscript((prev) => prev ? prev + " " + data.transcript : data.transcript);
+          }
+          if (data.translation) {
+            setOutputText((prev) => {
+              const defaultText = "Welcome to the applied technology conference. Today we will explore the future of neural translation.";
+              const isDefault = prev === defaultText || prev === "Listening to stream... Speak now." || prev.startsWith("Your translation");
+              return isDefault ? data.translation : prev + " " + data.translation;
+            });
+          }
+          
+          if (data.audio) {
+            const audioSrc = `data:audio/mp3;base64,${data.audio}`;
+            const audio = new Audio(audioSrc);
+            audio.play().catch((e) => console.log("Audio playback blocked by gesture security:", e));
+          }
+        } catch (jsonErr) {
+          console.error("JSON parse error on WebSocket message:", jsonErr);
+        }
+      };
+
+      socket.onclose = () => {
+        console.log("🔌 Real-time WebSocket connection closed.");
+        stopRealtimeStreaming();
+      };
+
+      socket.onerror = (err) => {
+        console.error("❌ WebSocket error:", err);
+        setError("WebSocket connection failed.");
+        stopRealtimeStreaming();
+      };
+
+    } catch (err) {
+      setError("Microphone access denied or connection failed.");
+      console.error(err);
+      stopRealtimeStreaming();
+    }
+  };
+
+  const stopRealtimeStreaming = () => {
+    setIsRecording(false);
+
+    if (socketRef.current) {
+      if (socketRef.current.readyState === WebSocket.OPEN || socketRef.current.readyState === WebSocket.CONNECTING) {
+        socketRef.current.close();
+      }
+      socketRef.current = null;
+    }
+
+    if (sourceNodeRef.current) {
+      sourceNodeRef.current.disconnect();
+      sourceNodeRef.current = null;
+    }
+
+    if (processorNodeRef.current) {
+      processorNodeRef.current.disconnect();
+      processorNodeRef.current.onaudioprocess = null;
+      processorNodeRef.current = null;
+    }
+
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  // ==========================================
+  // BATCH UPLOAD (SSE STREAMING) MODE
+  // ==========================================
+
   const startRecording = async () => {
     setError("");
+    setTranscript("");
     try {
-      // Prompt user for mic permissions
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
 
       mediaRecorderRef.current = recorder;
       audioChunksRef.current = [];
 
-      // Event handler called continuously as microphone data chunks become available
       recorder.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
       };
 
-      // Callback triggered when recording is stopped, consolidating chunks and posting payload to server
       recorder.onstop = async () => {
         const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
 
-        // Auto upload recorded blob for processing
         await uploadAudio(blob);
       };
 
-      // Start capture
       recorder.start();
       setIsRecording(true);
     } catch (err) {
@@ -139,50 +281,40 @@ export default function WorkspacePage() {
     }
   };
 
-  // Stops recording and releases microphone resources
   const stopRecording = () => {
     const recorder = mediaRecorderRef.current;
     if (!recorder) return;
 
     recorder.stop();
-    // Stop all media tracks associated with the stream to release the microphone lock
     recorder.stream.getTracks().forEach((track) => track.stop());
     setIsRecording(false);
   };
 
-  // ==========================================
-  // BACKEND API TRANSLATION STREAM
-  // ==========================================
-
-  // Uploads raw WebM audio blob to the translation engine endpoint
   const uploadAudio = async (blob: Blob) => {
-    if (!validateLanguages()) {
-      return;
-    }
+    if (!validateLanguages()) return;
 
     setIsProcessing(true);
-    setProcessingStep(1); // 1: Audio Uplink / Uploading
+    setProcessingStep(1);
     setError("");
+
+    const backendUrl = (import.meta.env as any).VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
     try {
       const formData = new FormData();
-
       formData.append("file", blob, "recording.webm");
       formData.append("source_lang", sourceLang);
       formData.append("target_lang", targetLang);
 
-      console.log("📤 Sending speech translation request...");
-
       const token = getAccessToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/speech/translate-and-speak`,
+        `${backendUrl}/speech/translate-and-speak`,
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
           body: formData,
-        },
+        }
       );
 
       if (response.status === 401) {
@@ -219,8 +351,6 @@ export default function WorkspacePage() {
 
           try {
             const data = JSON.parse(trimmed);
-            console.log("📨 Stream chunk received:", data);
-
             if (data.step !== undefined) {
               setProcessingStep(data.step);
             }
@@ -229,7 +359,16 @@ export default function WorkspacePage() {
               if (data.success) {
                 setTranscript(data.transcript || "");
                 setOutputText(data.translated_text || "");
-                setTtsAudioUrl(data.output_audio_url || null);
+                let url = data.output_audio_url;
+                if (url && url.startsWith("/")) {
+                  url = `${backendUrl}${url}`;
+                }
+                const freshUrl = url ? `${url}?cb=${Date.now()}` : null;
+                setTtsAudioUrl(freshUrl);
+                
+                if (freshUrl) {
+                  playTTSAudio(freshUrl);
+                }
               } else {
                 setError(data.error || "Speech translation server failed.");
               }
@@ -244,27 +383,21 @@ export default function WorkspacePage() {
     } catch (err) {
       setProcessingStep(0);
       console.error(err);
-
       setError(
         `Translation service error: ${
           err instanceof Error ? err.message : "Internal Server Error"
-        }`,
+        }`
       );
-
       setOutputText("Error: Could not retrieve translation.");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // ==========================================
-  // TEXT-TO-SPEECH (TTS) PLAYBACK CONTROL
-  // ==========================================
-
-  // Initiates browser playback for the synthesized translation audio file from server URL
-  const playTTSAudio = () => {
-    if (!ttsAudioUrl) {
-      setError("No target audio found. Record speech to generate speech.");
+  const playTTSAudio = (urlToPlay?: string) => {
+    const targetUrl = urlToPlay || ttsAudioUrl;
+    if (!targetUrl) {
+      setError("No target audio found. Record speech first.");
       return;
     }
 
@@ -275,11 +408,11 @@ export default function WorkspacePage() {
         playingAudioRef.current = null;
       }
 
-      const audio = new Audio(`${ttsAudioUrl}?t=${Date.now()}`);
+      const separator = targetUrl.includes("?") ? "&" : "?";
+      const audio = new Audio(`${targetUrl}${separator}t=${Date.now()}`);
       playingAudioRef.current = audio;
       setIsPlayingTTS(true);
 
-      // Reset play status when track ends
       audio.onended = () => {
         setIsPlayingTTS(false);
         playingAudioRef.current = null;
@@ -302,605 +435,499 @@ export default function WorkspacePage() {
     }
   };
 
+  const handleMicClick = () => {
+    if (mode === "realtime") {
+      if (isRecording) {
+        stopRealtimeStreaming();
+      } else {
+        startRealtimeStreaming();
+      }
+    } else {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+  };
+
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-center select-none font-sans">
-        <span className="w-8 h-8 border-2 border-white/20 border-t-[#6366f1] rounded-full animate-spin"></span>
-        <p className="text-sm text-zinc-500 font-mono tracking-widest uppercase">Authorizing Session...</p>
+      <div className="min-h-screen bg-[#030305] flex flex-col items-center justify-center gap-4 text-center select-none font-sans">
+        <span className="w-8 h-8 border-2 border-white/20 border-t-[#00f5ff] rounded-full animate-spin"></span>
+        <p className="text-xs text-zinc-500 font-mono tracking-widest uppercase">Syncing Console...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-black text-[#e7e0ed] relative font-sans grid-bg radial-glow">
+    <div className="flex flex-col min-h-screen bg-[#030305] text-[#e7e0ed] relative font-sans overflow-x-hidden">
+      {/* Background ambient orbs */}
+      <div className="absolute top-[10%] left-[10%] w-[400px] h-[400px] bg-[#8b5cf6]/5 rounded-full blur-[120px] animate-float-slow-1 pointer-events-none"></div>
+      <div className="absolute bottom-[20%] right-[10%] w-[400px] h-[400px] bg-[#00f5ff]/5 rounded-full blur-[120px] animate-float-slow-2 pointer-events-none"></div>
+
       <Header />
 
-      {/* Sidebar navigation + Main Area wrapper. 
-          Adjusted pt-[120px] dynamically offset top fixed banner + header height */}
-      <div className="flex flex-1 pt-[120px] overflow-hidden relative z-10 min-h-0">
+      <div className="flex flex-1 pt-32 pb-12 overflow-hidden relative z-10 w-[95%] max-w-[1200px] mx-auto flex-col gap-6">
         <Sidebar />
 
-        {/* Workspace core container */}
-        <div className="flex-1 flex flex-col relative overflow-hidden bg-transparent">
-          {/* Error alert wrapper */}
-          {error && (
-            <div className="mx-6 mt-6 bg-[#93000a]/20 border border-[#ffb4ab]/40 text-[#ffdad6] px-6 py-3 rounded-lg flex items-center justify-between z-20 backdrop-blur-md">
-              <span className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg">error</span>
-                {error}
-              </span>
-              <button
-                onClick={() => setError("")}
-                className="text-[#ffdad6] hover:text-white transition-colors"
-              >
-                <span className="material-symbols-outlined text-base">
-                  close
-                </span>
-              </button>
-            </div>
-          )}
+        {error && (
+          <div className="bg-red-950/30 border border-red-500/20 text-red-200 text-xs px-4 py-3 rounded-xl flex items-center justify-between backdrop-blur-md">
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">error</span>
+              {error}
+            </span>
+            <button onClick={() => setError("")} className="text-red-200 hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
+          </div>
+        )}
 
-          {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {/* Grid Split-view Workspace */}
-            <div className="grid grid-cols-12 gap-6 p-6 h-[calc(100vh-180px)] min-h-[500px] shrink-0">
-            {/* LEFT COLUMN: Input Stream Context (Whisper ASR) */}
-            <div className="col-span-12 md:col-span-6 flex flex-col gap-4 h-full overflow-hidden">
-              <div className="flex-1 flex flex-col premium-card overflow-hidden">
-                {/* Panel Header */}
-                <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/40 select-none">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#cbc3d7]/60">
-                      [01] Input_Stream
-                    </span>
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        isRecording
-                          ? "bg-[#8b5cf6] animate-pulse"
-                          : isProcessing
-                            ? "bg-[#ffb869] animate-pulse"
-                            : "bg-white/20"
-                      }`}
-                    ></span>
+        {/* Operational Mode Toggle Bar */}
+        <div className="flex justify-center select-none mb-2">
+          <div className="glass-card p-1 border border-white/5 flex gap-1 rounded-xl">
+            <button
+              onClick={() => {
+                if (isRecording) {
+                  mode === "realtime" ? stopRealtimeStreaming() : stopRecording();
+                }
+                setMode("batch");
+                setTranscript("");
+                setOutputText("Your translation will appear here after speech capture.");
+                setTtsAudioUrl(null);
+                setAudioUrl(null);
+              }}
+              className={`px-4.5 py-2.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all border ${
+                mode === "batch"
+                  ? "bg-[#8b5cf6] text-white border-[#8b5cf6]/30 shadow-md"
+                  : "text-zinc-400 hover:text-white border-transparent"
+              }`}
+            >
+              Batch Upload (SSE)
+            </button>
+            <button
+              onClick={() => {
+                if (isRecording) {
+                  mode === "realtime" ? stopRealtimeStreaming() : stopRecording();
+                }
+                setMode("realtime");
+                setTranscript("");
+                setOutputText("Press the mic button and speak continuously.");
+                setTtsAudioUrl(null);
+                setAudioUrl(null);
+              }}
+              className={`px-4.5 py-2.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all border ${
+                mode === "realtime"
+                  ? "bg-[#00f5ff] text-black border-[#00f5ff]/30 shadow-md"
+                  : "text-zinc-400 hover:text-white border-transparent"
+              }`}
+            >
+              Real-Time Stream (WS)
+            </button>
+          </div>
+        </div>
+
+        {/* Split View Columns */}
+        <div className="grid grid-cols-12 gap-6 items-stretch">
+          
+          {/* LEFT COLUMN: Input Stream Context (ASR) */}
+          <div className="col-span-12 lg:col-span-6 flex flex-col gap-4 h-full">
+            <div className="flex-1 flex flex-col glass-card overflow-hidden p-6 border border-white/5">
+              
+              {/* Panel Header */}
+              <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4 select-none">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500 font-bold">
+                    [01] Input_Stream ({mode === "realtime" ? "WebSocket" : "ASR"})
+                  </span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      isRecording
+                        ? mode === "realtime"
+                          ? "bg-[#00f5ff] animate-pulse"
+                          : "bg-[#8b5cf6] animate-pulse"
+                        : isProcessing
+                          ? "bg-[#00f5ff] animate-pulse"
+                          : "bg-white/10"
+                    }`}
+                  ></span>
+                </div>
+                <div className="font-mono text-[8px] text-[#00f5ff] uppercase tracking-widest font-bold">
+                  {isRecording ? "Recording" : isProcessing ? "Processing" : "Standby"}
+                </div>
+              </div>
+
+              {/* Speech transcript */}
+              <div className="flex-1 min-h-[160px] max-h-[250px] overflow-y-auto pr-2 custom-scrollbar text-left mb-6">
+                {isProcessing && !transcript ? (
+                  <div className="border-l border-[#8b5cf6]/20 pl-4 py-1 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6] animate-ping" />
+                      <p className="font-mono text-[8px] text-[#8b5cf6] uppercase tracking-widest font-bold">
+                        [VOXA CORE] Parsing speech tokens...
+                      </p>
+                    </div>
+                    <div className="font-mono text-[10px] text-zinc-500 space-y-1 pl-1 leading-relaxed">
+                      <div>&gt; Initializing Whisper large-v3 decoder...</div>
+                      <div>&gt; Slicing acoustic spectrogram blocks...</div>
+                      <div className="flex items-center gap-1">
+                        <span className="w-1 h-2 bg-[#8b5cf6] animate-pulse" />
+                        <span>Computing weights...</span>
+                      </div>
+                    </div>
+                    <SkeletonLoader lines={2} />
                   </div>
-                  <div className="font-mono text-[9px] text-[#d0bcff] uppercase tracking-widest font-bold">
+                ) : transcript ? (
+                  <div className="border-l border-[#8b5cf6]/30 pl-4 py-1">
+                    <p className="font-mono text-[8px] text-[#8b5cf6] uppercase tracking-wider font-bold mb-1.5">
+                      Transcribed Text ({sourceLang.toUpperCase()})
+                    </p>
+                    <p className="text-base text-zinc-300 font-light leading-relaxed">
+                      {transcript}
+                      <span className="inline-block w-1 h-4 bg-[#8b5cf6]/80 ml-1.5 align-middle animate-streaming-cursor" />
+                    </p>
+                  </div>
+                ) : (
+                  <div className="border-l border-white/5 pl-4 py-1 text-zinc-600 text-sm italic font-light">
                     {isRecording
-                      ? "Recording..."
-                      : isProcessing
-                        ? "Processing..."
-                        : "Standby"}
+                      ? mode === "realtime"
+                        ? "🎤 Streaming raw PCM blocks... speak continuously."
+                        : "🎤 Capturing speech... speak clearly."
+                      : mode === "realtime"
+                        ? "Ready for live translation. Press the orb to start streaming."
+                        : "Ready to translate. Select languages and start capture."}
+                    {isRecording && (
+                      <span className="inline-block w-1 h-4 bg-white/40 ml-1.5 align-middle animate-streaming-cursor" />
+                    )}
                   </div>
-                </div>
+                )}
+              </div>
 
-                {/* Speech transcript text display */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
-                  {isProcessing && !transcript ? (
-                    <div className="border-l-2 border-[#8b5cf6]/40 pl-6 py-3 space-y-4">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-ping" />
-                        <p className="font-mono text-[9px] text-[#d0bcff] uppercase tracking-widest font-bold">
-                          [VOXA CORE] Parsing speech tokens...
-                        </p>
-                      </div>
-                      <div className="font-mono text-[11px] text-zinc-500 space-y-1.5 pl-1 leading-relaxed">
-                        <div>&gt; Initializing Whisper large-v3 decoder...</div>
-                        <div>&gt; Slicing acoustic spectrogram blocks...</div>
-                        <div className="flex items-center gap-1.5 text-zinc-400">
-                          <span className="w-1.5 h-3 bg-[#8b5cf6] animate-pulse" />
-                          <span>Computing self-attention query weights...</span>
-                        </div>
-                      </div>
-                      <SkeletonLoader lines={2} />
-                    </div>
-                  ) : transcript ? (
-                    <div className="border-l-2 border-[#8b5cf6]/40 pl-6 py-2">
-                      <p className="font-mono text-[10px] text-[#d0bcff]/60 mb-2 uppercase tracking-widest">
-                        Transcribed Speech ({sourceLang.toUpperCase()})
-                      </p>
-                      <p className="text-lg text-white font-light leading-relaxed">
-                        {transcript}
-                        {/* Blinking prompt cursor from Stitch mockup */}
-                        <span
-                          id="streaming-cursor"
-                          className="inline-block w-1.5 h-5 bg-[#8b5cf6]/80 ml-2 align-middle animate-streaming-cursor shadow-[0_0_10px_rgba(139,92,246,0.6)]"
-                        />
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="border-l-2 border-white/5 pl-6 py-2">
-                      <p className="text-lg text-[#cbc3d7]/40 italic font-light">
-                        {isRecording
-                          ? "🎤 Capturing acoustic signals... speak clearly."
-                          : "Simulating translation on a web page. Press the microphone button below to start."}
-                        {!isRecording && (
-                          <span
-                            id="streaming-cursor"
-                            className="inline-block w-1.5 h-5 bg-white/40 ml-2 align-middle animate-streaming-cursor"
-                          />
-                        )}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Local wave indicator when capturing speech */}
-                <div className="h-16 bg-black/40 border-t border-white/5 flex items-center justify-center gap-1.5 px-4 select-none">
+              {/* Wave Visualizer and Recording Controls */}
+              <div className="border-t border-white/5 pt-4 flex flex-col gap-4 mt-auto">
+                <div className="flex items-end gap-1.5 h-10 justify-center select-none">
                   {waveformBars.map((bar, i) => (
                     <div
                       key={i}
                       style={{
-                        height: isRecording ? bar.height : "4px",
+                        height: isRecording ? bar.height : "3px",
                         animationDelay: bar.delay,
                       }}
                       className={`w-1 rounded-full transition-all duration-300 ${
                         isRecording
-                          ? "bg-[#8b5cf6] animate-waveform-jump"
-                          : "bg-white/10"
+                          ? mode === "realtime"
+                            ? "bg-[#00f5ff] animate-waveform-jump"
+                            : "bg-[#8b5cf6] animate-waveform-jump"
+                          : "bg-white/5"
                       }`}
                     ></div>
                   ))}
-                  {/* Local audio record trigger and player */}
-                  <div className="p-4 border-t border-white/5 bg-black/40 flex items-center gap-4 select-none">
-                    {/* Radar pulsing ring active micro state */}
-                    <div className="relative shrink-0">
-                      {isRecording && (
-                        <>
-                          <span className="absolute inset-0 rounded-full bg-[#8b5cf6]/30 animate-ping scale-150" />
-                          <span className="absolute -inset-1.5 rounded-full border border-[#8b5cf6]/30 animate-pulse scale-110" />
-                        </>
-                      )}
-                      <button
-                        onClick={isRecording ? stopRecording : startRecording}
-                        disabled={isProcessing}
-                        className={`group w-14 h-14 flex items-center justify-center rounded-full border transition-all duration-300 relative z-10 ${
-                          isRecording
-                            ? "border-[#8b5cf6]/40 bg-[#8b5cf6]/20 text-[#d0bcff] hover:bg-[#8b5cf6]/35 hover:scale-105 active:scale-95"
-                            : "border-white/10 bg-white/5 hover:border-[#8b5cf6]/45 text-white active:scale-95 disabled:opacity-50"
-                        }`}
-                        title={
-                          isRecording
-                            ? "Stop capture and translate"
-                            : "Start capturing microphone input"
-                        }
-                      >
-                        <span className="material-symbols-outlined text-2xl group-hover:text-[#d0bcff]">
-                          {isRecording ? "stop" : "mic"}
-                        </span>
-                      </button>
-                    </div>
+                </div>
 
-                    {/* Playback card for recorded user voice */}
-                    {audioUrl && (
-                      <CustomAudioPlayer src={audioUrl} label="Local Record" />
+                <div className="flex items-center gap-4">
+                  {/* Glowing Mic Orb */}
+                  <div className="relative shrink-0 select-none">
+                    {isRecording && (
+                      <>
+                        <span className={`absolute inset-0 rounded-full animate-ping scale-125 ${mode === "realtime" ? "bg-[#00f5ff]/20" : "bg-[#8b5cf6]/20"}`} />
+                        <span className={`absolute -inset-1 rounded-full border animate-pulse ${mode === "realtime" ? "border-[#00f5ff]/25" : "border-[#8b5cf6]/25"}`} />
+                      </>
                     )}
-                  </div>{" "}
+                    <button
+                      onClick={handleMicClick}
+                      disabled={isProcessing}
+                      className={`group w-12 h-12 flex items-center justify-center rounded-full border transition-all duration-300 relative z-10 ${
+                        isRecording
+                          ? mode === "realtime"
+                            ? "border-[#00f5ff]/35 bg-[#00f5ff]/20 text-[#00f5ff] hover:bg-[#00f5ff]/30 hover:scale-105 active:scale-95"
+                            : "border-[#8b5cf6]/30 bg-[#8b5cf6]/20 text-[#8b5cf6] hover:bg-[#8b5cf6]/30 hover:scale-105 active:scale-95"
+                          : "border-white/10 bg-white/3 text-white hover:border-[#8b5cf6]/30 hover:scale-105 active:scale-95 disabled:opacity-50"
+                      }`}
+                      title={isRecording ? "Stop capture" : "Start capture"}
+                    >
+                      <span className="material-symbols-outlined text-lg">
+                        {isRecording ? "stop" : "mic"}
+                      </span>
+                    </button>
+                  </div>
+
+                  {audioUrl && mode === "batch" && (
+                    <CustomAudioPlayer src={audioUrl} label="Local Audio" />
+                  )}
                 </div>
               </div>
+
             </div>
+          </div>
 
-            {/* RIGHT COLUMN: Output Context (Neural Translation Output) */}
-            <div className="col-span-12 md:col-span-6 flex flex-col gap-4 h-full overflow-hidden">
-              <div className="flex-1 flex flex-col premium-card overflow-hidden">
-                {/* Panel Header */}
-                <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/40 select-none">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#cbc3d7]/60">
-                      [02] Output_Buffer (
-                      {LANGUAGES.find((l) => l.code === targetLang)?.name ||
-                        "Hindi"}
-                      )
+          {/* RIGHT COLUMN: Output Stream Context (NMT) */}
+          <div className="col-span-12 lg:col-span-6 flex flex-col gap-4 h-full">
+            <div className="flex-1 flex flex-col glass-card overflow-hidden p-6 border border-white/5">
+              
+              {/* Panel Header */}
+              <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4 select-none">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500 font-bold">
+                    [02] Output_Buffer ({mode === "realtime" ? "WebSocket NMT" : "AZURE"})
+                  </span>
+                </div>
+                <div className="flex gap-2.5">
+                  <button
+                    onClick={handleCopy}
+                    className="p-1 text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-[9px] font-mono"
+                    title="Copy output"
+                  >
+                    <span className="material-symbols-outlined text-sm">{copied ? "check" : "content_copy"}</span>
+                    {copied && "Copied"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Translation display or SSE progress steps */}
+              <div className="flex-1 min-h-[160px] max-h-[250px] overflow-y-auto pr-2 custom-scrollbar text-left mb-6">
+                {isProcessing && mode === "batch" ? (
+                  <div className="space-y-3 font-sans">
+                    <span className="text-[8px] font-mono font-bold tracking-widest text-[#00f5ff] uppercase block mb-2">
+                      Live Translation Program:
                     </span>
-                  </div>
-
-                  {/* Actions (Copy / Save) */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleCopy}
-                      className="p-2 hover:bg-white/5 rounded-lg text-[#cbc3d7] hover:text-[#8b5cf6] transition-all flex items-center gap-1.5"
-                      title="Copy translated output to clipboard"
-                    >
-                      <span className="material-symbols-outlined text-lg">
-                        {copied ? "check" : "content_copy"}
-                      </span>
-                      {copied && (
-                        <span className="font-mono text-[9px] text-[#8b5cf6] uppercase tracking-wider">
-                          Copied
-                        </span>
-                      )}
-                    </button>
-                    <button
-                      className="p-2 hover:bg-white/5 rounded-lg text-[#cbc3d7] hover:text-[#8b5cf6] transition-all"
-                      title="Save translation log"
-                    >
-                      <span className="material-symbols-outlined text-lg">
-                        save
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Translation output display block */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
-                  <div className="bg-white/5 p-6 rounded-xl border border-white/5 flex flex-col gap-4">
-                    <div className="flex justify-between items-center select-none border-b border-white/5 pb-2">
-                      <span className="font-mono text-[9px] text-[#adc6ff] uppercase tracking-widest font-bold">
-                        Target Language: {targetLang.toUpperCase()} (AZURE
-                        TRANSLATOR)
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#adc6ff]/10 text-[#adc6ff] font-mono select-none">
-                        Active Layer
-                      </span>
+                    <div className="space-y-2">
+                      {[
+                        { stepNum: 1, text: "Uploading audio payload" },
+                        { stepNum: 2, text: "ASR speech recognition" },
+                        { stepNum: 3, text: "Claude context correction" },
+                        { stepNum: 4, text: "Azure neural translation" },
+                        { stepNum: 5, text: "ElevenLabs speech synthesis" },
+                      ].map((step, idx) => (
+                        <div key={idx} className="flex items-center gap-3 text-xs">
+                          <span
+                            className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border text-[8px] font-mono font-bold ${
+                              processingStep > step.stepNum
+                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                : processingStep === step.stepNum
+                                  ? "border-[#00f5ff] bg-[#00f5ff]/10 text-[#00f5ff] animate-pulse"
+                                  : "border-white/5 text-zinc-700"
+                            }`}
+                          >
+                            {processingStep > step.stepNum ? "✓" : step.stepNum}
+                          </span>
+                          <span
+                            className={
+                              processingStep === step.stepNum
+                                ? "text-white font-medium"
+                                : processingStep > step.stepNum
+                                  ? "text-zinc-400"
+                                  : "text-zinc-650"
+                            }
+                          >
+                            {step.text}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                    {isProcessing ? (
-                      <div className="space-y-3 py-2">
-                        <div className="font-mono text-[9px] uppercase tracking-wider text-[#adc6ff] border-b border-white/5 pb-2 font-bold mb-3">
-                          Processing Pipeline Steps
-                        </div>
-                        <div className="space-y-2.5">
-                          <div className="flex items-center gap-3 text-xs">
-                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                              processingStep > 1 
-                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                : processingStep === 1
-                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                  : "border-zinc-800 text-zinc-600"
-                            }`}>
-                              {processingStep > 1 ? "✓" : "1"}
-                            </span>
-                            <span className={processingStep === 1 ? "text-white font-medium" : "text-zinc-500"}>
-                              Uploading & buffering audio segment
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-xs">
-                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                              processingStep > 2 
-                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                : processingStep === 2
-                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                  : "border-zinc-800 text-zinc-600"
-                            }`}>
-                              {processingStep > 2 ? "✓" : "2"}
-                            </span>
-                            <span className={processingStep === 2 ? "text-white font-medium" : "text-zinc-500"}>
-                              Speech Recognition (Groq Whisper large-v3)
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-xs">
-                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                              processingStep > 3 
-                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                : processingStep === 3
-                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                  : "border-zinc-800 text-zinc-600"
-                            }`}>
-                              {processingStep > 3 ? "✓" : "3"}
-                            </span>
-                            <span className={processingStep === 3 ? "text-white font-medium" : "text-zinc-500"}>
-                              Transcript Correction (Claude Sonnet 4)
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-xs">
-                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                              processingStep > 4 
-                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                : processingStep === 4
-                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                  : "border-zinc-800 text-zinc-600"
-                            }`}>
-                              {processingStep > 4 ? "✓" : "4"}
-                            </span>
-                            <span className={processingStep === 4 ? "text-white font-medium" : "text-zinc-500"}>
-                              Neural Text Translation (Azure Translator)
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-xs">
-                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                              processingStep > 5 
-                                ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                : processingStep === 5
-                                  ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                  : "border-zinc-800 text-zinc-600"
-                            }`}>
-                              {processingStep > 5 ? "✓" : "5"}
-                            </span>
-                            <span className={processingStep === 5 ? "text-white font-medium" : "text-zinc-500"}>
-                              Speech Synthesis (ElevenLabs Vocoder)
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-lg text-white font-light leading-relaxed">
-                        {outputText}
-                      </p>
-                    )}
                   </div>
-                </div>
-
-                {/* TTS Synthetic Audio player when available */}
-                {ttsAudioUrl && (
-                  <div className="p-4 border-t border-white/5 bg-black/40 flex flex-col gap-3">
-                    <CustomAudioPlayer
-                      src={ttsAudioUrl}
-                      label="Generated Speech"
-                    />
+                ) : (
+                  <div className="bg-white/2 border border-white/5 p-4.5 rounded-xl">
+                    <p className="text-base text-white font-light leading-relaxed">
+                      {outputText}
+                    </p>
                   </div>
                 )}
+              </div>
 
-                {/* Inference/Translation Confidence gauge */}
-                <div className="p-6 border-t border-white/5 bg-black/40 select-none">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="font-mono text-[10px] uppercase text-[#cbc3d7]/60 tracking-wider">
-                      Inference_Confidence
-                    </span>
-                    <span className="font-mono text-[10px] text-[#8b5cf6] font-bold">
-                      95.00%
-                    </span>
-                  </div>
-                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#adc6ff] w-[95%] transition-all duration-700"></div>
+              {/* TTS audio output + Confidence gauge + Actions */}
+              <div className="border-t border-white/5 pt-4 flex flex-col gap-4 mt-auto">
+                <div className="flex items-center justify-between">
+                  {ttsAudioUrl && mode === "batch" && (
+                    <CustomAudioPlayer src={ttsAudioUrl} label="Translated TTS" />
+                  )}
+                  
+                  {/* Confidence gauge bar */}
+                  <div className="flex-1 max-w-[200px] flex flex-col gap-1 ml-auto select-none">
+                    <div className="flex justify-between items-center text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+                      <span>Confidence</span>
+                      <span className="text-[#8b5cf6] font-bold">95.00%</span>
+                    </div>
+                    <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#00f5ff] w-[95%]" />
+                    </div>
                   </div>
                 </div>
 
-                {/* Footer Action Buttons panel aligned inside card footer */}
-                <div className="p-4 border-t border-white/5 bg-black/40 flex justify-end gap-3 select-none">
-                  <button
-                    onClick={() => {
-                      if (playingAudioRef.current) {
-                        playingAudioRef.current.pause();
-                        playingAudioRef.current.src = "";
-                        playingAudioRef.current = null;
-                      }
-                      if (audioPlayerRef.current) {
-                        audioPlayerRef.current.pause();
-                        audioPlayerRef.current.src = "";
-                      }
-                      setOutputText("");
-                      setTranscript("");
-                      setTtsAudioUrl(null);
-                      setAudioUrl(null);
-                      setAudioBlob(null);
-                      setIsPlayingTTS(false);
-                      setProcessingStep(0);
-                      setError("");
-                    }}
-                    disabled={isProcessing}
-                    className="font-mono text-[10px] uppercase tracking-widest px-5 py-3 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/15 transition-all rounded-lg active:scale-95 disabled:opacity-50"
-                  >
-                    Clear_Cache
-                  </button>
-                  <button
-                    onClick={playTTSAudio}
-                    disabled={!ttsAudioUrl || isPlayingTTS}
-                    className={`font-mono text-[10px] uppercase tracking-widest px-5 py-3 rounded-lg font-bold flex items-center gap-2 transition-all active:scale-95 ${
-                      !ttsAudioUrl || isPlayingTTS
-                        ? "border border-white/5 bg-white/2 text-zinc-600 cursor-not-allowed"
-                        : "bg-[#8b5cf6] text-white hover:bg-[#7c3aed] shadow-lg shadow-[#8b5cf6]/15"
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-sm">
-                      volume_up
-                    </span>
-                    Play_TTS
-                  </button>
+                {/* Footer Controls */}
+                <div className="flex items-center justify-between select-none">
+                  {/* Language selectors */}
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={sourceLang}
+                      onChange={(e) => {
+                        const newSource = e.target.value;
+                        setSourceLang(newSource);
+                        if (newSource === targetLang) {
+                          const fallback = LANGUAGES.find((lang) => lang.code !== newSource);
+                          if (fallback) setTargetLang(fallback.code);
+                        }
+                      }}
+                      className="bg-white/3 border border-white/10 text-white font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg outline-none cursor-pointer"
+                    >
+                      {LANGUAGES.map((l) => (
+                        <option key={l.code} value={l.code} className="bg-zinc-950 text-white">
+                          {l.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      onClick={swapLanguages}
+                      className="w-7 h-7 rounded-lg bg-white/3 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white"
+                    >
+                      <span className="material-symbols-outlined text-xs">swap_horiz</span>
+                    </button>
+
+                    <select
+                      value={targetLang}
+                      onChange={(e) => {
+                        const newTarget = e.target.value;
+                        setTargetLang(newTarget);
+                        if (newTarget === sourceLang) {
+                          const fallback = LANGUAGES.find((lang) => lang.code !== newTarget);
+                          if (fallback) setSourceLang(fallback.code);
+                        }
+                      }}
+                      className="bg-white/3 border border-white/10 text-white font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg outline-none cursor-pointer"
+                    >
+                      {LANGUAGES.map((l) => (
+                        <option key={l.code} value={l.code} className="bg-zinc-950 text-white">
+                          {l.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (playingAudioRef.current) {
+                          playingAudioRef.current.pause();
+                          playingAudioRef.current.src = "";
+                          playingAudioRef.current = null;
+                        }
+                        setOutputText(mode === "realtime" ? "Press the mic button and speak continuously." : "Your translation will appear here after speech capture.");
+                        setTranscript("");
+                        setTtsAudioUrl(null);
+                        setAudioUrl(null);
+                        setAudioBlob(null);
+                        setIsPlayingTTS(false);
+                        setProcessingStep(0);
+                        setError("");
+                      }}
+                      disabled={isProcessing}
+                      className="font-mono text-[9px] uppercase tracking-wider px-3.5 py-2 border border-white/10 bg-white/3 text-white hover:bg-white/5 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      Clear
+                    </button>
+                    {mode === "batch" && (
+                      <button
+                        onClick={() => playTTSAudio()}
+                        disabled={!ttsAudioUrl || isPlayingTTS}
+                        className={`font-mono text-[9px] uppercase tracking-wider px-4.5 py-2 rounded-lg font-bold flex items-center gap-1.5 transition-all ${
+                          !ttsAudioUrl || isPlayingTTS
+                            ? "border border-white/5 bg-white/2 text-zinc-600 cursor-not-allowed"
+                            : "bg-white text-black hover:bg-zinc-200"
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-xs">volume_up</span>
+                        Play TTS
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
+
             </div>
           </div>
 
-          {/* Use Cases Section */}
-          <div className="p-8 border-t border-zinc-900 bg-zinc-950/20 space-y-8 select-none">
-            <div className="max-w-4xl mx-auto text-center md:text-left">
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-zinc-500 border-l-2 border-[#8b5cf6] pl-4">Voxa AI Application</span>
-              <h2 className="text-2xl font-semibold font-geist text-white mt-3 tracking-tight">Interactive Use Cases</h2>
-              <p className="text-zinc-400 text-xs mt-2 leading-relaxed font-sans font-light max-w-xl">
-                Unlock global connectivity with Voxa AI. Whether conducting international calls, practicing accent pronunciation, or learning new idioms, Voxa AI bridges the gap.
-              </p>
+        </div>
+
+        {/* Use Cases Section */}
+        <div className="p-6 border border-white/5 bg-white/1 rounded-2xl space-y-6 mt-6 select-none">
+          <div className="text-left">
+            <span className="font-mono text-[8px] tracking-[0.25em] uppercase text-[#00f5ff] border-l-2 border-[#8b5cf6] pl-3">
+              Application Contexts
+            </span>
+            <h2 className="text-lg font-semibold font-geist text-white mt-1.5 tracking-tight">
+              Interactive Use Cases
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Google Meet */}
+            <div className="border border-white/5 bg-white/1 p-5 rounded-xl flex flex-col gap-3 group">
+              <div className="w-8 h-8 rounded-lg bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center text-[#8b5cf6]">
+                <span className="material-symbols-outlined text-sm">groups</span>
+              </div>
+              <div>
+                <h3 className="font-semibold text-xs mb-1 text-white font-geist">Live Meetings (Google Meet)</h3>
+                <p className="text-zinc-500 text-[10px] leading-relaxed">
+                  Injects real-time captions directly into meeting tabs for seamless collaboration.
+                </p>
+              </div>
+              <div className="rounded-lg overflow-hidden border border-white/5 bg-black mt-1">
+                <img 
+                  src="/assets/google_meet.png" 
+                  alt="Google Meet Integration" 
+                  className="w-full object-contain opacity-75 group-hover:scale-102 transition-transform duration-300"
+                />
+              </div>
             </div>
 
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Google Meet Use Case */}
-              <div className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-xl flex flex-col gap-4 group">
-                <div className="w-10 h-10 rounded-lg bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#8b5cf6] text-xl">groups</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm mb-1 text-white font-geist">Live Meetings (Google Meet)</h3>
-                  <p className="text-zinc-400 text-[11px] leading-relaxed font-sans font-light">
-                    Translate video calls on the fly. Injects real-time captions directly into meeting tabs for seamless collaboration.
-                  </p>
-                </div>
-                <div className="rounded-lg overflow-hidden border border-zinc-900 bg-black mt-2">
-                  <img 
-                    src="/assets/google_meet.png" 
-                    alt="Google Meet Integration" 
-                    className="w-full object-contain opacity-85 group-hover:scale-102 transition-transform duration-300"
-                  />
-                </div>
+            {/* Speaking Practice */}
+            <div className="border border-white/5 bg-white/1 p-5 rounded-xl flex flex-col gap-3 group">
+              <div className="w-8 h-8 rounded-lg bg-[#00f5ff]/10 border border-[#00f5ff]/20 flex items-center justify-center text-[#00f5ff]">
+                <span className="material-symbols-outlined text-sm">record_voice_over</span>
               </div>
-
-              {/* Pronunciation Practice */}
-              <div className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-xl flex flex-col gap-4 group">
-                <div className="w-10 h-10 rounded-lg bg-[#ffb869]/10 border border-[#ffb869]/20 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#ffb869] text-xl">record_voice_over</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm mb-1 text-white font-geist">Speaking Practice</h3>
-                  <p className="text-zinc-400 text-[11px] leading-relaxed font-sans font-light">
-                    Improve accent and sentence delivery. Read transcripts side-by-side with translated references to practice and compare.
-                  </p>
-                </div>
-                <div className="rounded-lg overflow-hidden border border-zinc-900 bg-black mt-2">
-                  <img 
-                    src="/assets/workspace.png" 
-                    alt="Workspace practice view" 
-                    className="w-full object-contain opacity-85 group-hover:scale-102 transition-transform duration-300"
-                  />
-                </div>
+              <div>
+                <h3 className="font-semibold text-xs mb-1 text-white font-geist">Speaking Practice</h3>
+                <p className="text-zinc-500 text-[10px] leading-relaxed">
+                  Practise speech delivery. Compare transcripts side-by-side with translated references.
+                </p>
               </div>
+              <div className="rounded-lg overflow-hidden border border-white/5 bg-black mt-1">
+                <img 
+                  src="/assets/workspace.png" 
+                  alt="Speaking Practice" 
+                  className="w-full object-contain opacity-75 group-hover:scale-102 transition-transform duration-300"
+                />
+              </div>
+            </div>
 
-              {/* Language Learning */}
-              <div className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-xl flex flex-col gap-4 group">
-                <div className="w-10 h-10 rounded-lg bg-[#adc6ff]/10 border border-[#adc6ff]/20 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#adc6ff] text-xl">school</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm mb-1 text-white font-geist">Language Learning</h3>
-                  <p className="text-zinc-400 text-[11px] leading-relaxed font-sans font-light">
-                    Accelerate your language acquisition. Listen to translated syntheses to capture the native pitch and accents naturally.
-                  </p>
-                </div>
-                <div className="rounded-lg overflow-hidden border border-zinc-900 bg-black mt-2">
-                  <img 
-                    src="/assets/setup_guide.png" 
-                    alt="Setup and learning guide" 
-                    className="w-full object-contain opacity-85 group-hover:scale-102 transition-transform duration-300"
-                  />
-                </div>
+            {/* Language Learning */}
+            <div className="border border-white/5 bg-white/1 p-5 rounded-xl flex flex-col gap-3 group">
+              <div className="w-8 h-8 rounded-lg bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center text-[#8b5cf6]">
+                <span className="material-symbols-outlined text-sm">school</span>
+              </div>
+              <div>
+                <h3 className="font-semibold text-xs mb-1 text-white font-geist">Language Learning</h3>
+                <p className="text-zinc-500 text-[10px] leading-relaxed">
+                  Listen to native pitch and translation voice syntheses to accelerate acquisition.
+                </p>
+              </div>
+              <div className="rounded-lg overflow-hidden border border-white/5 bg-black mt-1">
+                <img 
+                  src="/assets/setup_guide.png" 
+                  alt="Language Learning Guide" 
+                  className="w-full object-contain opacity-75 group-hover:scale-102 transition-transform duration-300"
+                />
               </div>
             </div>
           </div>
         </div>
 
-          {/* Status footer bar at the bottom */}
-<footer className="h-12 bg-black border-t border-white/5 w-full flex items-center px-6 justify-between select-none absolute bottom-0 md:relative shrink-0 z-20">
-  <div className="flex items-center gap-3">
-
-    {/* Source Language */}
-    <div className="flex items-center gap-2 px-2.5 py-1 border border-white/10 rounded-lg bg-white/5">
-      <span className="font-mono text-[9px] text-[#cbc3d7]/50 uppercase tracking-widest">
-        Source
-      </span>
-
-      <select
-        value={sourceLang}
-        onChange={(e) => {
-          const newSource = e.target.value;
-
-          setSourceLang(newSource);
-
-          if (newSource === targetLang) {
-            const fallback = LANGUAGES.find(
-              (lang) => lang.code !== newSource
-            );
-
-            if (fallback) {
-              setTargetLang(fallback.code);
-            }
-          }
-        }}
-        className="bg-transparent text-white font-mono text-[10px] font-bold outline-none border-none cursor-pointer"
-      >
-        {LANGUAGES.map((lang) => (
-          <option
-            key={lang.code}
-            value={lang.code}
-            className="bg-black text-[#e7e0ed]"
-          >
-            {lang.name}
-          </option>
-        ))}
-      </select>
-    </div>
-
-    {/* Target Language */}
-    <div className="flex items-center gap-2 px-2.5 py-1 border border-white/10 rounded-lg bg-white/5">
-      <span className="font-mono text-[9px] text-[#cbc3d7]/50 uppercase tracking-widest">
-        Target
-      </span>
-
-      <select
-        value={targetLang}
-        onChange={(e) => {
-          const newTarget = e.target.value;
-
-          setTargetLang(newTarget);
-
-          if (newTarget === sourceLang) {
-            const fallback = LANGUAGES.find(
-              (lang) => lang.code !== newTarget
-            );
-
-            if (fallback) {
-              setSourceLang(fallback.code);
-            }
-          }
-        }}
-        className="bg-transparent text-[#d0bcff] font-mono text-[10px] font-bold outline-none border-none cursor-pointer"
-      >
-        {LANGUAGES.map((lang) => (
-          <option
-            key={lang.code}
-            value={lang.code}
-            className="bg-black text-[#f7e0ed]"
-          >
-            {lang.name}
-          </option>
-        ))}
-      </select>
-    </div>
-
-    {/* Active Pipeline */}
-    <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 border border-white/10 rounded-lg bg-white/5">
-      <span className="font-mono text-[9px] text-[#cbc3d7]/50 uppercase tracking-widest">
-        Active Pipeline
-      </span>
-
-      <span className="font-mono text-[10px] text-[#adc6ff] font-bold">
-        GROQ WHISPER + AZURE TRANSLATOR + COGNITIVE VOCODER
-      </span>
-    </div>
-
-  </div>
-
-  {/* Engine Ready */}
-  <div className="flex items-center gap-4">
-    <div className="flex items-center gap-2">
-      <span className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-pulse"></span>
-
-      <span className="font-mono text-[9px] text-[#cbc3d7]/60 uppercase tracking-wider">
-        Voxa Engine Ready
-      </span>
-    </div>
-  </div>
-</footer>
-
-      {/* Mobile Bottom Navigation Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-zinc-900 flex justify-around items-center h-16 z-50">
-        <Link
-          href="/workspace"
-          className="flex flex-col items-center gap-1 text-[#8b5cf6] flex-1 py-1"
-        >
-          <span className="material-symbols-outlined text-[22px]">
-            dashboard
-          </span>
-          <span className="text-[10px] font-medium font-sans">Workspace</span>
-        </Link>
-        <Link
-          href="/install"
-          className="flex flex-col items-center gap-1 text-[#cbc3d7]/60 hover:text-white flex-1 py-1"
-        >
-          <span className="material-symbols-outlined text-[22px]">
-            download
-          </span>
-          <span className="text-[10px] font-medium font-sans">Install</span>
-        </Link>
-        <Link
-          href="/technology"
-          className="flex flex-col items-center gap-1 text-[#cbc3d7]/60 hover:text-white flex-1 py-1"
-        >
-          <span className="material-symbols-outlined text-[22px]">
-            insights
-          </span>
-          <span className="text-[10px] font-medium font-sans">Architecture</span>
-        </Link>
       </div>
-        </div>
-      </div>
+
+      {/* Zen Footer */}
+      <footer className="py-6 text-center text-[8px] font-mono text-zinc-700 border-t border-white/2 w-[95%] max-w-[1200px] mx-auto z-10 relative">
+        VOXA REAL-TIME TRANSLATION CONSOLE | STATUS: SECURE & OPERATIONAL
+      </footer>
     </div>
   );
 }

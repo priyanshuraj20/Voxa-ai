@@ -55,7 +55,7 @@ export default function ShaderBackground() {
         
         float intensity = sin(uv.x + uv.y + time);
         vec3 accent = vec3(0.54, 0.36, 0.96); // Electric Purple
-        color += accent * 0.12 * (1.0 / length(uv - 0.5));
+        color += accent * 0.15 * (1.0 / (length(uv - 0.5) + 0.65));
         color *= 0.8 + 0.2 * intensity;
 
         gl_FragColor = vec4(color, 1.0);

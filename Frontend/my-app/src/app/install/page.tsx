@@ -33,12 +33,12 @@ export default function InstallPage() {
             {/* Quick Download Button */}
             <div className="flex justify-center border-b border-zinc-900 pb-8">
               <a
-                href="/voxa_entension.zip"
-                download="voxa_entension.zip"
+                href="/voxa_extension.zip"
+                download="voxa_extension.zip"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-[#6366f1] text-white hover:bg-[#4f46e5] transition-colors text-sm font-semibold active:scale-98 select-none"
               >
                 <span className="material-symbols-outlined text-sm">download</span>
-                Download Extension package (voxa_entension.zip)
+                Download Extension package (voxa_extension.zip)
               </a>
             </div>
 

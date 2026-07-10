@@ -6,8 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
-import CustomAudioPlayer from "@/components/ui/CustomAudioPlayer";
 
 const LANGUAGES = [
   { code: "en-US", name: "English (US)" },
@@ -72,7 +70,7 @@ export default function PdfReaderPage() {
     }
   }, []);
 
-  // Sync preferences from user configuration
+  // Sync preferences from user
   useEffect(() => {
     if (user) {
       const storedSource = sessionStorage.getItem("pdf_source_lang");
@@ -112,7 +110,7 @@ export default function PdfReaderPage() {
 
       const token = getAccessToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}/pdf/translate`,
+        `${(import.meta.env as any).VITE_BACKEND_URL || "http://127.0.0.1:8000"}/pdf/translate`,
         {
           method: "POST",
           headers: {
@@ -198,56 +196,31 @@ export default function PdfReaderPage() {
               throw new Error(data.message);
             }
           } catch (jsonErr: any) {
-            console.error("JSON parsing error:", jsonErr);
+            console.error("JSON parsing error inside stream:", jsonErr);
           }
         }
       }
     } catch (err: any) {
-      setPdfError(err.message || "Failed to process PDF.");
+      setPdfProcessingStep(0);
+      setPdfError(err.message || "Something went wrong.");
+      console.error(err);
     } finally {
       setIsPdfProcessing(false);
-      setPdfProgress("");
-      setPdfProcessingStep(0);
     }
   };
 
-  const handleClearPdf = () => {
-    if (playingAudioRef.current) {
-      playingAudioRef.current.pause();
-      playingAudioRef.current = null;
-    }
-    setIsPlayingPdfAudio(false);
-    setPdfProcessingStep(0);
-    setPdfFileObj(null);
-    setPdfFileName("");
-    setPdfExtractedText("");
-    setPdfTranslatedText("");
-    setPdfAudioUrl(null);
-    setPdfError("");
-
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("pdf_file_name");
-      sessionStorage.removeItem("pdf_extracted_text");
-      sessionStorage.removeItem("pdf_translated_text");
-      sessionStorage.removeItem("pdf_audio_url");
-      window.location.reload();
-    }
-  };
-
-  const playPdfSpeech = () => {
+  const playPdfAudio = () => {
     if (!pdfAudioUrl) return;
-
-    if (isPlayingPdfAudio && playingAudioRef.current) {
-      playingAudioRef.current.pause();
-      playingAudioRef.current = null;
-      setIsPlayingPdfAudio(false);
-      return;
-    }
 
     try {
       if (playingAudioRef.current) {
         playingAudioRef.current.pause();
+        playingAudioRef.current.src = "";
+        playingAudioRef.current = null;
+        setIsPlayingPdfAudio(false);
+        return;
       }
+
       const audio = new Audio(`${pdfAudioUrl}?t=${Date.now()}`);
       playingAudioRef.current = audio;
       setIsPlayingPdfAudio(true);
@@ -256,381 +229,268 @@ export default function PdfReaderPage() {
         setIsPlayingPdfAudio(false);
         playingAudioRef.current = null;
       };
+
       audio.onerror = () => {
-        setPdfError("Failed to play synthesized speech audio.");
+        setPdfError("Failed to stream synthetic audio speech.");
         setIsPlayingPdfAudio(false);
         playingAudioRef.current = null;
       };
 
-      audio.play().catch((e) => {
-        setPdfError(`Audio play failed: ${e.message}`);
+      audio.play().catch((err) => {
+        setPdfError(`Audio playback failed: ${err.message}`);
         setIsPlayingPdfAudio(false);
         playingAudioRef.current = null;
       });
     } catch (err) {
-      setPdfError("Audio synthesis playback failed.");
+      console.error("Playback error:", err);
       setIsPlayingPdfAudio(false);
       playingAudioRef.current = null;
     }
   };
 
+  const clearPdfData = () => {
+    if (playingAudioRef.current) {
+      playingAudioRef.current.pause();
+      playingAudioRef.current.src = "";
+      playingAudioRef.current = null;
+    }
+    setPdfFileObj(null);
+    setPdfFileName("");
+    setPdfExtractedText("");
+    setPdfTranslatedText("");
+    setPdfAudioUrl(null);
+    setPdfProgress("");
+    setPdfError("");
+    setPdfProcessingStep(0);
+    setIsPlayingPdfAudio(false);
+
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("pdf_extracted_text");
+      sessionStorage.removeItem("pdf_translated_text");
+      sessionStorage.removeItem("pdf_audio_url");
+      sessionStorage.removeItem("pdf_file_name");
+    }
+  };
+
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-center select-none font-sans">
-        <span className="w-8 h-8 border-2 border-white/20 border-t-[#6366f1] rounded-full animate-spin"></span>
-        <p className="text-sm text-zinc-500 font-mono tracking-widest uppercase">
-          Authorizing Session...
-        </p>
+      <div className="min-h-screen bg-[#030305] flex flex-col items-center justify-center gap-4 text-center select-none font-sans">
+        <span className="w-8 h-8 border-2 border-white/20 border-t-[#00f5ff] rounded-full animate-spin"></span>
+        <p className="text-xs text-zinc-500 font-mono tracking-widest uppercase">Syncing Assistant...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-black text-[#e7e0ed] relative font-sans grid-bg radial-glow">
+    <div className="bg-[#030305] text-white min-h-screen relative overflow-hidden font-sans flex flex-col justify-between">
+      {/* Ambient background blur */}
+      <div className="absolute top-[10%] right-[10%] w-[450px] h-[450px] bg-[#8b5cf6]/5 rounded-full blur-[140px] animate-float-slow-1 pointer-events-none"></div>
+      <div className="absolute bottom-[10%] left-[10%] w-[450px] h-[450px] bg-[#00f5ff]/5 rounded-full blur-[140px] animate-float-slow-2 pointer-events-none"></div>
+
       <Header />
 
-      <div className="flex flex-1 pt-[120px] overflow-hidden relative z-10 min-h-0">
-        <Sidebar />
+      <main className="flex-1 flex flex-col items-center justify-center px-6 pt-32 pb-16 z-10 relative max-w-[1000px] w-full mx-auto">
+        
+        {/* Error Notification */}
+        {pdfError && (
+          <div className="w-full mb-6 bg-red-950/30 border border-red-500/20 text-red-200 text-xs px-4 py-3 rounded-xl flex items-center justify-between backdrop-blur-md">
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">error</span>
+              {pdfError}
+            </span>
+            <button onClick={() => setPdfError("")} className="text-red-200 hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
+          </div>
+        )}
 
-        {/* Core PDF Layout scroll-container */}
-        <div className="flex-1 flex flex-col relative overflow-hidden bg-transparent">
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+        {/* Dynamic State Layout */}
+        {!pdfExtractedText ? (
+          /* UPLOAD CONSOLE */
+          <div className="w-full max-w-[600px] glass-card p-8 border border-white/5 flex flex-col items-center gap-8 text-center relative">
             
-            {/* PDF Reading Assistant Card */}
-            <div className="border border-zinc-900 bg-zinc-950/20 p-8 rounded-xl flex flex-col gap-6 relative select-none">
-              
-              {/* Header Info Block */}
-              <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[#6366f1] text-xl">
-                      picture_as_pdf
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <h2 className="text-lg font-bold font-geist text-white tracking-tight">
-                      PDF Reading Assistant
-                    </h2>
-                    <span className="text-[9px] text-zinc-500 font-mono tracking-widest uppercase mt-0.5">
-                      Document Translation &amp; Speech
-                    </span>
-                  </div>
-                </div>
+            {/* Header controls: Language pickers */}
+            <div className="w-full flex items-center justify-center border-b border-white/5 pb-4 select-none">
+              <div className="flex items-center gap-3">
+                <select
+                  value={pdfSourceLang}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setPdfSourceLang(val);
+                    savePdfState("pdf_source_lang", val);
+                  }}
+                  className="bg-white/5 border border-white/10 text-white font-mono text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg outline-none cursor-pointer"
+                >
+                  {LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code} className="bg-zinc-950 text-white">
+                      {l.name}
+                    </option>
+                  ))}
+                </select>
 
-                {/* PDF Language Selectors */}
-                <div className="flex items-center gap-4">
-                  {/* PDF Source Language Selector */}
-                  <div className="flex items-center gap-2 px-2.5 py-1 border border-white/10 rounded-lg bg-white/5">
-                    <span className="font-mono text-[9px] text-[#cbc3d7]/50 uppercase tracking-widest">
-                      PDF Source
-                    </span>
-                    <select
-                      value={pdfSourceLang}
-                      onChange={(e) => {
-                        const newSource = e.target.value;
-                        setPdfSourceLang(newSource);
-                        savePdfState("pdf_source_lang", newSource);
-                        if (newSource === pdfTargetLang) {
-                          const fallback = LANGUAGES.find((lang) => lang.code !== newSource);
-                          if (fallback) {
-                            setPdfTargetLang(fallback.code);
-                            savePdfState("pdf_target_lang", fallback.code);
-                          }
-                        }
-                      }}
-                      className="bg-transparent text-white font-mono text-[10px] font-bold outline-none border-none cursor-pointer"
-                    >
-                      {LANGUAGES.map((lang) => (
-                        <option key={lang.code} value={lang.code} className="bg-black text-[#e7e0ed]">
-                          {lang.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <span className="material-symbols-outlined text-zinc-600 text-sm">east</span>
 
-                  {/* PDF Target Language Selector */}
-                  <div className="flex items-center gap-2 px-2.5 py-1 border border-white/10 rounded-lg bg-white/5">
-                    <span className="font-mono text-[9px] text-[#cbc3d7]/50 uppercase tracking-widest">
-                      PDF Target
-                    </span>
-                    <select
-                      value={pdfTargetLang}
-                      onChange={(e) => {
-                        const newTarget = e.target.value;
-                        setPdfTargetLang(newTarget);
-                        savePdfState("pdf_target_lang", newTarget);
-                        if (newTarget === pdfSourceLang) {
-                          const fallback = LANGUAGES.find((lang) => lang.code !== newTarget);
-                          if (fallback) {
-                            setPdfSourceLang(fallback.code);
-                            savePdfState("pdf_source_lang", fallback.code);
-                          }
-                        }
-                      }}
-                      className="bg-transparent text-[#6366f1] font-mono text-[10px] font-bold outline-none border-none cursor-pointer"
-                    >
-                      {LANGUAGES.map((lang) => (
-                        <option key={lang.code} value={lang.code} className="bg-black text-[#e7e0ed]">
-                          {lang.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                <select
+                  value={pdfTargetLang}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setPdfTargetLang(val);
+                    savePdfState("pdf_target_lang", val);
+                  }}
+                  className="bg-white/5 border border-white/10 text-white font-mono text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg outline-none cursor-pointer"
+                >
+                  {LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code} className="bg-zinc-950 text-white">
+                      {l.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+            </div>
 
-              {/* Error block */}
-              {pdfError && (
-                <div className="bg-[#93000a]/20 border border-[#ffb4ab]/40 text-[#ffdad6] px-4 py-2.5 rounded-lg flex items-center justify-between text-xs font-sans">
-                  <span className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-sm">error</span>
-                    {pdfError}
+            {/* Glass Drop Zone Container */}
+            <form onSubmit={handlePdfUpload} className="w-full flex flex-col items-center gap-6">
+              
+              {!isPdfProcessing ? (
+                <label className="w-full min-h-[220px] rounded-2xl border-2 border-dashed border-white/10 hover:border-[#8b5cf6]/50 bg-white/2 hover:bg-white/3 flex flex-col items-center justify-center p-6 cursor-pointer transition-all duration-300 group">
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        setPdfFileObj(file);
+                        setPdfFileName(file.name);
+                      }
+                    }}
+                  />
+                  <span className="material-symbols-outlined text-4xl text-zinc-500 group-hover:text-[#00f5ff] transition-colors mb-4">
+                    upload_file
                   </span>
-                  <button onClick={() => setPdfError("")} className="text-[#ffdad6] hover:text-white">
-                    <span className="material-symbols-outlined text-sm">close</span>
-                  </button>
+                  {pdfFileName ? (
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-white max-w-sm overflow-hidden text-ellipsis whitespace-nowrap">
+                        {pdfFileName}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 font-mono uppercase">
+                        {(pdfFileObj!.size / (1024 * 1024)).toFixed(2)} MB | Ready
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm font-semibold text-white">Select PDF Document</p>
+                      <p className="text-[10px] text-zinc-500 mt-1 uppercase font-mono tracking-wider">
+                        Drag and drop or browse files
+                      </p>
+                    </div>
+                  )}
+                </label>
+              ) : (
+                /* Glowing Circular Processing Indicator */
+                <div className="w-full min-h-[220px] flex flex-col items-center justify-center gap-5">
+                  <div className="relative flex items-center justify-center">
+                    <span className="w-16 h-16 border-4 border-[#8b5cf6]/20 border-t-[#00f5ff] rounded-full animate-spin"></span>
+                    <span className="absolute w-10 h-10 bg-[#8b5cf6]/10 rounded-full animate-ping"></span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-mono text-[#00f5ff] tracking-wider uppercase animate-pulse">
+                      {pdfProgress || "Reading PDF pages..."}
+                    </p>
+                    <p className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest">
+                      Processing Pipeline step {pdfProcessingStep}/4
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Display Panels */}
-              <div className="grid grid-cols-12 gap-6 min-h-[300px]">
-                
-                {/* PDF Extraction Panel (Left) */}
-                <div className="col-span-12 md:col-span-6 flex flex-col gap-4">
-                  <div className="flex-1 border border-white/5 bg-black/40 rounded-xl flex flex-col overflow-hidden min-h-[250px]">
-                    <div className="flex justify-between items-center p-3.5 border-b border-white/5 bg-black/20 select-none">
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#cbc3d7]/60">
-                        [01] PDF_Source_Content
-                      </span>
-                      {pdfFileName && (
-                        <span className="text-[10px] text-[#adc6ff] font-mono max-w-[200px] truncate">
-                          File: {pdfFileName}
-                        </span>
-                      )}
-                    </div>
+              {/* Translate Submit button */}
+              {pdfFileObj && !isPdfProcessing && (
+                <button
+                  type="submit"
+                  className="bg-white text-black text-xs font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-zinc-200 transition-colors shadow-lg active:scale-95"
+                >
+                  Translate Document
+                </button>
+              )}
+            </form>
 
-                    <div className="flex-1 p-6 flex flex-col justify-start">
-                      {isPdfProcessing ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border border-zinc-900 rounded-lg bg-black/20 animate-pulse select-none">
-                          <span className="material-symbols-outlined text-3xl text-[#6366f1] mb-3">
-                            document_scanner
-                          </span>
-                          <p className="text-xs text-zinc-300 font-semibold mb-1">
-                            Extracting Plaintext Chunks...
-                          </p>
-                          <p className="text-[10px] text-zinc-500 font-mono">
-                            Running pypdf analyzer on backend
-                          </p>
-                        </div>
-                      ) : !pdfExtractedText ? (
-                        <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-lg p-6 bg-white/[0.01] hover:bg-white/[0.02] hover:border-white/20 transition-all duration-200 cursor-pointer relative">
-                          <input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                setPdfFileObj(e.target.files[0]);
-                              }
-                            }}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          />
-                          <span className="material-symbols-outlined text-3xl text-zinc-600 mb-3 animate-pulse">
-                            upload_file
-                          </span>
-                          <p className="text-xs text-zinc-400 font-semibold text-center mb-1">
-                            {pdfFileObj ? pdfFileObj.name : "Drag & drop PDF here, or click to browse"}
-                          </p>
-                          <p className="text-[10px] text-zinc-500 font-mono text-center">
-                            PDF files only
-                          </p>
-                        </div>
-                      ) : (
-                        <textarea
-                          readOnly
-                          value={pdfExtractedText}
-                          className="w-full h-48 bg-transparent text-sm text-[#cbc3d7] font-sans leading-relaxed focus:outline-none resize-none custom-scrollbar"
-                        />
-                      )}
-                    </div>
-                  </div>
+          </div>
+        ) : (
+          /* CINEMATIC BOOK-LIKE DUAL READER */
+          <div className="w-full flex flex-col gap-6 relative">
+            
+            {/* Header toolbar */}
+            <div className="w-full glass-card px-6 py-4 flex items-center justify-between border border-white/5">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm text-[#00f5ff]">picture_as_pdf</span>
+                <span className="text-xs font-mono font-bold uppercase tracking-wide max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">
+                  {pdfFileName}
+                </span>
+              </div>
 
-                  {/* PDF Upload Buttons */}
-                  {!pdfExtractedText ? (
-                    <button
-                      onClick={handlePdfUpload}
-                      disabled={isPdfProcessing || !pdfFileObj}
-                      className={`w-full h-[40px] flex items-center justify-center gap-2 rounded-lg font-bold tracking-wider font-mono text-[11px] uppercase transition-all active:scale-98 ${
-                        isPdfProcessing || !pdfFileObj
-                          ? "bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed"
-                          : "bg-[#6366f1] text-white hover:bg-[#4f46e5]"
-                      }`}
-                    >
-                      {isPdfProcessing ? (
-                        <>
-                          <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-                          {pdfProgress || "Extracting & Translating..."}
-                        </>
-                      ) : (
-                        <>
-                          <span className="material-symbols-outlined text-sm">translate</span>
-                          Upload &amp; Translate PDF
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleClearPdf}
-                      className="w-full h-[40px] flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/50 font-bold tracking-wider font-mono text-[11px] uppercase transition-all active:scale-98"
-                    >
-                      <span className="material-symbols-outlined text-sm">delete</span>
-                      Clear PDF Assistant
-                    </button>
-                  )}
-                </div>
+              <div className="flex items-center gap-3">
+                {pdfAudioUrl && (
+                  <button
+                    onClick={playPdfAudio}
+                    className={`flex items-center gap-1.5 px-4.5 py-2 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-colors active:scale-95 ${
+                      isPlayingPdfAudio
+                        ? "bg-[#8b5cf6] text-white hover:bg-[#7c3aed]"
+                        : "bg-white text-black hover:bg-zinc-200"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-xs">
+                      {isPlayingPdfAudio ? "pause" : "volume_up"}
+                    </span>
+                    {isPlayingPdfAudio ? "Playing" : "Listen Speech"}
+                  </button>
+                )}
 
-                {/* PDF Translation Panel (Right) */}
-                <div className="col-span-12 md:col-span-6 flex flex-col gap-4">
-                  <div className="flex-1 border border-white/5 bg-black/40 rounded-xl flex flex-col overflow-hidden min-h-[250px]">
-                    <div className="p-3.5 border-b border-white/5 bg-black/20 select-none">
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-[#cbc3d7]/60">
-                        [02] Translated_Output
-                      </span>
-                    </div>
-
-                    <div className="flex-1 p-6 flex flex-col justify-start">
-                      {isPdfProcessing ? (
-                        <div className="space-y-4 py-2 select-none animate-in fade-in duration-300 w-full text-left">
-                          <div className="font-mono text-[9px] uppercase tracking-wider text-[#cbc3d7]/60 border-b border-white/5 pb-2 font-bold mb-3">
-                            PDF Processing Pipeline
-                          </div>
-                          
-                          <div className="space-y-3">
-                            {/* Step 1: Uploading & Parsing */}
-                            <div className="flex items-center gap-3 text-xs">
-                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                                pdfProcessingStep > 1 
-                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                  : pdfProcessingStep === 1
-                                    ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                    : "border-zinc-800 text-zinc-600"
-                              }`}>
-                                {pdfProcessingStep > 1 ? "✓" : "1"}
-                              </span>
-                              <span className={pdfProcessingStep === 1 ? "text-white font-medium" : "text-zinc-500"}>
-                                Uploading & parsing PDF page-by-page (PyPDF)
-                              </span>
-                            </div>
-
-                            {/* Step 2: Translation */}
-                            <div className="flex items-center gap-3 text-xs">
-                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                                pdfProcessingStep > 2 
-                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                  : pdfProcessingStep === 2
-                                    ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                    : "border-zinc-800 text-zinc-600"
-                              }`}>
-                                {pdfProcessingStep > 2 ? "✓" : "2"}
-                              </span>
-                              <span className={pdfProcessingStep === 2 ? "text-white font-medium" : "text-zinc-500"}>
-                                Neural Text Translation (Azure Translator)
-                              </span>
-                            </div>
-
-                            {/* Step 3: Synthesis */}
-                            <div className="flex items-center gap-3 text-xs">
-                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                                pdfProcessingStep > 3 
-                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                  : pdfProcessingStep === 3
-                                    ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                    : "border-zinc-800 text-zinc-600"
-                              }`}>
-                                {pdfProcessingStep > 3 ? "✓" : "3"}
-                              </span>
-                              <span className={pdfProcessingStep === 3 ? "text-white font-medium" : "text-zinc-500"}>
-                                Speech Synthesis Chunks (ElevenLabs)
-                              </span>
-                            </div>
-
-                            {/* Step 4: Merging */}
-                            <div className="flex items-center gap-3 text-xs">
-                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border font-mono text-[8px] font-bold ${
-                                pdfProcessingStep > 4 
-                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                                  : pdfProcessingStep === 4
-                                    ? "border-[#adc6ff] bg-[#adc6ff]/10 text-[#adc6ff] animate-pulse"
-                                    : "border-zinc-800 text-zinc-600"
-                              }`}>
-                                {pdfProcessingStep > 4 ? "✓" : "4"}
-                              </span>
-                              <span className={pdfProcessingStep === 4 ? "text-white font-medium" : "text-zinc-500"}>
-                                Sequential Audio Merging & Packaging
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {/* Live message display */}
-                          <div className="mt-4 p-3 bg-zinc-900/60 rounded-lg border border-zinc-850 text-[11px] font-mono text-zinc-400 flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#adc6ff] animate-ping shrink-0" />
-                            <span>Status: {pdfProgress || "Initializing..."}</span>
-                          </div>
-                        </div>
-                      ) : !pdfTranslatedText ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border border-zinc-900/50 border-dashed rounded-lg bg-black/20">
-                          <span className="material-symbols-outlined text-3xl text-zinc-700 mb-3">
-                            translate
-                          </span>
-                          <p className="text-xs text-zinc-500 font-sans leading-relaxed">
-                            Awaiting document upload...
-                          </p>
-                        </div>
-                      ) : (
-                        <textarea
-                          readOnly
-                          value={pdfTranslatedText}
-                          className="w-full h-48 bg-transparent text-sm text-[#cbc3d7] font-sans leading-relaxed focus:outline-none resize-none custom-scrollbar"
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Speech playback trigger component */}
-                  {pdfAudioUrl ? (
-                    <div className="w-full flex justify-center">
-                      <CustomAudioPlayer src={pdfAudioUrl} label="PDF Speech Output" />
-                    </div>
-                  ) : (
-                    <button
-                      disabled
-                      className="w-full h-[40px] flex items-center justify-center gap-2 rounded-lg font-bold tracking-wider font-mono text-[11px] uppercase bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed select-none"
-                    >
-                      <span className="material-symbols-outlined text-sm">
-                        volume_up
-                      </span>
-                      Play PDF Speech
-                    </button>
-                  )}
-                </div>
+                <button
+                  onClick={clearPdfData}
+                  className="bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-mono uppercase tracking-wider px-4.5 py-2 rounded-lg transition-colors active:scale-95"
+                >
+                  Clear Document
+                </button>
               </div>
             </div>
 
-            {/* Flat Description Info Section */}
-            <div className="mt-8 border border-zinc-900 bg-zinc-950/20 p-8 rounded-xl space-y-4 font-sans select-none">
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#cbc3d7]/30 block">
-                Technical Architecture
-              </span>
-              <h3 className="text-base font-bold text-white tracking-tight">
-                Document Synthesis Operations
-              </h3>
-              <p className="text-zinc-400 text-xs leading-relaxed font-light">
-                Our parsing gateway processes PDF structures directly in memory, bypassing storage constraints to protect client confidentiality. Extracted blocks are parsed using context boundaries to feed Azure translation engines, outputting clean transcripts ready for local playback.
-              </p>
+            {/* Book Columns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[calc(100vh-280px)] min-h-[400px]">
+              
+              {/* Left Column: Extracted */}
+              <div className="glass-card p-6 border border-white/5 flex flex-col gap-4 overflow-hidden">
+                <div className="flex justify-between items-center border-b border-white/5 pb-2 select-none">
+                  <span className="text-[9px] font-mono font-bold tracking-widest text-zinc-500 uppercase">
+                    ORIGINAL EXTRACTED TEXT ({pdfSourceLang.split("-")[0].toUpperCase()})
+                  </span>
+                </div>
+                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar text-zinc-400 text-sm font-light leading-relaxed whitespace-pre-wrap select-text">
+                  {pdfExtractedText}
+                </div>
+              </div>
+
+              {/* Right Column: Translated */}
+              <div className="glass-card p-6 border border-white/5 flex flex-col gap-4 overflow-hidden">
+                <div className="flex justify-between items-center border-b border-white/5 pb-2 select-none">
+                  <span className="text-[9px] font-mono font-bold tracking-widest text-[#00f5ff] uppercase">
+                    TRANSLATION ({pdfTargetLang.split("-")[0].toUpperCase()})
+                  </span>
+                </div>
+                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar text-white text-sm font-light leading-relaxed whitespace-pre-wrap select-text">
+                  {pdfTranslatedText}
+                </div>
+              </div>
+
             </div>
-            
           </div>
-        </div>
-      </div>
+        )}
+      </main>
+
+      {/* Zen Footer */}
+      <footer className="py-8 text-center text-[10px] font-mono text-zinc-700 border-t border-white/2 max-w-[1000px] w-[90%] mx-auto z-10 relative">
+        VOXA DOCUMENT CONSOLE | ENCRYPTED EPHEMERAL BUFFER
+      </footer>
     </div>
   );
 }

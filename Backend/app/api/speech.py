@@ -102,17 +102,16 @@ async def get_credits(current_user=Depends(get_current_user)):
 @router.get("/output-audio")
 async def get_output_audio():
     file_path = "output.mp3"
-
     if os.path.exists(file_path):
-        return FileResponse(
-            file_path,
-            media_type="audio/mpeg"
-        )
+        return FileResponse(file_path, media_type="audio/mpeg")
+    raise HTTPException(status_code=404, detail="Audio file not found")
 
-    raise HTTPException(
-        status_code=404,
-        detail="Audio file not found"
-    )
+@router.get("/output-audio/{filename}")
+async def get_output_audio_dynamic(filename: str):
+    safe_filename = os.path.basename(filename)
+    if os.path.exists(safe_filename):
+        return FileResponse(safe_filename, media_type="audio/mpeg")
+    raise HTTPException(status_code=404, detail="Audio file not found")
 
 @router.post("/translate-and-speak")
 async def translate_and_speak(
@@ -190,14 +189,24 @@ async def translate_and_speak(
                 print(translated)
                 print("=" * 100 + "\n")
 
-                audio_file = TTSService.generate_speech(translated)
+                import uuid
+                import glob
+                # Clean up old output files to save space
+                for old_f in glob.glob("output_*.mp3"):
+                    try:
+                        os.remove(old_f)
+                    except Exception:
+                        pass
+
+                unique_filename = f"output_{uuid.uuid4().hex}.mp3"
+                audio_file = TTSService.generate_speech(translated, output_path=unique_filename)
 
                 if audio_file and os.path.exists(audio_file):
                     print(f" Audio Generated Successfully : {audio_file}")
                     print(f" Size : {os.path.getsize(audio_file)} bytes")
-                    output_audio_url = f"{BACKEND_URL}/speech/output-audio"
+                    output_audio_url = f"{BACKEND_URL}/speech/output-audio/{unique_filename}"
                 else:
-                    print(" output.mp3 was not generated.")
+                    print(" Dynamic audio output was not generated.")
 
             except Exception as tts_error:
                 print("\n TTS ERROR")

@@ -1,241 +1,255 @@
-# 🌍 Voxa AI — Real-Time Browser Audio Translator
+# 🌍 Voxa AI — Real-Time Multilingual Speech Translation Platform
 
-Voxa AI is a state-of-the-art, real-time speech translation platform. It captures browser tab sound streams or microphone audio, orchestrates them through an optimized sequence of specialized AI modules, and outputs punctuated transcripts, translations, and natural voice syntheses back to the user in sub-second latencies.
+Voxa AI is a real-time speech translation platform that captures live audio from browser tabs (Google Meet, Udemy, YouTube) or microphone input, transcribes it using Whisper ASR, corrects it with Claude LLM, translates it using Azure Neural Machine Translation, and synthesizes natural voice output using ElevenLabs TTS — all in under 2 seconds per utterance.
 
-🔗 **Production Live Link:** [voxa-ai-pi.vercel.app](https://voxa-ai-pi.vercel.app/)
-
----
-
-## 📸 Product Showcases
-
-### 💻 Real-Time Workspace Dashboard
-The Next.js 16 dashboard allows users to record microphone inputs, upload audio files, and watch progress updates resolve in real time.
-<p align="left">
-  <img src="assets/workspace.png" alt="Voxa AI Workspace" width="90%" style="border-radius: 8px; border: 1px solid #1f1f1f;" />
-</p>
-
-### 📄 AI PDF Reading Assistant
-The dedicated document workspace allows users to upload PDF files, extract page text, translate, track generation logs, and download/stream combined ElevenLabs TTS audio back.
-<p align="left">
-  <img src="assets/pdf_assistant.png" alt="Voxa AI PDF Assistant" width="90%" style="border-radius: 8px; border: 1px solid #1f1f1f;" />
-</p>
-
-#### 🔄 Under the Hood: The PDF Processing Gateway
-When a user uploads a document, the application runs a secure, multi-stage processing pipeline:
-* **Secure In-Memory Extraction**: Raw PDF byte streams are parsed directly in-memory using `pypdf`. Bypassing local disk storage protects client confidentiality.
-* **Contextual Neural Translation**: The parsed text is translated page-by-page into the target locale.
-* **Sentence-Aware Chunking**: To prevent ElevenLabs 10,000 character limit exceptions (`max_character_limit_exceeded`), the translated text is tokenized into chunks between 3,000 and 5,000 characters. It splits on paragraph boundaries (`\n\n`) or sentence endings (`. `), never cutting words or sentences in half.
-* **Live Progress Streaming**: The FastAPI backend yields real-time progress text (`Reading page 1...`, `Generating audio part x/y...`) to the Next.js client using line-delimited NDJSON streaming buffers, updating the button loader dynamically.
-* **Binary Audio Merger**: All chunked audio parts are written to temp files, compiled sequentially using a binary stream concatenator into a final `output.mp3` file, and served back to the player.
-
-
-### 🌍 Google Meet Active Integration
-The Voxa AI Chrome Extension captures tab audio contextually, presenting subtitle streams in a side panel or as a floating overlay inside active Meet tabs.
-<p align="left">
-  <img src="assets/google_meet.png" alt="Google Meet Translation" width="90%" style="border-radius: 8px; border: 1px solid #1f1f1f;" />
-</p>
+🔗 **Live:** [voxa-ai-pi.vercel.app](https://voxa-ai-pi.vercel.app/)
 
 ---
 
-## 🚀 The Voxa AI Pipeline Architecture
+## ⚡ Key Features
 
-Voxa AI operates two primary translation flows: **REST-Based File Upload with Streaming Status Updates** and **Real-Time WebSocket Binary Streaming**.
-
-### 1. REST Streaming Pipeline Flow (Workspace Web App)
-When uploading or recording audio via the Workspace dashboard, the server processes it via `POST /speech/translate-and-speak`. Instead of blocking, the server yields incremental progress status updates chunk-by-chunk using a Server-Sent Events (SSE) stream to drive the frontend checkmarks.
-
-```
-[User Mic Input] ──► [WebM Recording Blob] ──► [POST /speech/translate-and-speak]
-                                                           │
-                                                           ├──► Step 2: Groq Whisper ASR transcription start
-                                                           │
-                                                           ├──► Step 3: OpenRouter Claude 3.5 Sonnet correction start
-                                                           │
-                                                           ├──► Step 4: Azure Neural Translation start
-                                                           │
-                                                           ├──► Step 5: ElevenLabs synthetic voice generation start
-                                                           │
-                                                           └──► Step 6: Returns final JSON payload with audio URL
-```
-
-### 2. WebSocket Streaming Flow (Chrome Extension)
-The Chrome Extension downsamples meeting or tab audio to a clean 16kHz mono 16-bit PCM feed in the background, streaming raw binary chunks over persistent WebSockets in 3-second windows for instant processing.
-
-```
-[Google Meet Tab Audio] ──► (Captured via Chrome Offscreen Document)
-                                       │
-                                       ▼
-[Audio Resampler]       ──► (Converts Float32 to 16kHz Mono 16-Bit PCM)
-                                       │
-                                       ▼
-[WebSocket Channel]     ──► (Streams binary chunks to ws://localhost:8000/ws)
-                                       │
-                                       ▼
-[FastAPI Buffer]        ──► (Accumulates chunks in 3-second sliding window)
-                                       │
-                                       ▼
-[Groq Whisper ASR]      ──► (Transcribes raw audio using Whisper large-v3)
-                                       │
-                                       ▼
-[OpenRouter Postprocess]──► (Punctuates & corrects text using Claude 3.5 Sonnet)
-                                       │
-                                       ▼
-[Azure Translator]      ──► (Translates transcript contextually into target language)
-                                       │
-                                       ▼
-[ElevenLabs TTS]        ──► (Synthesizes translated speech voice playback)
-                                       │
-                                       ▼
-[JSON Response]         ──► (Sends transcripts & translations back to client)
-```
-
-### 3. PDF Reading Assistant Pipeline Flow (Privacy & Ephemeral Security)
-When uploading documents, the server processes them via `POST /pdf/translate`. Large text streams are tokenized into sentence-aware blocks of 3,000–5,000 characters to stay within API limit bounds, translated, and compiled into a joined MP3 play link:
-
-```
-[PDF Upload File] ──► [In-Memory Text Parser] ──► [Sentence-Aware Text Splitter]
-                                                               │
-                                                               ├──► Azure Neural Translation (each chunk)
-                                                               │
-                                                               ├──► ElevenLabs Audio Synthesis (individual MP3 files)
-                                                               │
-                                                               ├──► Binary File Merger (combines all chunks to output.mp3)
-                                                               │
-                                                               └──► Yields real-time progress text via NDJSON Stream
-```
-
-#### 🔒 Data Privacy & Zero Retention Policies:
-* **Zero Database Storage**: No PDF binary, text dump, or translated transcript is ever written or stored in a persistent backend database.
-* **In-Memory Buffer Processing**: The backend handles the uploaded file directly in-memory as a byte array (`BytesIO`). 
-* **Transient File Disposal**: Temporary chunk MP3 files created during speech synthesis are immediately deleted and destroyed (`os.remove()`) as soon as the binary merge is completed.
-* **Session-Bound Persistence**: The frontend caches the translation text and metadata inside the browser's `sessionStorage`. This data remains locally contained and is wiped out automatically when the user closes the browser tab.
-
-### 4. Authentication & Security Redirection Flow
-All core features and workspace pages require active user authorization. The security layer manages access validation, route protection, token expiration, and Sandbox OTP fallbacks:
-
-```
-[Unauthenticated User]
-      │
-      ├─► Tries to access guarded routes (/workspace, /profile, /pdf-reader)
-      │   │
-      │   ▼ (Client-side mount check: checks for valid JWT cookie)
-      │   Intercepts click and redirects immediately to /login?required=true
-      │
-      ▼
-[User Credentials Submit]
-      │
-      ├─► POST /auth/token ──► Validates hashes against SQLite DB
-      │                         │
-      │                         ▼
-      │                    Returns JWT Bearer Access Token
-      │
-      ▼ (Client saves JWT securely in cookies)
-Access Granted & Profile default preferences loaded contextually
-```
-
-#### 🔑 Sandbox OTP Recovery Fallback:
-To bypass sandbox limits on free transactional email keys (which restrict OTP delivery only to the account owner):
-* **Resilient Exception Catching**: If the Resend API email transmission fails, the server catches the exception and outputs the code directly to the secure terminal console (`🔑 OTP FOR TESTING (recipient): <otp>`), allowing sandbox testing environments to log in seamlessly.
-
+| Feature | Description |
+|---|---|
+| **Real-Time Voice Translation** | Speak into mic → Hear translated voice output with 6-step progress tracking |
+| **WebSocket Streaming + VAD** | Continuous audio streaming with Voice Activity Detection — no fixed timers, processes on natural speech pauses |
+| **Chrome Extension (MV3)** | Captures tab audio from any website (Meet, YouTube, Udemy) via Offscreen Document architecture |
+| **PDF Translation + Audio** | Upload PDF → Extract text → Translate → Generate full audio narration with chunked TTS |
+| **Dynamic Language Switching** | Switch languages mid-stream without dropping the WebSocket connection |
+| **LLM Transcript Correction** | Claude Sonnet 4 corrects Whisper ASR errors (spelling, punctuation, proper nouns) |
+| **API Credits Dashboard** | Live monitoring of ElevenLabs, Groq, Azure, and OpenRouter API usage |
+| **JWT Authentication** | Full auth system with register, login, refresh tokens, OTP-based password reset |
 
 ---
 
-## ✨ Core Features & Technical Stack
+## 🏗️ Architecture
 
-* **WebSocket PCM Streaming:** Downsamples browser audio to 16kHz mono PCM and streams it continuously to achieve sub-second latencies.
-* **Server-Sent Events (SSE) Progress:** Visual step checklist updates are synchronized 100% with server execution milestones (ASR, post-refine, translate, TTS synthesis).
-* **AI PDF Reading Assistant:** Translates large PDF files using in-memory byte extraction, sentence-boundary text chunking (3k-5k char segments), and multi-part voice syntheses.
-* **Smart Audio Merger:** Sequentially synthesizes text segments and merges the resulting MP3 payloads into a single file with resilient warning fallbacks.
-* **ASR Transcript Correction:** Raw transcriptions from Whisper large-v3 are sent through **Claude 3.5 Sonnet via OpenRouter** to correct homophones, insert punctuation, and fix grammar before translation.
-* **Azure Translation Layer:** Fully contextual text translation into 45+ supported target locales using Azure Cognitive Services.
-* **Expressive Synthesizer:** Integrates ElevenLabs Voice Synthesis (using `eleven_multilingual_v2`) to generate natural speech playback.
-* **Floating Subtitle Injection:** Injects a secure floating overlay widget directly into Google Meet browser tabs.
+Voxa AI operates two primary translation flows:
+
+### 1. REST Streaming Pipeline (Web Dashboard)
+
+```
+[User Mic / File Upload]
+        │
+        ▼
+POST /speech/translate-and-speak (multipart/form-data + JWT)
+        │
+        ├──► Step 2: Groq Whisper Large-v3 (ASR transcription)
+        │
+        ├──► Step 3: OpenRouter Claude Sonnet 4 (transcript correction)
+        │
+        ├──► Step 4: Azure Cognitive Translator (neural machine translation)
+        │
+        ├──► Step 5: ElevenLabs TTS (voice synthesis, optimize_streaming_latency=3)
+        │
+        └──► Step 6: Returns JSON with transcript + translation + audio URL
+```
+
+Progress updates are streamed to the client via **Server-Sent Events (SSE)** — the frontend shows real-time checkmarks as each pipeline stage completes.
+
+### 2. WebSocket Streaming Pipeline (Chrome Extension + Web App)
+
+```
+[Tab Audio / Microphone]
+        │
+        ▼
+Chrome Offscreen Document captures audio
+        │
+        ▼
+Downsamples: 48kHz Float32 Stereo → 16kHz Int16 Mono (12x bandwidth reduction)
+        │
+        ▼
+WebSocket ws://backend/ws?source_lang=en&target_lang=hi-IN
+        │
+        ▼
+FastAPI VAD Engine (RMS amplitude analysis)
+        │
+        ├── RMS > 350: Speech detected → accumulate in buffer
+        ├── RMS < 350 for ~1.2s: Pause → trigger processing
+        ├── Buffer > 256KB (~8s): Force-split → prevent latency buildup
+        └── Buffer < 16KB: Too short → discard (prevents Whisper hallucinations)
+        │
+        ▼
+Groq Whisper → Claude → Azure → ElevenLabs → Base64 audio
+        │
+        ▼
+JSON response: {"transcript": "...", "translation": "...", "audio": "<base64>"}
+```
+
+### 3. Dynamic Language Switching
+
+Users can change source/target language mid-meeting. The client sends a JSON control frame over the existing WebSocket:
+```json
+{"action": "switch_languages", "source_lang": "en", "target_lang": "ja", "voice_id": "..."}
+```
+The backend updates local state variables — no reconnection needed.
 
 ---
 
-## 🛠️ Project Directory Tree
+## 🛠️ Tech Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Backend Framework** | FastAPI (Python) | REST APIs, WebSocket endpoints, SSE streaming |
+| **Speech Recognition** | Groq Whisper Large-v3 | ASR transcription (~200ms on LPU hardware) |
+| **LLM Post-Processing** | Claude Sonnet 4 via OpenRouter | Transcript correction (spelling, grammar, proper nouns) |
+| **Translation** | Azure Cognitive Translator | Neural Machine Translation (130+ languages) |
+| **Voice Synthesis** | ElevenLabs Multilingual v2 | Natural TTS with streaming latency optimization |
+| **Database** | MongoDB Atlas + Motor (async) | User profiles, auth tokens, preferences |
+| **Auth** | JWT (python-jose) + bcrypt | Access/refresh tokens, OTP password reset |
+| **Email** | Resend API | OTP delivery for password reset |
+| **Frontend** | React + Vite + TypeScript | SPA dashboard with responsive design |
+| **Extension** | Chrome Manifest V3 | Tab capture, offscreen audio processing, Shadow DOM overlay |
+
+---
+
+## 📁 Project Structure
 
 ```
 Voxa-ai/
-├── Backend/                 # Python FastAPI Web Server & AI Engine
+├── Backend/                          # FastAPI Server + AI Pipeline
+│   ├── .env                          # API keys (Groq, ElevenLabs, Azure, OpenRouter, MongoDB)
+│   ├── requirements.txt              # Python dependencies
 │   └── app/
-│       ├── api/             # API Router Endpoints (REST & WebSockets)
-│       │   ├── health.py    # Health checks
-│       │   ├── pdf.py       # PDF extraction & chunked translation stream
-│       │   ├── speech.py    # REST Translation & serving output-audio
-│       │   └── websocket_api.py # WebSocket Stream Gateway
-│       ├── core/            # Config variables & settings
-│       ├── services/        # Logic Handlers (STT, Postprocess, Translation, TTS)
-│       │   ├── speech_service.py      # Groq Whisper
-│       │   ├── postprocess_service.py # OpenRouter Claude 3.5 Sonnet
-│       │   ├── translation_service.py # Azure Translator API
-│       │   └── tts_service.py         # ElevenLabs TTS
-│       └── main.py          # FastAPI server loader
+│       ├── main.py                   # App factory, CORS, router registration
+│       ├── database.py               # MongoDB async connection (Motor)
+│       ├── core/
+│       │   └── config.py             # Environment variable loader
+│       ├── auth/
+│       │   ├── router.py             # /register, /login, /me, /logout, /forgot-password, etc.
+│       │   ├── service.py            # Auth business logic
+│       │   ├── dependency.py         # JWT verification + in-memory user cache
+│       │   ├── jwt.py                # Token creation/verification (HS256)
+│       │   ├── password.py           # bcrypt hashing
+│       │   ├── schemas.py            # Pydantic request validation
+│       │   ├── models.py             # MongoDB document factories
+│       │   ├── email.py              # Resend OTP sender
+│       │   └── otp.py                # 6-digit OTP generator
+│       ├── api/
+│       │   ├── speech.py             # POST /speech/translate-and-speak + GET /speech/credits
+│       │   ├── websocket_api.py      # WebSocket /ws with VAD + dynamic lang switching
+│       │   ├── pdf.py                # POST /pdf/translate (chunk + merge audio)
+│       │   └── health.py             # Health check
+│       └── services/
+│           ├── speech_service.py     # Groq Whisper wrapper
+│           ├── postprocess_service.py # Claude transcript correction
+│           ├── translation_service.py # Azure NMT wrapper
+│           └── tts_service.py        # ElevenLabs TTS (file + bytes methods)
 │
-├── Frontend/my-app/         # Next.js 16 Web Dashboard
-│   ├── public/              # Static assets & Packed extension voxa_entension.zip
+├── Frontend/my-app/                  # Vite + React Dashboard
+│   ├── .env                          # VITE_BACKEND_URL
+│   ├── public/
+│   │   └── voxa_extension/           # Chrome Extension source files
+│   │       ├── manifest.json         # MV3 permissions + service worker
+│   │       ├── background.js         # Tab capture + offscreen lifecycle
+│   │       ├── content.js            # Shadow DOM overlay (glassmorphic UI)
+│   │       ├── offscreen.html/.js    # Audio capture + WebSocket streaming
+│   │       └── assets/               # Extension icons
 │   └── src/
-│       ├── app/             # Page routing & pages (Landing, workspace, pdf-reader, profile, settings)
-│       └── components/      # Responsive design systems
-│
-└── Extension/               # Chrome Extension source
-    ├── background/          # Background worker capturing tab streams
-    ├── content/             # Floating subtitles DOM injection scripts
-    ├── offscreen/           # Offscreen audio context recorder
-    └── sidepanel/           # sidepanel settings & logs layout
+│       ├── app/
+│       │   ├── workspace/page.tsx    # Main translation workspace
+│       │   ├── pdf-reader/page.tsx   # PDF upload + translation
+│       │   └── install/page.tsx      # Extension download page
+│       └── components/               # Reusable UI components
 ```
 
 ---
 
-## ⚙️ Local Setup & Configuration
+## 🚀 Local Development Setup
 
-### 1. Configure Backend Environment
-Create a `.env` file in `Backend/app/.env` with your API credentials:
-```env
-# Groq API Key (Used for Whisper STT)
-GROQ_API_KEY=your_groq_api_key_here
+### Prerequisites
+- Python 3.11+
+- Node.js 18+
+- MongoDB Atlas cluster
+- API keys: Groq, ElevenLabs, Azure Translator, OpenRouter, Resend
 
-# OpenRouter API Key (Used for Claude Sonnet 4 post-processing)
-OPENROUTER_API_KEY=your_openrouter_key_here
+### Backend
 
-# Azure Translator Details (Used for text translation)
-AZURE_TRANSLATOR_KEY=your_azure_translator_key_here
-AZURE_TRANSLATOR_REGION=centralindia
-AZURE_TRANSLATOR_ENDPOINT=https://api.cognitive.microsofttranslator.com/
-
-# ElevenLabs API Key (Used for voice synthesis playback)
-ELEVENLABS_API_KEY=your_eleven_labs_key_here
-
-BACKEND_URL=http://localhost:8000
-FRONTEND_URL=http://localhost:3000
-```
-
-### 2. Startup Backend
 ```bash
 cd Backend
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+python -m venv venv
+venv\Scripts\activate        # Windows
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+
+# Create .env with required keys (see .env.example)
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 3. Startup Frontend
+### Frontend
+
 ```bash
 cd Frontend/my-app
-echo "NEXT_PUBLIC_BACKEND_URL=http://localhost:8000" > .env.local
 npm install
+
+# Create .env with VITE_BACKEND_URL=http://localhost:8000
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) to view the web workspace.
 
-### 4. Load the Extension
-1. Open Chrome and navigate to `chrome://extensions/`.
-2. Toggle **Developer Mode** on in the top-right.
-3. Click **Load Unpacked** in the top-left.
-4. Select the `Extension` directory in the root of this project.
-5. Use the shortcut `Ctrl + Shift + U` or click the Voxa AI icon to start translating your meetings!
+### Chrome Extension
+
+1. Open `chrome://extensions/`
+2. Enable "Developer mode"
+3. Click "Load unpacked" → select `Frontend/my-app/public/voxa_extension/`
 
 ---
 
-## 👥 Authors
-* **Priyanshu Raj** - Computer Science Engineer & Architect.
+## 🌐 Deployment
+
+| Component | Platform | Root Directory | Build Command | Start Command |
+|---|---|---|---|---|
+| **Backend** | Render | `Backend/` | `pip install -r requirements.txt` | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| **Frontend** | Vercel | `Frontend/my-app/` | `npm run build` | (auto-detected by Vercel) |
+
+### Environment Variables
+
+**Backend (.env)**:
+```
+GROQ_API_KEY=
+ELEVENLABS_API_KEY=
+AZURE_TRANSLATOR_KEY=
+AZURE_TRANSLATOR_REGION=centralindia
+AZURE_TRANSLATOR_ENDPOINT=https://api.cognitive.microsofttranslator.com
+OPENROUTER_API_KEY=
+MONGODB_URI=
+DATABASE_NAME=
+USERS_COLLECTION=
+JWT_SECRET_KEY=
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=7
+RESEND_API_KEY=
+BACKEND_URL=https://your-render-url.onrender.com
+FRONTEND_URL=https://your-app.vercel.app
+```
+
+**Frontend (.env)**:
+```
+VITE_BACKEND_URL=https://your-render-url.onrender.com
+```
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/auth/register` | ❌ | Create account |
+| `POST` | `/auth/login` | ❌ | Get access + refresh tokens |
+| `GET` | `/auth/me` | ✅ | Get current user profile |
+| `POST` | `/auth/logout` | ✅ | Invalidate refresh token |
+| `POST` | `/auth/refresh` | ✅ | Get new access token |
+| `POST` | `/auth/change-password` | ✅ | Update password |
+| `POST` | `/auth/forgot-password` | ❌ | Send OTP email |
+| `POST` | `/auth/verify-otp` | ❌ | Verify OTP code |
+| `POST` | `/auth/reset-password` | ❌ | Reset password with OTP |
+| `PUT` | `/auth/preferences` | ✅ | Update language preferences |
+| `POST` | `/speech/translate-and-speak` | ✅ | Full translation pipeline (SSE) |
+| `GET` | `/speech/credits` | ✅ | API usage dashboard data |
+| `GET` | `/speech/output-audio/{filename}` | ❌ | Serve generated audio files |
+| `WS` | `/ws` | ❌ | Real-time streaming translation |
+| `POST` | `/pdf/translate` | ✅ | PDF translation with audio |
+
+---
+
+## 👤 Author
+
+**Priyanshu Raj** — Computer Science Engineer

@@ -21,6 +21,9 @@ export default function CustomAudioPlayer({ src, label }: CustomAudioPlayerProps
   useEffect(() => {
     setIsPlaying(false);
     setCurrentTime(0);
+    if (audioRef.current) {
+      audioRef.current.load();
+    }
   }, [src]);
 
   const togglePlay = () => {

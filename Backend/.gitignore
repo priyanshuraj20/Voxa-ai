@@ -29,3 +29,9 @@ yarn-error.log*
 # Operating System Files
 .DS_Store
 Thumbs.db
+
+# Temporary Generated Media
+output.mp3
+output_*.mp3
+pdf_chunk_*.mp3
+test_output.mp3

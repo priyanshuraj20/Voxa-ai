@@ -14,10 +14,7 @@ from app.database import check_database_connection
 
 
 from app.auth.router import router as auth_router
-
-from app.core.rate_limit import RateLimitMiddleware
 from fastapi.middleware.cors import CORSMiddleware
-
 
 app = FastAPI(
     title="Voxa Ai",
@@ -26,10 +23,8 @@ app = FastAPI(
 )
 
 
-app.add_middleware(RateLimitMiddleware)
-
-
 app.add_middleware(
+
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,

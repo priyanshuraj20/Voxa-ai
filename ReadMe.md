@@ -17,7 +17,7 @@ Voxa AI is a real-time speech translation platform that captures live audio from
 | **Dynamic Language Switching** | Switch languages mid-stream without dropping the WebSocket connection |
 | **LLM Transcript Correction** | Claude Sonnet 4 corrects Whisper ASR errors (spelling, punctuation, proper nouns) |
 | **API Credits Dashboard** | Live monitoring of ElevenLabs, Groq, Azure, and OpenRouter API usage |
-| **JWT Authentication** | Full auth system with register, login, refresh tokens, OTP-based password reset |
+| **JWT Authentication** | Full auth system with register, login, refresh tokens |
 
 ---
 
@@ -95,8 +95,7 @@ The backend updates local state variables — no reconnection needed.
 | **Translation** | Azure Cognitive Translator | Neural Machine Translation (130+ languages) |
 | **Voice Synthesis** | ElevenLabs Multilingual v2 | Natural TTS with streaming latency optimization |
 | **Database** | MongoDB Atlas + Motor (async) | User profiles, auth tokens, preferences |
-| **Auth** | JWT (python-jose) + bcrypt | Access/refresh tokens, OTP password reset |
-| **Email** | Resend API | OTP delivery for password reset |
+| **Auth** | JWT (python-jose) + bcrypt | Access/refresh tokens |
 | **Frontend** | React + Vite + TypeScript | SPA dashboard with responsive design |
 | **Extension** | Chrome Manifest V3 | Tab capture, offscreen audio processing, Shadow DOM overlay |
 
@@ -228,27 +227,7 @@ VITE_BACKEND_URL=https://your-render-url.onrender.com
 
 ---
 
-## 📡 API Endpoints
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/auth/register` | ❌ | Create account |
-| `POST` | `/auth/login` | ❌ | Get access + refresh tokens |
-| `GET` | `/auth/me` | ✅ | Get current user profile |
-| `POST` | `/auth/logout` | ✅ | Invalidate refresh token |
-| `POST` | `/auth/refresh` | ✅ | Get new access token |
-| `POST` | `/auth/change-password` | ✅ | Update password |
-| `POST` | `/auth/forgot-password` | ❌ | Send OTP email |
-| `POST` | `/auth/verify-otp` | ❌ | Verify OTP code |
-| `POST` | `/auth/reset-password` | ❌ | Reset password with OTP |
-| `PUT` | `/auth/preferences` | ✅ | Update language preferences |
-| `POST` | `/speech/translate-and-speak` | ✅ | Full translation pipeline (SSE) |
-| `GET` | `/speech/credits` | ✅ | API usage dashboard data |
-| `GET` | `/speech/output-audio/{filename}` | ❌ | Serve generated audio files |
-| `WS` | `/ws` | ❌ | Real-time streaming translation |
-| `POST` | `/pdf/translate` | ✅ | PDF translation with audio |
-
----
 
 ## 👤 Author
 

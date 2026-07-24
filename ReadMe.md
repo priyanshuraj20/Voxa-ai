@@ -2,7 +2,7 @@
 
 Voxa AI is a real-time speech translation platform that captures live audio from browser tabs (Google Meet, Udemy, YouTube) or microphone input, transcribes it using Whisper ASR, corrects it with Claude LLM, translates it using Azure Neural Machine Translation, and synthesizes natural voice output using ElevenLabs TTS — all in under 2 seconds per utterance.
 
-🔗 **Live:** [voxa-ai-pi.vercel.app](https://voxa-ai-pi.vercel.app/)
+🔗 **Live:** [voxa-ai-pi.vercel.app]((https://voxa-ai-two.vercel.app/))
 
 ---
 
